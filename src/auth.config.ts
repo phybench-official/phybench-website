@@ -22,11 +22,6 @@ declare module "next-auth" {
 
 export default {
   providers: [
-    Authentik({
-      clientId: process.env.AUTH_AUTHENTIK_CLIENT_ID,
-      clientSecret: process.env.AUTH_AUTHENTIK_CLIENT_SECRET,
-      issuer: process.env.AUTH_AUTHENTIK_ISSUER,
-    }),
     {
       id: "uaaa",
       name: "PKU UAAA",
