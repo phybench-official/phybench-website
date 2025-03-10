@@ -158,8 +158,12 @@ body {
 
 /* 超长公式显示 */
 .katex-display {
-  min-height: 100%;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+/* 修复overflow溢出 */
+.katex-mathml {
+  display: none;
 }

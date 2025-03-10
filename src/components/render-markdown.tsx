@@ -3,21 +3,32 @@
 import Markdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import rehypeMathjax from 'rehype-mathjax'
 import 'katex/dist/katex.min.css'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
-import { vscDarkPlus ,vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import remarkParse from 'remark-parse'
+import rehypeStringify from "rehype-stringify"
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { ComponentProps, useState } from "react"
 import { cn } from "@/lib/utils"
 import { useTheme } from 'next-themes'
-import { Copy } from 'lucide-react';
+import { Copy, ChevronDown, ChevronRight } from 'lucide-react';
 
-export default function RenderMarkdown({content}: {content: string}) {
+// 添加自定义类型定义
+type CustomMarkdownComponents = ComponentProps<typeof Markdown>['components'] & {
+  think: React.ComponentType<{
+    children: React.ReactNode;
+    className?: string;
+  }>;
+}
+
+export default function RenderMarkdown({ content }: { content: string }) {
 
   const { theme, systemTheme } = useTheme()
 
-  const markdownComponents: ComponentProps<typeof Markdown>['components'] = {
+  const markdownComponents = {
     h1: ({ className, ...props }) => (
       <h1 className={cn("scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl", className)} {...props} />
     ),
@@ -71,8 +82,8 @@ export default function RenderMarkdown({content}: {content: string}) {
     a: ({ className, ...props }) => (
       <a className={cn("font-medium underline underline-offset-4 text-sky-800 dark:text-sky-200 hover:font-semibold transition-all", className)} {...props} />
     ),
-    code:(props) => {
-      const {children, className, node, ...rest} = props
+    code: (props) => {
+      const { children, className, node, ...rest } = props
       const match = /language-(\w+)/.exec(className || '')
       const [copied, setCopied] = useState(false);
 
@@ -113,18 +124,43 @@ export default function RenderMarkdown({content}: {content: string}) {
           {children}
         </code>
       )
-    }
-  }
+    },
+    think: ({ className, ...props }) => {
+      const [isOpen, setIsOpen] = useState(true);
+
+      return (
+        <div className="mb-4 rounded-lg border border-slate-200 dark:border-slate-700">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex items-center w-full px-4 py-2 text-left bg-slate-100 dark:bg-slate-800 rounded-t-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          >
+            {isOpen ? (
+              <ChevronDown className="h-4 w-4 mr-2" />
+            ) : (
+              <ChevronRight className="h-4 w-4 mr-2" />
+            )}
+            <span className="font-medium text-sm">推理过程</span>
+          </button>
+          {isOpen && (
+            <div className="p-4 bg-slate-300/50 dark:bg-black/50 text-xs text-slate-800 dark:text-slate-200  rounded-b-lg">
+              {props.children}
+            </div>
+          )}
+        </div>
+      );
+    },
+  } as CustomMarkdownComponents;
 
 
   return (
     <>
       <Markdown
-        remarkPlugins={[remarkMath, remarkGfm]}
-        rehypePlugins={[rehypeKatex, rehypeRaw]}
+        remarkPlugins={[remarkMath, remarkGfm, remarkParse]}
+        rehypePlugins={[rehypeKatex, rehypeRaw, rehypeStringify]}
         components={markdownComponents}
-        children={content}
-      />
+      >
+        {content}
+      </Markdown>
     </>
   );
 };

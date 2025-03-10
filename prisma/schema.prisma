@@ -92,7 +92,7 @@ model Authenticator {
 
 // 存储用户上传的问题
 model Problem {
-  id        String   @id @default(cuid())
+  id        Int     @id @default(autoincrement())
   userId    String
   title     String
   content   String
