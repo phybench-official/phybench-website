@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import RenderMarkdown from "@/components/render-markdown";
 
@@ -41,6 +41,22 @@ export default function SubmitPage() {
   });
   const [aiError, setAiError] = useState("");
 
+  // 从 localStorage 读取数据
+  useEffect(() => {
+    const savedData = localStorage.getItem("savedData");
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setTitle(parsedData.title);
+      setSelectedType(parsedData.selectedType);
+      setSource(parsedData.source);
+      setQuestion(parsedData.question);
+      setSolution(parsedData.solution);
+      setAnswer(parsedData.answer);
+      setVariables(parsedData.variables || []);
+      setAiResponses(parsedData.aiResponses || []);
+    }
+  }, []);
+
   const handleInput = (
     e: React.FormEvent<HTMLTextAreaElement>,
     setter: React.Dispatch<React.SetStateAction<string>>
@@ -51,7 +67,6 @@ export default function SubmitPage() {
     target.style.height = `${target.scrollHeight}px`;
   };
 
-  // 状态管理
   const [showQuestionResult, setShowQuestionResult] = useState(false);
   const [showSolutionResult, setShowSolutionResult] = useState(false);
   const [showAnswerResult, setShowAnswerResult] = useState(false);
@@ -96,7 +111,7 @@ export default function SubmitPage() {
   const addAIResponse = () => {
     const isNameValid =
       (newAIResponse.name !== "" && newAIResponse.name !== "其它") ||
-      (newAIResponse.name == "其它" && newAIResponse.customName);
+      (newAIResponse.name === "其它" && newAIResponse.customName);
     const isProcessValid = newAIResponse.process !== "";
     const isAnswerValid = newAIResponse.answer !== "";
     const isCorrectnessValid = newAIResponse.correctness !== "";
@@ -193,7 +208,6 @@ export default function SubmitPage() {
         rows={1}
       />
 
-      {/* 控制题干渲染的按钮 */}
       <button
         onClick={toggleQuestionResult}
         className={`mb-4 px-4 py-2 text-white rounded-lg ${
@@ -298,7 +312,6 @@ export default function SubmitPage() {
         rows={1}
       />
 
-      {/* 控制解答过程渲染的按钮 */}
       <button
         onClick={toggleSolutionResult}
         className={`mb-4 px-4 py-2 text-white rounded-lg ${
@@ -325,7 +338,6 @@ export default function SubmitPage() {
         rows={1}
       />
 
-      {/* 控制答案渲染的按钮 */}
       <button
         onClick={toggleAnswerResult}
         className={`mb-4 px-4 py-2 text-white rounded-lg ${
@@ -341,7 +353,6 @@ export default function SubmitPage() {
         </div>
       )}
 
-      {/* AI表现部分 */}
       <h2 className="text-xl font-semibold mb-2 mt-4">AI表现</h2>
 
       <h3 className="text-lg font-semibold mb-2">AI名称</h3>
@@ -403,7 +414,6 @@ export default function SubmitPage() {
         rows={1}
       />
 
-      {/* 控制AI解答过程渲染的按钮 */}
       <button
         onClick={toggleAIProcessResult}
         className={`mb-4 px-4 py-2 text-white rounded-lg ${
@@ -431,7 +441,6 @@ export default function SubmitPage() {
         rows={1}
       />
 
-      {/* 控制AI答案渲染的按钮 */}
       <button
         onClick={toggleAIAnswerResult}
         className={`mb-4 px-4 py-2 text-white rounded-lg ${
