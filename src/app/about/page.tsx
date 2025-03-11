@@ -140,8 +140,8 @@ const content = `# This is an H1
 
 export default function AboutPage() {
   return (
-    <div className="my-32 w-1/2 ml-[100px]">
-      <RenderMarkdown content={content}/>
+    <div className="my-32 w-1/2 ml-[100px] ">
+      <RenderMarkdown content={content}/>      
     </div>
   )
 }

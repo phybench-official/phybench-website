@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { motion } from "motion/react";
+import { Hero1 } from "./hero-with-button";
 
 function SplashCursor({
   // Add whatever props you like for customization
@@ -1262,8 +1263,8 @@ function SplashCursor({
         initial={{ opacity: 0.0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{
-          delay: 0.3,
-          duration: 0.8,
+          delay: 0.1,
+          duration: 2.0,
           ease: "easeInOut",
         }}
         className="absolute top-0 left-0 w-screen h-screen flex flex-col gap-4 items-center justify-center px-4 z-[2]"

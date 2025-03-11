@@ -8,7 +8,7 @@ export function MyNavBar() {
     { name: "主页", url: "/", icon: "Home" },
     { name: "提交", url: "/submit", icon: "Upload" },
     // { name: '测试', url: '/chat', icon: "MessageCircle" },
-    { name: "审查", url: "/examine", icon: "MessageCircle" },
+    { name: "审核", url: "/examine", icon: "MessageCircle" },
     // { name: '关于', url: '/about', icon: "List" }
     { name: "发现", url: "/find", icon: "List" },
   ];

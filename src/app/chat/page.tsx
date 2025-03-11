@@ -7,7 +7,7 @@ export default async function Page() {
   if (!session) return <NotAuthorized />
 
   return (
-    <div>
+    <div className=" h-screen max-h-screen overflow-clip pt-24">
       <ChatPage />
     </div>
   )
