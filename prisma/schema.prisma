@@ -90,17 +90,93 @@ model Authenticator {
   @@id([userId, credentialID])
 }
 
-// 存储用户上传的问题
+
+
+// 物理问题对象
 model Problem {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  content   String
-  answer    String?
-  tag      String?
-  aiResults Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               Int   @id @default(autoincrement())
+  userId           String
+  title            String                    // 题目名称
+  tag              ProblemTag                // 题目类型（力热光电近四大及以上）
+  source           String?                   // 题目来源（选填）
+  content          String                    // 题干
+  variables        ProblemVariable[]         // 题目涉及的变量（包括数值范围）
+  solution         String                    // 题目解答过程
+  answer           String                    // 题目答案，一个表达式
+  aiPerformances   AiPerformance[]           // AI表现（提交时选填，允许列表为空）
+  status           ProblemStatus             // 审核状态
+  score            Int?                      // 题目积分（由审核人员给出）
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ProblemTag {
+  MECHANICS            // 力学
+  ELECTRICITY          // 电磁学
+  THERMODYNAMICS       // 热学
+  OPTICS               // 光学
+  MODERN               // 近代物理
+  ADVANCED             // 四大力学及以上知识
+  OTHER                // 其它
+}
+
+model ProblemVariable {
+  id           Int   @id @default(autoincrement())
+  problemId    Int
+  name         String      // 变量名
+  lowerBound   Float       // 变量数值范围下限
+  upperBound   Float       // 变量数值范围上限
+
+  problem      Problem  @relation(fields: [problemId], references: [id])
+}
+
+enum ProblemStatus {
+  PENDING       // 待审核
+  RETURNED      // 已打回
+  APPROVED      // 已通过
+  REJECTED      // 已拒绝
+}
+
+
+
+// AI表现对象
+model AiPerformance {
+  id              Int         @id @default(autoincrement())
+  problemId       Int
+  aiName          AiName               // AI名称
+  aiSolution      String               // AI解答过程
+  aiAnswer        String               // AI答案
+  isCorrect       Boolean              // AI所给答案是否正确
+  tag             AiPerformanceTag     // AI表现的性质（“学生上传”或“测评相关”）
+  aiEvaluationId  Int?                 // 测评ID（AI表现与测评相关时具有此属性）
+  aiScore         Int?                 // AI得分（AI表现与测评相关时具有此属性）
+  unlistedAiName  String?              // 若AI名称为OTHER，则此字段非空，为学生自行输入的AI名称
+  createdAt       DateTime       @default(now())
+
+  problem         Problem        @relation(fields: [problemId], references: [id])
+  aiEvaluation    AiEvaluation?  @relation(fields: [aiEvaluationId], references: [id])
+}
+
+enum AiName {
+  DEEPSEEK
+  DEEPSEEK_R1
+  OTHER
+}
+
+enum AiPerformanceTag {
+  SUBMITTED            // 学生上传问题时自附的AI表现
+  EVALUATION           // 与测评相关的AI表现
+}
+
+
+
+// AI测评对象
+model AiEvaluation {
+  id                Int         @id @default(autoincrement())
+  aiName            AiName      
+  aiPerformances    AiPerformance[]
+  aiScore           Float
+  createdAt         DateTime       @default(now())
 }

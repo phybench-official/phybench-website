@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import SubmitPage from "@/components/main-submit";
+import FindPage from "@/components/main-find";
 import { NotAuthorized } from "@/components/ui/not-authorized";
 
 export default async function Page() {
@@ -8,7 +8,7 @@ export default async function Page() {
 
   return (
     <div>
-      <SubmitPage />
+      <FindPage />
     </div>
   );
 }

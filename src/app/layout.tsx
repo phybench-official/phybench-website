@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MyNavBar } from "@/components/navbar";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,9 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className="antialiased relative  bg-gradient-to-br from-white to-slate-200 dark:from-slate-800 dark:to-black min-h-screen"
-      >
+      <body className="antialiased relative  bg-gradient-to-br from-white to-slate-200 dark:from-slate-800 dark:to-black min-h-screen">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
