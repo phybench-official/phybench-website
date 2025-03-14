@@ -12,13 +12,11 @@ function Hero1() {
             </Button>
           </div>
           <div className="flex gap-4 flex-col">
-            <h1 className="text-5xl md:text-7xl max-w-2xl tracking-tighter text-center font-regular">
-              This is the start of something new
+            <h1 className="text-5xl md:text-7xl max-w-2xl tracking-tighter text-center font-semibold text-transparent bg-clip-text bg-linear-to-br from-cyan-800 to-yellow-700 dark:from-indigo-400 dark:to-pink-300">
+              PhyBench
             </h1>
-            <p className="text-lg md:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-2xl text-center">
-              Managing a small business today is already tough. Avoid further
-              complications by ditching outdated, tedious trade methods. Our goal
-              is to streamline SMB trade, making it easier and faster than ever.
+            <p className="text-lg md:text-2xl leading-relaxed tracking-tight text-muted-foreground max-w-2xl text-center font-semibold">
+            智识共生：让北大人才与AI共攀物理新高度！
             </p>
           </div>
           <div className="flex flex-row gap-3">

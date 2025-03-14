@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import SubmitPage from "@/components/submit/main-submit";
+import SubmitPage from "@/components/submit/main-submit-backup";
 import { NotAuthorized } from "@/components/ui/not-authorized";
 
 export default async function Page() {
@@ -8,7 +8,7 @@ export default async function Page() {
 
   return (
     <div className="w-screen h-screen pt-24">
-      <SubmitPage user={session?.user} />
+      <SubmitPage />
     </div>
   );
 }

@@ -9,6 +9,8 @@ export default async function ProfilePage() {
     return <NotAuthorized />
   }
 
+  console.log(session);
+
   return (
     <div className="mt-[20vh]">
       {/* <pre>{JSON.stringify(session, null, 2)}</pre> */}

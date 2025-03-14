@@ -1269,16 +1269,7 @@ function SplashCursor({
         }}
         className="absolute top-0 left-0 w-screen h-screen flex flex-col gap-4 items-center justify-center px-4 z-[2]"
       >
-        <div className="text-3xl md:text-7xl font-bold dark:text-white text-center">
-          {/* Ignite the Light Build the future */}
-          PhyBench
-        </div>
-        <div className="font-extralight text-base md:text-4xl dark:text-neutral-200 py-4">
-          智识共生：让北大人才与AI共攀物理新高度！
-        </div>
-        {/* <button className="bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-4 py-2">
-          一个按钮
-        </button> */}
+        <Hero1 />
       </motion.div>
     </div>
   );

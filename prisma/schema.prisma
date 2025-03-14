@@ -104,7 +104,7 @@ model Problem {
   solution         String                    // 题目解答过程
   answer           String                    // 题目答案，一个表达式
   aiPerformances   AiPerformance[]           // AI表现（提交时选填，允许列表为空）
-  status           ProblemStatus             // 审核状态
+  status           ProblemStatus @default(PENDING)             // 审核状态
   score            Int?                      // 题目积分（由审核人员给出）
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -145,38 +145,20 @@ enum ProblemStatus {
 model AiPerformance {
   id              Int         @id @default(autoincrement())
   problemId       Int
-  aiName          AiName               // AI名称
+  aiName          String               // AI名称
   aiSolution      String               // AI解答过程
   aiAnswer        String               // AI答案
   isCorrect       Boolean              // AI所给答案是否正确
-  tag             AiPerformanceTag     // AI表现的性质（“学生上传”或“测评相关”）
-  aiEvaluationId  Int?                 // 测评ID（AI表现与测评相关时具有此属性）
+  comment         String?              // 用户评语
+  tag             AiPerformanceTag @default(SUBMITTED)    // AI表现的性质（“学生上传”或“测评相关”）
   aiScore         Int?                 // AI得分（AI表现与测评相关时具有此属性）
   unlistedAiName  String?              // 若AI名称为OTHER，则此字段非空，为学生自行输入的AI名称
   createdAt       DateTime       @default(now())
 
   problem         Problem        @relation(fields: [problemId], references: [id])
-  aiEvaluation    AiEvaluation?  @relation(fields: [aiEvaluationId], references: [id])
-}
-
-enum AiName {
-  DEEPSEEK
-  DEEPSEEK_R1
-  OTHER
 }
 
 enum AiPerformanceTag {
   SUBMITTED            // 学生上传问题时自附的AI表现
   EVALUATION           // 与测评相关的AI表现
-}
-
-
-
-// AI测评对象
-model AiEvaluation {
-  id                Int         @id @default(autoincrement())
-  aiName            AiName      
-  aiPerformances    AiPerformance[]
-  aiScore           Float
-  createdAt         DateTime       @default(now())
 }

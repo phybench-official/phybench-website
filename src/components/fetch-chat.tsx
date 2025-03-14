@@ -31,7 +31,8 @@ export function FetchChat({ content, model, provider }: { content: string, model
         },
         body: JSON.stringify({ content, model }),
       });
-
+      
+      // @ts-ignore
       const runner = ChatCompletionStream.fromReadableStream(response.body);
       
       runner.on('content', (delta, snapshot) => {
