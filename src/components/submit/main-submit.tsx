@@ -129,7 +129,7 @@ export default function Component({ user }: { user: any }) {
         toast.success("题目提交成功!");
         // 成功后跳转到提交页面
         setTimeout(() => {
-          router.push('/submit');
+          router.push('/');
         }, 1500);
         
       } catch (error: any) {

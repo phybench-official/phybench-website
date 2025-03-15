@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
+import createMDX from '@next/mdx'
 
 const nextConfig: NextConfig = {
   /* config options here */
-  transpilePackages: ['@ant-design/pro-editor'],
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   experimental: {
     turbo: {
       resolveAlias: {
@@ -12,4 +13,21 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+const withMDX = createMDX({
+  // Add markdown plugins here, as desired
+  options: {
+    remarkPlugins: [
+      // @ts-expect-error fuck
+      ['remark-math', { strict: true, throwOnError: true }],
+      // @ts-expect-error fuck
+      ['remark-gfm', { throwOnError: true }],
+    ],
+    rehypePlugins: [
+      // @ts-expect-error fuck
+      ['rehype-katex', { strict: true, throwOnError: true }],
+      // rehypeRaw
+    ],
+  },
+})
+
+export default withMDX(nextConfig);

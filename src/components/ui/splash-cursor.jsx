@@ -1253,11 +1253,11 @@ function SplashCursor({
   ]);
 
   return (
-    <div className="relative top-0 left-0 z-0 pointer-events-none w-screen h-screen">
+    <div className="relative top-0 left-0 z-0 w-screen h-screen">
       <canvas
         ref={canvasRef}
         id="fluid"
-        className="absolute w-screen h-screen z-[1]"
+        className="pointer-events-none absolute w-screen h-screen z-[1]"
       />
       <motion.div
         initial={{ opacity: 0.0, y: 40 }}
@@ -1267,7 +1267,7 @@ function SplashCursor({
           duration: 2.0,
           ease: "easeInOut",
         }}
-        className="absolute top-0 left-0 w-screen h-screen flex flex-col gap-4 items-center justify-center px-4 z-[2]"
+        className="absolute top-0 left-0 w-screen h-screen flex flex-col gap-4 items-center justify-center px-4 z-50"
       >
         <Hero1 />
       </motion.div>

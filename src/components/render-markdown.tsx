@@ -127,7 +127,7 @@ export default function RenderMarkdown({ content }: { content: string }) {
         </code>
       )
     },
-    think: ({ className, ...props }) => {
+    think: ({ ...props }) => {
       const [isOpen, setIsOpen] = useState(true);
 
       return (

@@ -52,7 +52,7 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
               {aiResponses && aiResponses.length > 0 ? (
                 <div className="flex flex-col space-y-2">
                   {aiResponses.map((res, index) => (
-                    <div className="flex flex-row space-x-4 p-2 w-full border">
+                    <div key={index} className="flex flex-row space-x-4 p-2 w-full border">
                       <span className="text-lg font-semibold">{res.name}</span>
                       {
                         res.correctness == "correct" ? <Badge>正确</Badge> : <Badge variant="destructive">错误</Badge>

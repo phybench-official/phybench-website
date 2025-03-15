@@ -1,14 +1,16 @@
-import { MoveRight, PhoneCall } from "lucide-react";
+import { MoveRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation";
 
 function Hero1() {
+  const router = useRouter();
   return (
-    <div className="w-full">
+    <div className="w-full z-50">
       <div className="container mx-auto">
         <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
           <div>
-            <Button variant="secondary" size="sm" className="gap-4">
-              Read our launch article <MoveRight className="w-4 h-4" />
+            <Button variant="secondary" size="sm" className="gap-4 cursor-pointer group" onClick={() => router.push("/docs/about")}>
+              阅读项目文档 <MoveRight className="w-4 h-4 group-hover:translate-x-[-1px] group-hover:scale-120 transition-all" />
             </Button>
           </div>
           <div className="flex gap-4 flex-col">
@@ -20,11 +22,13 @@ function Hero1() {
             </p>
           </div>
           <div className="flex flex-row gap-3">
-            <Button size="lg" className="gap-4" variant="outline">
-              Jump on a call <PhoneCall className="w-4 h-4" />
-            </Button>
-            <Button size="lg" className="gap-4">
-              Sign up here <MoveRight className="w-4 h-4" />
+            <a href="mailto:contact@phybench.cn">
+              <Button size="lg" className="gap-4" variant="outline">
+                联系我们 <Mail className="w-4 h-4" />
+              </Button>
+            </a>
+            <Button size="lg" className="gap-4 cursor-pointer" onClick={() => router.push("/submit")}>
+              即刻提交题目 <MoveRight className="w-4 h-4" />
             </Button>
           </div>
         </div>

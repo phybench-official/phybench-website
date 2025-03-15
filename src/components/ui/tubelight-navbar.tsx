@@ -43,7 +43,15 @@ export function NavBar({ items, className }: NavBarProps) {
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [])
+  }, [isMobile])
+  
+  // 添加路由监听，当路由变化时更新activeTab
+  useEffect(() => {
+    const matchingItem = items.find(item => item.url === pathname);
+    if (matchingItem) {
+      setActiveTab(matchingItem.name);
+    }
+  }, [pathname, items]);
 
   return (
     <div
