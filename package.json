@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pm2start": "PORT=3005 pm2 start npm --name 'phy-bench' -- start"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.1.13",
