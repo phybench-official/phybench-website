@@ -2,7 +2,6 @@ import type { MDXComponents } from 'mdx/types'
 import 'katex/dist/katex.min.css'
 import Image, { ImageProps } from 'next/image'
 import { cn } from "@/lib/utils"
-// 导入客户端组件
 import MDXCode from '@/components/mdx-code'
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
@@ -35,18 +34,16 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <blockquote className={cn("mt-6 border-l-2 pl-6 italic", className)} {...props} />
     ),
     img: (props) => {
-      if ((props as ImageProps).src?.toString().startsWith('/')) {
-        return (
-          <Image
-            sizes="100vw"
-            style={{ width: '100%', height: 'auto' }}
-            className={cn("rounded-md border")}
-            {...(props as ImageProps)}
-            alt={(props as ImageProps).alt || 'MDX image'}
-          />
-        )
-      }
-      return <img className={cn("rounded-md border")} {...props} alt={props.alt || 'MDX image'} />
+      return (
+        <Image
+          width={800}
+          height={1000}
+          className={cn("rounded-md border")}
+          {...(props as ImageProps)}
+          alt={(props as ImageProps).alt || 'MDX image'}
+          unoptimized
+        />
+      )
     },
     hr: ({ ...props }) => (
       <hr className="my-4 border-slate-200 dark:border-slate-700" {...props} />

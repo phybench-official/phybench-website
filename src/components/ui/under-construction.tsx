@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link"; // 新增导入
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -26,9 +27,9 @@ export function UnderConstruction() {
           />
         </CardContent>
         <CardFooter className="flex justify-center">
-          <a href="/">
+          <Link href="/">
             <Button className="cursor-pointer" type="submit">返回主页</Button>
-          </a>
+          </Link>
         </CardFooter>
       </Card>
     </div>

@@ -24,7 +24,7 @@ import { auth } from "@/auth"
 
 export const maxDuration = 3000;
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
   const session = await auth()
 
   if (!session) {
@@ -41,7 +41,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
   const stream = openai.beta.chat.completions.stream({
     model: model,
     stream: true,
-    // @ts-ignore
     messages: [{ role: 'user', content: content }],
   });
 

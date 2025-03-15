@@ -1,16 +1,11 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import Chat from "@/components/chat-part";
 import { FetchChat } from "./fetch-chat";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -34,7 +29,6 @@ const modelList = [
 
 export default function ChatPage() {
   const [inputMessage, setInputMessage] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   return (
     <div className="flex flex-row w-full h-full overflow-auto px-12">

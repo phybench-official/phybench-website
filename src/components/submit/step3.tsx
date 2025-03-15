@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Plus, Trash2, Check, Pencil } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import RenderMarkdown from "@/components/render-markdown"
 import { useState } from "react"
 
@@ -328,9 +328,9 @@ export default function Step3({
                 </CardHeader>
                 <CardContent className="pb-2 text-sm">
                   {response.comment ? (
-                    <p className="text-xs text-slate-800 dark:text-slate-300 italic">"{response.comment.length > 100 ? 
+                    <p className="text-xs text-slate-800 dark:text-slate-300 italic">&quot;{response.comment.length > 100 ? 
                       response.comment.substring(0, 100) + '...' : 
-                      response.comment}"</p>
+                      response.comment} &quot;</p>
                   ) : (
                     <p className="text-xs text-gray-400 italic">无评价</p>
                   )}

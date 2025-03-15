@@ -13,20 +13,12 @@ import rehypeStringify from "rehype-stringify"
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 // @ts-ignore
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { ComponentProps, useState } from "react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { useTheme } from 'next-themes'
 import { Copy, ChevronDown, ChevronRight } from 'lucide-react';
 
-// 添加自定义类型定义
-type CustomMarkdownComponents = ComponentProps<typeof Markdown>['components'] & {
-  think: React.ComponentType<{
-    children: React.ReactNode;
-    className?: string;
-  }>;
-}
-
-export default function RenderMarkdown({ content }: { content: string }) {
+export default function RenderMarkdown({ content }) {
 
   const { theme, systemTheme } = useTheme()
 
@@ -151,7 +143,7 @@ export default function RenderMarkdown({ content }: { content: string }) {
         </div>
       );
     },
-  } as CustomMarkdownComponents;
+  };
 
 
   return (

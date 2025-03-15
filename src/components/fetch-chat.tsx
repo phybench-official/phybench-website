@@ -2,15 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { toast } from "sonner"
 import RenderMarkdown from "./render-markdown";
 import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream';
@@ -32,7 +23,7 @@ export function FetchChat({ content, model, provider }: { content: string, model
         body: JSON.stringify({ content, model }),
       });
       
-      // @ts-ignore
+      // @ts-expect-error fuck
       const runner = ChatCompletionStream.fromReadableStream(response.body);
       
       runner.on('content', (delta, snapshot) => {

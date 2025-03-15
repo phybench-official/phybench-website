@@ -1,5 +1,4 @@
 import { type DefaultSession, type NextAuthConfig } from "next-auth"
-import Authentik from "next-auth/providers/authentik"
 
 declare module "next-auth" {
   interface Session {
@@ -48,7 +47,7 @@ export default {
     jwt({ token, user }) {
       if(user) {
         token.role = user.role
-        token.realname = user.realname,
+        token.realname = user.realname
         token.username = user.username
       }
       return token

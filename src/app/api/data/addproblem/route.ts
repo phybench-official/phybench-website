@@ -1,15 +1,17 @@
 import { auth } from "@/auth"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/prisma"
 import { ProblemTag } from "@prisma/client"
 
-export const POST = auth(async function POST(req) {
-  if (!req.auth) {
-    return NextResponse.json({ message: "未认证" }, { status: 401 })
+export async function POST(req: NextRequest) {
+  const session = await auth()
+
+  if (!session) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const userEmail = req.auth.user.email;
+    const userEmail = session.user.email;
     
     if (!userEmail) {
       return NextResponse.json({ message: "用户邮箱缺失，无法确认用户身份" }, { status: 400 })
@@ -113,4 +115,4 @@ export const POST = auth(async function POST(req) {
   } finally {
     await prisma.$disconnect()
   }
-})
+}
