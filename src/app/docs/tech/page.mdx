@@ -1,0 +1,113 @@
+# Tech Report
+
+## Getting Started
+
+The Source Code of this project is hosted on [GitHub](https://github.com/wjsoj/phybench-website). You can clone the project and run it locally.
+
+```bash
+npm install
+npm run dev
+```
+
+Caution: To run the project locally, you need to have the `.env` or `.env.local` file in the root directory. The content of the file should be like this:
+
+```env
+# Database URL For Prisma ORM 
+DATABASE_URL="postgresql://username:password@ip:port/name"
+
+# OAuth2 Client ID and Secret (With PKU UAAA)
+AUTH_CLIENT_ID=""
+AUTH_CLIENT_SECRET=""
+AUTH_CLIENT_ISSUER="https://unifiedauth.pku.edu.cn"
+
+# Auth.js Secret
+AUTH_SECRET=""
+
+# For Calling AI endpoint
+OPENAI_API_KEY="sk-<your-key>"
+OPENAI_API_BASE_URL="<your-api-endpoint>"
+```
+
+For reason of security, the `.env` file is not included in the repository. You need to create it by yourself. For sensitive information, please contact the project owner.
+
+You may need to set up a local development database. Currently, the project uses PostgreSQL deployed by docker-compose. You can create a `docker-compose.yml` file in the root directory with the following content:
+
+```yaml
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: phy-postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - 5435:5432
+    volumes:
+      - /extra/db_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - phy-network
+  minio:
+    image: minio/minio
+    container_name: phy-minio
+    mem_limit: 1G
+    volumes:
+      - /extra/minio_data:/etc/minio/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    restart: always
+    ports:
+      - ${MINIO_CONSOLE_PORT}:9001
+      - ${MINIO_API_PORT}:${MINIO_API_PORT}
+    command: >
+      server /etc/minio/data --address ":${MINIO_API_PORT}" --console-address
+      ":9001"
+    env_file:
+      - .env
+    networks:
+      - phy-network
+networks:
+  phy-network:
+    driver: bridge
+```
+
+The `minio` image is used for storing files (Currently not being used). The volume path and ports can be changed according to your needs. You should also create a `.env` file in the same directory of `docker-compose.yml` with the necessary environment variables. 
+
+## Tech Stack
+
+- **Framework:** Next.js with TypeScript
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Authentication:** Auth.js with [PKU UAAA](https://unifiedauth.pku.edu.cn)
+- **UI Components Library:** shadcn/UI
+- **CSS Framework:** Tailwind CSS
+- **Markdown Render:** react-markdown
+- **Code Highlight:** react-syntax-highlighter
+- **Math Render:** KaTeX by remark-math
+- **Icon Library:** lucide
+- **Static MDX Render:** @mdx-js/react
+- **Motion Animation:** framer-motion
+- **Type Checking:** Zod
+- **Linter:** ESLint
+
+We currently use a series of experimental technologies in this project. Including:
+
+- **Packaging:** Turbopack for Next.js
+- **New version of Tailwind CSS:** Tailwind CSS v4 (Released on January 22, 2025)
+- **OpenAI Node SDK:** We are using the alpha version, which is not released yet.
+
+These technologies are still under development and not stable yet. We will keep updating the project to the latest version of these libraries.
+
+## Deployment
+
+We currently use pm2 to deploy the project. You can use the following command to deploy the project on the server:
+
+```bash
+npm run build
+npm run pm2start
+```
+
+In the future, we may use Docker to deploy the project, which is still under development.

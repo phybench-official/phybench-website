@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    baseURL: "https://api.gpt.ge/v1"
+    baseURL: process.env.OPENAI_API_BASE_URL,
   });
 
   const stream = openai.beta.chat.completions.stream({

@@ -1,139 +1,65 @@
-# This is an H1
+# 网站说明
 
-## This is an H2
+关于网站的技术细节及代码，请参阅[技术说明文档](/docs/tech)
 
-### This is an H3
+## 登录
 
-#### This is an H4
+使用**北京大学统一认证**系统登录后，你将能够访问 **提交**、**审核** （仅审核员）和 **发现** 页面。
 
-##### This is an H5
+<img src="https://img-api.pku3d.com/ota/parkcai/Ed90TQ5e.png" alt="图1" width="250"/>
 
-The point of reference-style links is not that they’re easier to write. The point is that with reference-style links, your document source is vastly more readable. Compare the above examples: using reference-style links, the paragraph itself is only 81 characters long; with inline-style links, it’s 176 characters; and as raw \`HTML\`, it’s 234 characters. In the raw \`HTML\`, there’s more markup than there is text.
+## 上传题目
 
----
+### 选择题目
 
-> This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
-> consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
-> Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
->
-> Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
-> id sem consectetuer libero luctus adipiscing.
+登录后，你可以在 **提交** 页面上传题目。在选择了心仪的题目后，你可能需要对其进行适度的调整或删减，以符合格式要求。
 
----
+在当前阶段，我们希望题目满足以下要求：
 
-an example | *an example* | **an example**
+1. 不含多个小问，**只有一个小问**；对于含有多个小问的题目，你可以删除其他小问，保留必要的解题逻辑，只留下最关键的小问；
+2. 答案应为 **简单的表达式**，不涉及文字叙述、绘图描述或需要分类讨论的复杂表达式；
+3. **答案中涉及的所有符号必须在题干中显式给出**；原有题干中常常忽略的气体常数 $R$、光速 $c$ 等，你可能需要手动补充；
+4. 题干 **不得包含图片**；如果题干确实含有图片，你可以尝试使用图文生成模型等方式，概括图片的含义并融入题干的文字表述中。
 
----
+此外，我们希望 **题目不能被当前的优秀 AI 轻易攻破** 。尽管 AI 表现并非必填项，但如果你选择 **Deepseek R1**、**o3-mini** 或 **Gemini** 回答出错的题目，并在后续步骤中**上传出错的 AI 表现**，题目将**更容易通过审核**。
 
-![](https://gw.alipayobjects.com/zos/kitchen/sLO%24gbrQtp/lobe-chat.webp)
+### 确定题目基本信息
 
-![](https://gw.alipayobjects.com/zos/kitchen/8Ab%24hLJ5ur/cover.webp)
+假设我希望上传 2022 年爱培优物理竞赛刷题营测试（一）的第七题：
 
-<video
-poster="https://gw.alipayobjects.com/zos/kitchen/sLO%24gbrQtp/lobe-chat.webp"
-src="https://github.com/lobehub/lobe-chat/assets/28616219/f29475a3-f346-4196-a435-41a6373ab9e2"/>
+<img src="https://img-api.pku3d.com/ota/parkcai/Gte6mOE8.png" alt="图2" width="600"/>
 
----
+为满足格式要求，略作改编，删去图示，删去第二小问；在 **提交** 页面的 **确定题目基本信息** 栏填写信息如下：
 
-1. Bird
-1. McHale
-1. Parish
-    1. Bird
-    1. McHale
-        1. Parish
+<img src="https://img-api.pku3d.com/ota/parkcai/mMfC4lo2.png" alt="图3" width="1000"/>
 
----
+### 题目解答与答案
 
-- Red
-- Green
-- Blue
-    - Red
-    - Green
-        - Blue
+在 **提交** 页面的 **上传题目** 栏，我们需要提供 **Markdown 格式的解题步骤** ；在此推荐一种简易的解决办法：**使用 MinerU 等文档提取工具，自动将 PDF 文件转换为 Markdown 格式** 。
 
----
+请注意：如果解题步骤包含图片，MinerU 等文档提取工具通常会在其服务器存储图片，并提供图片的 url 字符串；因此， **这一办法对含图的解题步骤同样适用，并且无须额外操作** 。
 
-This is [an example](http://example.com/ "Title") inline link.
+<img src="https://img-api.pku3d.com/ota/parkcai/vghfR4PR.png" alt="图4" width="1000"/>
 
+MinerU 等文档提取工具的转换正确率并非 100%，但解题步骤部分主要是给审核员看的，厘清大致思路、陈列大部分公式即可，不必求全责备。
 
-| title | title | title |
-| --- | --- | --- |
-| content | content | content |
+上传解题步骤与题目答案后，还需要设置题目变量（符号），并标注符号范围。在此作两点说明如下：
 
+1. **符号范围不是题目本身包含的信息，是为方便后续数值验证而人为引入的界限**；你可以在满足自然约束（如非负性）的前提下任意框定一个范围，但不必过分极端；
+2. 如果符号是一个常量（如气体常数$R$），请在最小值和最大值输入相同的值。
 
-```bash
-$ pnpm install
-```
+<img src="https://img-api.pku3d.com/ota/parkcai/4mBiGEjm.png" alt="图5" width="1000"/>
 
+### 上传 AI 答案
 
-```javascript
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-dom/test-utils';
-import { useDropNodeOnCanvas } from './useDropNodeOnCanvas';
-```
+在 **提交** 页面的 **上传题目** 栏，我们可以提供 AI 解此道题目的表现。以 Deepseek R1 为例（你可以使用北京大学内部提供的 Deepseek），添加 AI 表现如下：
 
+<img src="https://img-api.pku3d.com/ota/parkcai/2IgwG50F.png" alt="图6" width="500"/>
 
-```mermaid
-graph TD
-A[Enter Chart Definition] --> B(Preview)
-B --> C{decide}
-C --> D[Keep]
-C --> E[Edit Definition]
-E --> B
-D --> F[Save Image and Code]
-F --> B
-```
+请注意，AI 表现不是必须的，但如果你提供 **Deepseek R1**、**o3-mini** 或 **Gemini** 的错误 AI 表现，题目将更容易通过审核。
 
+## 积分与奖励
 
----
+若题目通过审核，审核员会依据题目质量给予积分奖励。
 
-以下是一段Markdown格式的LaTeX数学公式：
-
-我是一个行内公式：$E=mc^2$
-
-我是一个独立的傅里叶公式：
-
-$$
-f(x) = a_0 + \sum_{n=1}^{\infty} \left( a_n \cos(nx) + b_n \sin(nx) \right)
-$$
-
-其中，带有积分符号的项：
-$$
-a_0 = \frac{1}{2\pi} \int_{-\pi}^{\pi} f(x) \, dx
-$$
-
-$$
-a_n = \frac{1}{\pi} \int_{-\pi}^{\pi} f(x) \cos(nx) \, dx \quad \text{for} \quad n \geq 1
-$$
-
-$$
-b_n = \frac{1}{\pi} \int_{-\pi}^{\pi} f(x) \sin(nx) \, dx \quad \text{for} \quad n \geq 1
-$$
-
-我是一个带有分式、测试长度超长的泰勒公式：
-
-$$
-\begin{equation}
-f(x) = f(a) + f'(a)(x - a) + \frac{f''(a)}{2!}(x - a)^2 + \frac{f'''(a)}{3!}(x - a)^3 + \cdots + \frac{f^{(n)}(a)}{n!}(x - a)^n + R_n(x)
-\end{equation}
-$$
-
-我是上面公式的行内版本，看看我会不会折行：$ f(x) = f(a) + f'(a)(x - a) + \frac{f''(a)}{2!}(x - a)^2 + \frac{f'''(a)}{3!}(x - a)^3 + \cdots + \frac{f^{(n)}(a)}{n!}(x - a)^n + R_n(x) $
-
-
-我是一个带有上下标的公式：
-$$
-q_1 q_2 = (w_1 w_2 - \vec{v}_1^T \vec{v}_2, \, w_1 \vec{v}_2 + w_2 \vec{v}_1 + \vec{v}_1 \times \vec{v}_2)
-$$
-
-我是一个带有 tag 的公式：
-$$
-q = a + bi + cj + dk \tag{1}
-$$
-
----
-
-我是一个嵌套测试：
-```
-$1
-```
+在即将开放的网站功能中，你可以在**发现**页面上查看积分榜。积分代表劳动时长，可以**替代劳动教育课时**（与 CUPT 类似）、**兑换志愿课时**、**兑换费米子文创等精美小礼品**。如果你的积分足够高，你会被列为**PhyBench 工作的共同作者（Author）**。
