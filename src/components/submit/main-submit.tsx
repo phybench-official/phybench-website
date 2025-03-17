@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Stepper,
@@ -46,7 +46,8 @@ export default function Component({ user }: { user: any }) {
   const [problem, setProblem] = useState("");
   const [source, setSource] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  
+  const [description, setDescription] = useState("");
+
   // 题目答案和变量
   const [solution, setSolution] = useState("");
   const [answer, setAnswer] = useState("");
@@ -66,29 +67,34 @@ export default function Component({ user }: { user: any }) {
       toast.error("请输入题目标题");
       return false;
     }
-    
+
     if (!selectedType) {
       toast.error("请选择题目类型");
       return false;
     }
-    
+
+    if (!description) {
+      toast.error("请输入题目描述");
+      return false;
+    }
+
     if (!problem.trim()) {
       toast.error("请输入题目内容");
       return false;
     }
-    
+
     if (page.step === 2 || page.step === 4) {
       if (!solution.trim()) {
         toast.error("请提供解题过程");
         return false;
       }
-      
+
       if (!answer.trim()) {
         toast.error("请提供题目答案");
         return false;
       }
     }
-    
+
     return true;
   };
 
@@ -99,39 +105,39 @@ export default function Component({ user }: { user: any }) {
     } else {
       // 最终提交逻辑
       if (!validateForm()) return;
-      
+
       try {
         setIsSubmitting(true);
-        
-        const response = await fetch('/api/data/addproblem', {
-          method: 'POST',
+
+        const response = await fetch("/api/data/addproblem", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             title,
             source,
             selectedType,
+            description,
             problem,
             solution,
             answer,
             variables,
-            aiResponses
+            aiResponses,
           }),
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.message || "提交失败");
         }
-        
+
         toast.success("题目提交成功!");
         // 成功后跳转到提交页面
         setTimeout(() => {
-          router.push('/');
+          router.push("/");
         }, 1500);
-        
       } catch (error: any) {
         toast.error(error.message || "提交过程中出现错误");
         console.error("提交错误:", error);
@@ -154,6 +160,8 @@ export default function Component({ user }: { user: any }) {
             setProblem={setProblem}
             selectedType={selectedType}
             setSelectedType={setSelectedType}
+            description={description}
+            setDescription={setDescription}
           />
         );
       case 2:
@@ -168,12 +176,7 @@ export default function Component({ user }: { user: any }) {
           />
         );
       case 3:
-        return (
-          <Step3
-            responses={aiResponses}
-            setResponses={setAiResponses}
-          />
-        );
+        return <Step3 responses={aiResponses} setResponses={setAiResponses} />;
       case 4:
         return (
           <Step4
@@ -205,7 +208,11 @@ export default function Component({ user }: { user: any }) {
 
   return (
     <div className="mx-auto w-full h-full space-y-8 text-center px-24 flex flex-col items-center">
-      <Stepper defaultValue={1} value={page.step} className="items-start gap-4 max-w-xl">
+      <Stepper
+        defaultValue={1}
+        value={page.step}
+        className="items-start gap-4 max-w-xl"
+      >
         {steps.map(({ step, title }) => (
           <StepperItem key={step} step={step} className="flex-1">
             <StepperTrigger className="w-full flex-col items-start gap-2 rounded">
@@ -236,7 +243,7 @@ export default function Component({ user }: { user: any }) {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.div
           key={page.step}
           className="flex justify-between w-xl"
           initial={{ y: 20, opacity: 0 }}
@@ -244,11 +251,15 @@ export default function Component({ user }: { user: any }) {
           exit={{ y: -20, opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Button onClick={handlePrev} disabled={page.step === 1} className="cursor-pointer">
+          <Button
+            onClick={handlePrev}
+            disabled={page.step === 1}
+            className="cursor-pointer"
+          >
             上一步
           </Button>
-          <Button 
-            onClick={handleNext} 
+          <Button
+            onClick={handleNext}
             className="cursor-pointer"
             disabled={isSubmitting}
           >
