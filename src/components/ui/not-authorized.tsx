@@ -26,7 +26,7 @@ export function NotAuthorized() {
             height={200}
           />
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center space-x-4">
           <form
             action={async () => {
               "use server"
@@ -34,6 +34,14 @@ export function NotAuthorized() {
             }}
           >
             <Button className="cursor-pointer" type="submit">使用UAAA登录</Button>
+          </form>
+          <form
+            action={async () => {
+              "use server"
+              await signIn("authentik")
+            }}
+          >
+            <Button variant="outline" className="cursor-pointer" type="submit">临时登录</Button>
           </form>
         </CardFooter>
       </Card>
