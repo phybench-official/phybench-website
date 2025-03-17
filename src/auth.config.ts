@@ -1,4 +1,5 @@
 import { type DefaultSession, type NextAuthConfig } from "next-auth"
+import Authentik from "next-auth/providers/authentik";
 
 declare module "next-auth" {
   interface Session {
@@ -38,7 +39,12 @@ export default {
           email: profile.email,
         }
       }
-    }
+    },
+    Authentik({
+      clientId: process.env.AUTH_AUTHENTIK_CLIENT_ID,
+      clientSecret: process.env.AUTH_AUTHENTIK_CLIENT_SECRET,
+      issuer: process.env.AUTH_AUTHENTIK_ISSUER
+    })
   ],
   // session: {
   //   strategy: "database",

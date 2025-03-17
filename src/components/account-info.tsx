@@ -46,7 +46,8 @@ export async function AccountInfo() {
                 <form
                   action={async () => {
                     "use server"
-                    await signIn("uaaa")
+                    // await signIn("uaaa")
+                    await signIn("authentik")
                   }}
                 >
                   <button type="submit" className="cursor-pointer">登录</button>
