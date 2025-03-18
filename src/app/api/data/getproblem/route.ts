@@ -41,12 +41,18 @@ export async function GET(req: NextRequest) {
     if (dbUser.role === "admin") {
       // 如果是管理员，获取所有问题
       problems = await prisma.problem.findMany({
+        // select: {
+        //   remark: true,
+        // },
         skip,
         take: limit,
       });
     } else if (dbUser.role === "user") {
       // 如果是普通用户，获取该用户的问题
       problems = await prisma.problem.findMany({
+        // select: {
+        //   remark: true,
+        // },
         where: {
           userId: dbUser.id,
         },

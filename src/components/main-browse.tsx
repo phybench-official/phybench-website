@@ -22,6 +22,7 @@ interface Problem {
   answer: string;
   status: string;
   userId: string;
+  remark?: string;
   score: string | null;
   realname?: string;
   username?: string;
@@ -50,7 +51,6 @@ export default function BrowsePage() {
         const data = await response.json();
 
         if (data.success) {
-          // 获取问题后，根据 userId 获取供题人信息
           const problemsWithUserNames = await Promise.all(
             data.problems.map(async (problem: Problem) => {
               const userResponse = await fetch(
@@ -145,7 +145,7 @@ export default function BrowsePage() {
                 </div>
                 <div>
                   <strong>题目备注: </strong>
-                  {problem.note || <span className="text-red-500">缺失</span>}
+                  {problem.note || <span className="text-gray-500">无</span>}
                 </div>
                 <div>
                   <strong>审核状态: </strong>
@@ -164,6 +164,10 @@ export default function BrowsePage() {
                   {!["PENDING", "APPROVED", "RETURNED", "REJECTED"].includes(
                     problem.status
                   ) && <span className="text-red-500">未知状态</span>}
+                </div>
+                <div>
+                  <strong>审核评语: </strong>
+                  {problem.remark || <span className="text-gray-500">无</span>}
                 </div>
                 <div>
                   <strong>积分: </strong>
@@ -190,6 +194,13 @@ export default function BrowsePage() {
                     content={problem.solution || "缺失解答过程"}
                   />
                 </div>
+                {/* 显示问题的 JSON 数据，调试用 */}
+                {/* <div className="border rounded p-2 mt-2 bg-gray-100">
+                  <strong>问题数据:</strong>
+                  <pre className="whitespace-pre-wrap text-xs">
+                    {JSON.stringify(problem, null, 2)}
+                  </pre>
+                </div> */}
               </div>
             </CardContent>
             <CardFooter>{/* 底部可根据需要添加按钮等操作 */}</CardFooter>

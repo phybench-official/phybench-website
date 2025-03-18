@@ -108,6 +108,7 @@ model Problem {
   aiPerformances   AiPerformance[]           // AI表现（提交时选填，允许列表为空）
   status           ProblemStatus @default(PENDING)             // 审核状态
   score            Int?                      // 题目积分（由审核人员给出）
+  remark           String?                   // 审核评语（由审核人员给出）
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
