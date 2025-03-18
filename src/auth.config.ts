@@ -43,7 +43,18 @@ export default {
     Authentik({
       clientId: process.env.AUTH_AUTHENTIK_CLIENT_ID,
       clientSecret: process.env.AUTH_AUTHENTIK_CLIENT_SECRET,
-      issuer: process.env.AUTH_AUTHENTIK_ISSUER
+      issuer: process.env.AUTH_AUTHENTIK_ISSUER,
+      profile(profile) {
+        // console.log(profile)
+        return {
+          name: profile.nickname,
+          role: "user",
+          username: profile.preferred_username,
+          realname: profile.name,
+          id: profile.sub,
+          email: profile.email,
+        }
+      }
     })
   ],
   // session: {
@@ -52,6 +63,7 @@ export default {
   callbacks: {
     jwt({ token, user }) {
       if(user) {
+        // console.log(user)
         token.role = user.role
         token.realname = user.realname
         token.username = user.username

@@ -42,17 +42,28 @@ export async function AccountInfo() {
                 </DropdownMenuItem>
               </DialogTrigger>
             ) : (
-              <DropdownMenuItem>
-                <form
-                  action={async () => {
-                    "use server"
-                    // await signIn("uaaa")
-                    await signIn("authentik")
-                  }}
-                >
-                  <button type="submit" className="cursor-pointer">登录</button>
-                </form>
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem>
+                  <form
+                    action={async () => {
+                      "use server"
+                      await signIn("uaaa")
+                    }}
+                  >
+                    <button type="submit" className="cursor-pointer">登录</button>
+                  </form>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <form
+                    action={async () => {
+                      "use server"
+                      await signIn("authentik")
+                    }}
+                  >
+                    <button type="submit" className="cursor-pointer">临时登录</button>
+                  </form>
+                </DropdownMenuItem>
+              </>
             )
           }
           <DropdownMenuItem>
