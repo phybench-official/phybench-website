@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RenderMarkdown from "@/components/render-markdown";
+import { useState } from "react";
 
 export default function Step1({
   title,
@@ -29,6 +30,8 @@ export default function Step1({
   setSelectedType,
   description,
   setDescription,
+  note,
+  setNote,
 }: {
   title: string;
   setTitle: (v: string) => void;
@@ -40,6 +43,8 @@ export default function Step1({
   setSelectedType: (v: string) => void;
   description: string;
   setDescription: (v: string) => void;
+  note: string;
+  setNote: (v: string) => void;
 }) {
   return (
     <Card className="flex-1 h-[60vh] w-full flex flex-col">
@@ -95,6 +100,15 @@ export default function Step1({
                 placeholder="请输入进一步描述题目的若干tag，如：刚体动力学 感知 几何 有图（详见项目文档）"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                className="col-span-2"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-sm font-medium mt-2">题目备注</label>
+              <Input
+                placeholder="请输入题目备注（可选）"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
                 className="col-span-2"
               />
             </div>

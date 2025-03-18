@@ -99,6 +99,7 @@ model Problem {
   title            String                    // 题目名称
   tag              ProblemTag                // 题目类型（力热光电近四大及以上）
   description      String @default("")       // 题目描述
+  note             String @default("")       // 题目备注
   source           String?                   // 题目来源（选填）
   content          String                    // 题干
   variables        ProblemVariable[]         // 题目涉及的变量（包括数值范围）

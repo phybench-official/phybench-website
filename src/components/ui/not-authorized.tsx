@@ -1,6 +1,6 @@
-import { signIn } from "@/auth"
+import { signIn } from "@/auth";
 import Image from "next/image";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 export function NotAuthorized() {
   return (
@@ -29,14 +29,16 @@ export function NotAuthorized() {
         <CardFooter className="flex justify-center">
           <form
             action={async () => {
-              "use server"
-              await signIn("uaaa")
+              "use server";
+              await signIn("uaaa");
             }}
           >
-            <Button className="cursor-pointer" type="submit">使用UAAA登录</Button>
+            <Button className="cursor-pointer" type="submit">
+              使用UAAA登录
+            </Button>
           </form>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

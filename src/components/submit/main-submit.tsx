@@ -47,6 +47,7 @@ export default function Component({ user }: { user: any }) {
   const [source, setSource] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [description, setDescription] = useState("");
+  const [note, setNote] = useState("");
 
   // 题目答案和变量
   const [solution, setSolution] = useState("");
@@ -119,6 +120,7 @@ export default function Component({ user }: { user: any }) {
             source,
             selectedType,
             description,
+            note,
             problem,
             solution,
             answer,
@@ -162,6 +164,8 @@ export default function Component({ user }: { user: any }) {
             setSelectedType={setSelectedType}
             description={description}
             setDescription={setDescription}
+            note={note}
+            setNote={setNote}
           />
         );
       case 2:
