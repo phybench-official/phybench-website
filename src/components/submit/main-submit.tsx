@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,24 @@ export default function Component({ user }: { user: any }) {
   // AI解答
   const [aiResponses, setAiResponses] = useState<AIResponse[]>([]);
 
+  useEffect(() => {
+    // 读取本地草稿数据
+    const draft = localStorage.getItem("problemDraft");
+    if (draft) {
+      const data = JSON.parse(draft);
+      if (data.title) setTitle(data.title);
+      if (data.source) setSource(data.source);
+      if (data.selectedType) setSelectedType(data.selectedType);
+      if (data.description) setDescription(data.description);
+      if (data.note) setNote(data.note);
+      if (data.problem) setProblem(data.problem);
+      if (data.solution) setSolution(data.solution);
+      if (data.answer) setAnswer(data.answer);
+      if (data.variables) setVariables(data.variables);
+      if (data.aiResponses) setAiResponses(data.aiResponses);
+    }
+  }, []);
+
   const handlePrev = () => {
     if (page.step > 1) {
       setPage((prev) => ({ step: prev.step - 1, direction: -1 }));
@@ -102,6 +120,23 @@ export default function Component({ user }: { user: any }) {
   const handleNext = async () => {
     if (page.step < 4) {
       if (!validateForm()) return;
+      // 保存当前题目信息至本地
+      localStorage.setItem(
+        "problemDraft",
+        JSON.stringify({
+          title,
+          source,
+          selectedType,
+          description,
+          note,
+          problem,
+          solution,
+          answer,
+          variables,
+          aiResponses,
+        })
+      );
+      toast.success("题目信息已保存至浏览器本地");
       setPage((prev) => ({ step: prev.step + 1, direction: 1 }));
     } else {
       // 最终提交逻辑
@@ -136,6 +171,8 @@ export default function Component({ user }: { user: any }) {
         }
 
         toast.success("题目提交成功!");
+        // 提交成功后删除本地草稿数据
+        localStorage.removeItem("problemDraft");
         // 成功后跳转到提交页面
         setTimeout(() => {
           router.push("/");

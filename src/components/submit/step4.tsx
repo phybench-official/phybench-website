@@ -28,7 +28,7 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
           {/* 左侧信息 */}
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col space-y-1 items-start">
             <div>
               <strong>题目名称: </strong>
               {title ? title : <span className="text-red-500">缺失</span>}
@@ -39,8 +39,8 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
             </div>
             <div>
               <strong>提交人: </strong>
-              {user?.name || user?.email
-                ? (user.name || user.email)
+              {user?.realname || user?.name
+                ? (user.realname || user.name)
                 : <span className="text-red-500">缺失</span>}
             </div>
             <div>
@@ -48,12 +48,12 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
               {source ? source : <span className="text-red-500">缺失</span>}
             </div>
             <div>
-              <strong>已上传的AI表现:</strong>
+              <strong className="text-sky-800 dark:text-sky-200">已上传的AI表现:</strong>
               {aiResponses && aiResponses.length > 0 ? (
                 <div className="flex flex-col space-y-2">
                   {aiResponses.map((res, index) => (
-                    <div key={index} className="flex flex-row space-x-4 p-2 w-full border">
-                      <span className="text-lg font-semibold">{res.name}</span>
+                    <div key={index} className="flex flex-row justify-between space-x-4 p-2 w-full border">
+                      <span className="text-sm font-medium opacity-80">{res.name}</span>
                       {
                         res.correctness == "correct" ? <Badge>正确</Badge> : <Badge variant="destructive">错误</Badge>
                       }
@@ -61,7 +61,7 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
                   ))}
                 </div>
               ) : (
-                <span className="text-red-500">缺失</span>
+                <span className="text-red-500">暂无</span>
               )}
             </div>
           </div>

@@ -27,12 +27,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Plus, Trash2 } from "lucide-react";
-import RenderMarkdown from "@/components/render-markdown"
 import { useState } from "react"
+import { MarkdownEditor } from "./markdown-editor"
 
 export interface AIResponse {
   id: string;
@@ -121,7 +120,7 @@ export default function Step3({
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="text-start">
           <CardTitle className="text-xl">AI 表现</CardTitle>
-          <CardDescription>记录不同 AI 对该题目的解答表现</CardDescription>
+          <CardDescription>记录不同 AI 对该题目的解答表现（可以不填）</CardDescription>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -203,49 +202,22 @@ export default function Step3({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>解答过程</Label>
-                  <Tabs defaultValue="edit" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="edit">编辑</TabsTrigger>
-                      <TabsTrigger value="preview">预览</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="edit">
-                      <Textarea 
-                        placeholder="请输入Markdown格式的AI解答过程"
-                        value={aiProcess}
-                        onChange={(e) => setAiProcess(e.target.value)}
-                        className="h-[300px] resize-none"
-                      />
-                    </TabsContent>
-                    <TabsContent value="preview">
-                      <div className="border rounded-md p-3 h-[300px] overflow-y-auto bg-gray-50">
-                        <RenderMarkdown content={aiProcess} />
-                      </div>
-                    </TabsContent>
-                  </Tabs>
+                  <MarkdownEditor
+                    text={aiProcess}
+                    setText={setAiProcess}
+                    placeholder="请输入Markdown格式的AI解答过程"
+                  />
                 </div>
                 
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label>答案</Label>
-                    <Tabs defaultValue="edit" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="edit">编辑</TabsTrigger>
-                        <TabsTrigger value="preview">预览</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="edit">
-                        <Textarea 
-                          placeholder="请输入Markdown格式的AI答案"
-                          value={aiAnswer}
-                          onChange={(e) => setAiAnswer(e.target.value)}
-                          className="h-[100px] resize-none"
-                        />
-                      </TabsContent>
-                      <TabsContent value="preview">
-                        <div className="border rounded-md p-3 h-[100px] overflow-y-auto bg-gray-50">
-                          <RenderMarkdown content={aiAnswer} />
-                        </div>
-                      </TabsContent>
-                    </Tabs>
+                    <MarkdownEditor
+                      text={aiAnswer}
+                      setText={setAiAnswer}
+                      placeholder="请输入Markdown格式的AI答案"
+                      classNames="h-[15vh]"
+                    />
                   </div>
                   
                   <div className="space-y-2">
@@ -300,20 +272,20 @@ export default function Step3({
             {responses.map((response) => (
               <Card 
                 key={response.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow dark:bg-slate-800 bg-slate-50 px-2 py-2"
+                className="cursor-pointer hover:shadow-md transition-shadow dark:bg-slate-800/50 bg-slate-50 px-2 py-2"
                 onClick={() => handleOpenDialog(response)}
               >
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-row space-x-4">
-                      <CardTitle className="text-lg font-bold">{response.name}</CardTitle>
-                      <Badge 
-                        variant={response.correctness === "correct" ? "default" : "destructive"}
-                        className="mt-1"
-                      >
-                        {response.correctness === "correct" ? "正确" : "错误"}
-                      </Badge>
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-1 flex-row items-center space-x-4">
+                      <CardTitle className="text-base font-bold">{response.name}</CardTitle>
                     </div>
+                    <Badge 
+                      variant={response.correctness === "correct" ? "default" : "destructive"}
+                      className="mt-1 h-6 flex-nowrap"
+                    >
+                      {response.correctness === "correct" ? "正确" : "错误"}
+                    </Badge>
                     <Button
                       variant="ghost" 
                       size="icon"
@@ -322,17 +294,17 @@ export default function Step3({
                         handleDeleteResponse(response.id);
                       }}
                     >
-                      <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500" />
+                      <Trash2 className="h-8 w-8 text-gray-500 hover:text-red-500" />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="pb-2 text-sm">
                   {response.comment ? (
-                    <p className="text-xs text-slate-800 dark:text-slate-300 italic">&quot;{response.comment.length > 100 ? 
+                    <p className="text-sm text-slate-800 dark:text-slate-300 italic">&quot;{response.comment.length > 100 ? 
                       response.comment.substring(0, 100) + '...' : 
                       response.comment} &quot;</p>
                   ) : (
-                    <p className="text-xs text-gray-400 italic">无评价</p>
+                    <p className="text-sm text-gray-400 italic">无评价</p>
                   )}
                 </CardContent>
                 <CardFooter className="pt-0">

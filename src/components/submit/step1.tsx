@@ -13,11 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { MarkdownEditor } from "./markdown-editor";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import RenderMarkdown from "@/components/render-markdown";
-import { useState } from "react";
 
 export default function Step1({
   title,
@@ -46,6 +43,7 @@ export default function Step1({
   note: string;
   setNote: (v: string) => void;
 }) {
+
   return (
     <Card className="flex-1 h-[60vh] w-full flex flex-col">
       <CardHeader>
@@ -114,25 +112,11 @@ export default function Step1({
             </div>
           </div>
           <div className="flex flex-col h-full">
-            <Tabs defaultValue="edit" className="w-full flex flex-col flex-1">
-              <TabsList className="grid grid-cols-2">
-                <TabsTrigger value="edit">Edit</TabsTrigger>
-                <TabsTrigger value="preview">Preview</TabsTrigger>
-              </TabsList>
-              <TabsContent value="edit" className="flex-1 overflow-hidden">
-                <Textarea
-                  placeholder="请输入Markdown格式的题干"
-                  value={problem}
-                  onChange={(e) => setProblem(e.target.value)}
-                  className="w-full h-[35vh] resize-none overflow-y-auto"
-                />
-              </TabsContent>
-              <TabsContent value="preview" className="flex-1 overflow-hidden">
-                <div className="border p-2 h-[35vh] overflow-y-auto text-start">
-                  <RenderMarkdown content={problem} />
-                </div>
-              </TabsContent>
-            </Tabs>
+            <MarkdownEditor 
+              text={problem} 
+              setText={setProblem} 
+              placeholder="请输入Markdown格式的题干"
+            />
           </div>
         </div>
       </CardContent>
