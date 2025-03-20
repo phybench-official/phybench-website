@@ -4,7 +4,7 @@ import { ProblemView } from "@/components/problem-view";
 import { notFound } from "next/navigation";
 import { prisma } from "@/prisma";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session) return <NotAuthorized />;
 
