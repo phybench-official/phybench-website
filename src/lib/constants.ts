@@ -10,11 +10,11 @@ const statusMap = {
 const tagMap = {
   MECHANICS: { label: "力学", color: "bg-blue-500" },
   ELECTRICITY: { label: "电磁学", color: "bg-purple-500" },
-  THERMODYNAMICS: { label: "热学", color: "bg-orange-500" },
-  OPTICS: { label: "光学", color: "bg-yellow-500" },
-  MODERN: { label: "近代物理", color: "bg-green-500" },
-  ADVANCED: { label: "高等物理", color: "bg-indigo-500" },
-  OTHER: { label: "其它", color: "bg-gray-500" },
+  THERMODYNAMICS: { label: "热学", color: "bg-orange-700" },
+  OPTICS: { label: "光学", color: "bg-yellow-700" },
+  MODERN: { label: "近代物理", color: "bg-green-700" },
+  ADVANCED: { label: "高等物理", color: "bg-indigo-600" },
+  OTHER: { label: "其它", color: "bg-gray-600" },
 }
 
 export { tagMap, statusMap }

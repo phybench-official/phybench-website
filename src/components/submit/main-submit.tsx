@@ -15,6 +15,7 @@ import Step2, { Variable } from "./step2";
 import Step3, { AIResponse } from "./step3";
 import Step4 from "./step4";
 import { useRouter } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 
 const steps = [
   {
@@ -31,7 +32,7 @@ const steps = [
   },
   {
     step: 4,
-    title: "提交",
+    title: "确认并提交",
   },
 ];
 
@@ -243,24 +244,37 @@ export default function Component({ user }: { user: any }) {
 
   return (
     <div className="mx-auto w-full h-full space-y-8 text-center px-24 flex flex-col items-center">
-      <Stepper
-        defaultValue={1}
-        value={page.step}
-        className="items-start gap-4 max-w-xl"
-      >
-        {steps.map(({ step, title }) => (
-          <StepperItem key={step} step={step} className="flex-1">
-            <StepperTrigger className="w-full flex-col items-start gap-2 rounded">
-              <StepperIndicator asChild className="bg-border h-1 w-full">
-                <span className="sr-only">{step}</span>
-              </StepperIndicator>
-              <div className="space-y-0.5">
-                <StepperTitle>{title}</StepperTitle>
-              </div>
-            </StepperTrigger>
-          </StepperItem>
-        ))}
-      </Stepper>
+      <div className="grid grid-cols-5 w-full items-center gap-4">
+        <div className="justify-self-start">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1 cursor-pointer col-span-1"
+          onClick={() => router.push("/submit")}
+        >
+          <ChevronLeft className="h-4 w-4" /> 返回题目列表
+        </Button>
+        </div>
+        <Stepper
+          defaultValue={1}
+          value={page.step}
+          className="items-start gap-4 max-w-xl col-span-3 justify-self-center"
+        >
+          {steps.map(({ step, title }) => (
+            <StepperItem key={step} step={step} className="flex-1">
+              <StepperTrigger className="w-full flex-col items-start gap-2 rounded">
+                <StepperIndicator asChild className="bg-border h-1 w-full">
+                  <span className="sr-only">{step}</span>
+                </StepperIndicator>
+                <div className="space-y-0.5 text-center w-full">
+                  <StepperTitle className="">{title}</StepperTitle>
+                </div>
+              </StepperTrigger>
+            </StepperItem>
+          ))}
+        </Stepper>
+        <div className=" col-span-1 w-24 justify-self-end"></div>
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div

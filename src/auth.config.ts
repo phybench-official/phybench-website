@@ -30,6 +30,7 @@ export default {
       clientId: process.env.AUTH_CLIENT_ID,
       clientSecret: process.env.AUTH_CLIENT_SECRET,
       profile(profile) {
+        console.log(profile)
         return {
           name: profile.name,
           role: "user",

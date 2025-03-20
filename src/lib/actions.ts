@@ -52,5 +52,8 @@ export async function deleteProblem(problemId: number) {
   if (session.user.role !== "admin" && problem.userId !== session.user.id) {
     throw new Error("Not authorized to delete this problem");
   }
+  await prisma.aiPerformance.deleteMany({
+    where: { problemId },
+  });
   await prisma.problem.delete({ where: { id: problemId } });
 }

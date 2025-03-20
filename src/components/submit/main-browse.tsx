@@ -27,6 +27,7 @@ import { fetchProblems, deleteProblem } from "@/lib/actions";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { tagMap } from "@/lib/constants";
 
 // 定义每页显示数量
 const PER_PAGE = 15;
@@ -34,7 +35,7 @@ const PER_PAGE = 15;
 interface Problem {
   id: number;
   title: string;
-  tag: string;
+  tag: keyof typeof tagMap;
   status: string;
   remark: string | null;
   score: number | null;
@@ -45,7 +46,7 @@ function SkeletonCard() {
   return (
     <div className="mt-8 xl:mx-32 lg:mx-24 flex flex-col items-center">
       <div className="grid grid-cols-3 gap-4 w-full min-h-[50vh]">
-        {Array(PER_PAGE).fill(0).map((_, index) => (
+        {Array(9).fill(0).map((_, index) => (
           <Card key={index} className="flex flex-col justify-between">
             <CardHeader>
               <Skeleton className="h-6 w-3/4 mb-2" />
@@ -142,7 +143,12 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
       </div>
 
       {/* main list */}
-      <div className="grid grid-cols-3 gap-4 w-full min-h-[50vh]">
+      <div className="grid grid-cols-3 gap-4 w-full">
+        {!problems.length && (
+          <div className="col-span-3 text-center text-gray-500 dark:text-gray-400 h-[50vh]">
+            暂无问题
+          </div>
+        )}
         {problems.map((problem) => (
           <Card key={problem.id} className="felx flex-col justify-between">
             <CardHeader>
@@ -153,7 +159,9 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
                 {problem.title}
               </CardTitle>
               <CardDescription className="flex flex-row text-sm">
-                <Badge>{problem.tag}</Badge>
+                <Badge variant="secondary" className={`${tagMap[problem.tag].color} text-white`}>
+                  {tagMap[problem.tag].label}
+                </Badge>
                 <Badge variant="secondary" >{problem.createdAt.toLocaleDateString()}</Badge>
               </CardDescription>
             </CardHeader>
@@ -203,8 +211,8 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
                       variant="destructive"
                       onClick={() => {
                         deleteProblem(problem.id).then(() => {
-                          toast.success("问题已删除");
                           router.refresh();
+                          toast.success("问题已删除");
                         });
                       }}
                     >
@@ -222,68 +230,70 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
         }
       </div>
       {/* Pagination */}
-      <div className="w-full mt-8">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                href={currentPage > 1 ? `/submit/${Number(currentPage) - 1}` : '#'} 
-                isActive={Number(currentPage) > 1} 
-              />
-            </PaginationItem>
+      {totalPages > 1 && (
+        <div className="w-full mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  href={currentPage > 1 ? `/submit/${Number(currentPage) - 1}` : '#'} 
+                  isActive={Number(currentPage) > 1} 
+                />
+              </PaginationItem>
+              
+              {/* 动态生成分页项 */}
+              {paginationItems.map((pageNum, index) => {
+                if (pageNum < 0) {
+                  // 显示省略号
+                  return (
+                    <PaginationItem key={`ellipsis-${index}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                } else {
+                  // 显示页码
+                  return (
+                    <PaginationItem key={`page-${pageNum}`}>
+                      <PaginationLink 
+                        href={`/submit/${pageNum}`} 
+                        isActive={pageNum === currentPage}
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                }
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  href={currentPage < totalPages ? `/submit/${Number(currentPage) + 1}` : '#'} 
+                  isActive={Number(currentPage) < totalPages} 
+                />
+              </PaginationItem>
+            </PaginationContent>
             
-            {/* 动态生成分页项 */}
-            {paginationItems.map((pageNum, index) => {
-              if (pageNum < 0) {
-                // 显示省略号
-                return (
-                  <PaginationItem key={`ellipsis-${index}`}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                );
-              } else {
-                // 显示页码
-                return (
-                  <PaginationItem key={`page-${pageNum}`}>
-                    <PaginationLink 
-                      href={`/submit/${pageNum}`} 
-                      isActive={pageNum === currentPage}
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              }
-            })}
-            
-            <PaginationItem>
-              <PaginationNext 
-                href={currentPage < totalPages ? `/submit/${Number(currentPage) + 1}` : '#'} 
-                isActive={Number(currentPage) < totalPages} 
+            {/* 输入框切换页码 */}
+            <div className="flex justify-center mt-2">
+              <Input
+                type="number"
+                value={nextPage}
+                min={1}
+                max={totalPages}
+                className="w-20 text-center"
+                onChange={(e) => setNextPage(parseInt(e.target.value))}
               />
-            </PaginationItem>
-          </PaginationContent>
-          
-          {/* 输入框切换页码 */}
-          <div className="flex justify-center mt-2">
-            <Input
-              type="number"
-              value={nextPage}
-              min={1}
-              max={totalPages}
-              className="w-20 text-center"
-              onChange={(e) => setNextPage(parseInt(e.target.value))}
-            />
-            <Button variant="secondary" size="sm" onClick={() => {
-              if (nextPage >= 1 && nextPage <= totalPages) {
-                router.push(`/submit/${nextPage}`);
-              }
-            }}>
-              跳转
-            </Button>
-          </div>
-        </Pagination>
-      </div>
+              <Button variant="secondary" size="sm" onClick={() => {
+                if (nextPage >= 1 && nextPage <= totalPages) {
+                  router.push(`/submit/${nextPage}`);
+                }
+              }}>
+                跳转
+              </Button>
+            </div>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }
