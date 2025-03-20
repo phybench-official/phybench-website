@@ -27,7 +27,7 @@ const icons = {
 
 export function NavBar({ items, className }: NavBarProps) {
   const pathname = usePathname()
-  const initialActive = items.find(item => item.url === pathname)?.name || items[0].name
+  const initialActive = items.find(item => pathname.startsWith(item.url))?.name || items[0].name
   const [activeTab, setActiveTab] = useState(initialActive)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -45,11 +45,16 @@ export function NavBar({ items, className }: NavBarProps) {
     return () => window.removeEventListener("resize", handleResize)
   }, [isMobile])
   
-  // 添加路由监听，当路由变化时更新activeTab
   useEffect(() => {
-    const matchingItem = items.find(item => item.url === pathname);
-    if (matchingItem) {
-      setActiveTab(matchingItem.name);
+    // 找出所有匹配的项目
+    const matchingItems = items.filter(item => pathname.startsWith(item.url));
+    if (matchingItems.length > 0) {
+      const bestMatch = matchingItems.reduce((prev, current) => 
+        prev.url.length > current.url.length ? prev : current
+      );
+      if (bestMatch.name !== activeTab) {
+        setActiveTab(bestMatch.name);
+      }
     }
   }, [pathname, items]);
 

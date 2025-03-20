@@ -10,7 +10,17 @@ const nextConfig: NextConfig = {
         'micromark-extension-math': 'micromark-extension-llm-math'
       }
     }
-  }
+  },
+  // redirect /submit to /submit/1 permanently
+  async redirects() {
+    return [
+      {
+        source: '/submit',
+        destination: '/submit/1',
+        permanent: true,
+      },
+    ]
+  },
 };
 
 const withMDX = createMDX({

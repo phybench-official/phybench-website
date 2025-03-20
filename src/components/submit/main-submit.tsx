@@ -86,34 +86,28 @@ export default function Component({ user }: { user: any }) {
       toast.error("请输入题目标题");
       return false;
     }
-
     if (!selectedType) {
       toast.error("请选择题目类型");
       return false;
     }
-
     if (!description) {
       toast.error("请输入题目描述");
       return false;
     }
-
     if (!problem.trim()) {
       toast.error("请输入题目内容");
       return false;
     }
-
     if (page.step === 2 || page.step === 4) {
       if (!solution.trim()) {
         toast.error("请提供解题过程");
         return false;
       }
-
       if (!answer.trim()) {
         toast.error("请提供题目答案");
         return false;
       }
     }
-
     return true;
   };
 
@@ -175,7 +169,7 @@ export default function Component({ user }: { user: any }) {
         localStorage.removeItem("problemDraft");
         // 成功后跳转到提交页面
         setTimeout(() => {
-          router.push("/");
+          router.push("/submit/1");
         }, 1500);
       } catch (error: any) {
         toast.error(error.message || "提交过程中出现错误");
