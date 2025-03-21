@@ -1,0 +1,69 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: phy-postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - 5435:5432
+    volumes:
+      - /extra/db_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - phy-network
+
+  phybench:
+    image: wjsoj/phybench-website:latest
+    container_name: phybench
+    ports:
+      - 3005:3000
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_CLIENT_ID=${AUTH_CLIENT_ID}
+      - AUTH_CLIENT_SECRET=${AUTH_CLIENT_SECRET}
+      - AUTH_CLIENT_ISSUER=${AUTH_CLIENT_ISSUER}
+      - AUTH_AUTHENTIK_ID=${AUTH_AUTHENTIK_ID}
+      - AUTH_AUTHENTIK_SECRET=${AUTH_AUTHENTIK_SECRET}
+      - AUTH_AUTHENTIK_ISSUER=${AUTH_AUTHENTIK_ISSUER}
+      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
+      - AUTH_URL=${AUTH_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL}
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - phy-network
+
+  minio:
+    image: minio/minio
+    container_name: phy-minio
+    mem_limit: 1G
+    volumes:
+      - /extra/minio_data:/etc/minio/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    restart: always
+    ports:
+      - ${MINIO_CONSOLE_PORT}:9001
+      - ${MINIO_API_PORT}:${MINIO_API_PORT}
+    command: >
+      server /etc/minio/data --address ":${MINIO_API_PORT}" --console-address
+      ":9001"
+    env_file:
+      - .env
+    networks:
+      - phy-network
+
+networks:
+  phy-network:
+    driver: bridge
