@@ -125,12 +125,30 @@ export function ProblemView({ problem }: { problem: ProblemData }) {
             </div>
           </div>
 
+          {
+            <div className="pt-2 border-t">
+              <h4 className="font-medium mb-2">供题人</h4>
+              <p className="text-sm italic">
+                {!problem.offererEmail ? "本人供题" : problem.offererEmail}
+              </p>
+            </div>
+          }
+
           {problem.remark && (
             <div className="pt-2 border-t">
               <h4 className="font-medium mb-2">审核意见</h4>
               <p className="text-sm italic">{problem.remark}</p>
             </div>
           )}
+
+          {
+            <div className="pt-2 border-t">
+              <h4 className="font-medium mb-2">是否被提名为好题</h4>
+              <p className="text-sm italic">
+                {problem.nominated === "Yes" ? "是" : "否"}
+              </p>
+            </div>
+          }
         </CardContent>
       </Card>
 

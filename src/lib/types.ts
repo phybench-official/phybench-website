@@ -37,6 +37,7 @@ interface ProblemData {
   score?: number | null;
   remark?: string | null;
   nominated?: string | null;
+  offererEmail?: string | null;
   createdAt: Date;
   updatedAt: Date;
   user: {

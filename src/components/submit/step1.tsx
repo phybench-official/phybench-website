@@ -29,6 +29,8 @@ export default function Step1({
   setDescription,
   note,
   setNote,
+  offererEmail,
+  setOffererEmail,
 }: {
   title: string;
   setTitle: (v: string) => void;
@@ -42,8 +44,9 @@ export default function Step1({
   setDescription: (v: string) => void;
   note: string;
   setNote: (v: string) => void;
+  offererEmail: string;
+  setOffererEmail: (v: string) => void;
 }) {
-
   return (
     <Card className="flex-1 h-[60vh] w-full flex flex-col">
       <CardHeader>
@@ -110,11 +113,22 @@ export default function Step1({
                 className="col-span-2"
               />
             </div>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-sm font-medium mt-2">
+                供题人邮箱
+              </label>
+              <Input
+                placeholder="请输入供题人邮箱（可选）"
+                value={offererEmail}
+                onChange={(e) => setOffererEmail(e.target.value)}
+                className="col-span-2"
+              />
+            </div>
           </div>
           <div className="flex flex-col h-full">
-            <MarkdownEditor 
-              text={problem} 
-              setText={setProblem} 
+            <MarkdownEditor
+              text={problem}
+              setText={setProblem}
               placeholder="请输入Markdown格式的题干"
             />
           </div>
