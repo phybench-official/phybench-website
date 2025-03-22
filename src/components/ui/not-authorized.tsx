@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function NotAuthorized() {
+export function NotAuthorized({ needLogin = true } : { needLogin?: boolean }) {
   return (
     <div className="w-full h-screen flex flex-row justify-center items-center">
       <Card className="w-[350px]">
@@ -27,24 +27,30 @@ export function NotAuthorized() {
           />
         </CardContent>
         <CardFooter className="flex justify-center space-x-4">
-          <form
-            action={async () => {
-              "use server";
-              await signIn("uaaa");
-            }}
-          >
-            <Button className="cursor-pointer" type="submit">
-              使用UAAA登录
-            </Button>
-          </form>
-          <form
-            action={async () => {
-              "use server"
-              await signIn("authentik")
-            }}
-          >
-            <Button variant="outline" className="cursor-pointer" type="submit">临时登录</Button>
-          </form>
+          {
+            needLogin && (
+              <>
+              <form
+                action={async () => {
+                  "use server";
+                  await signIn("uaaa");
+                }}
+              >
+                <Button className="cursor-pointer" type="submit">
+                  使用UAAA登录
+                </Button>
+              </form>
+              <form
+                action={async () => {
+                  "use server"
+                  await signIn("authentik")
+                }}
+              >
+                <Button variant="outline" className="cursor-pointer" type="submit">临时登录</Button>
+              </form>
+              </>
+            )
+          }
         </CardFooter>
       </Card>
     </div>
