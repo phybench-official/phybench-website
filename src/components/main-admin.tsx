@@ -30,7 +30,6 @@ export default function AdminPage() {
   const [examineProblems, setExamineProblems] = useState<Problem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [fetchedData, setFetchedData] = useState<any>(null);
   const [problemCounts, setProblemCounts] = useState<ProblemCounts | null>(
     null
   );
@@ -60,14 +59,12 @@ export default function AdminPage() {
       fetch(`/api/data/getexamineproblems?userId=${selectedUserId}`)
         .then((res) => res.json())
         .then((data) => {
-          setFetchedData(data);
           if (data.success) {
             setExamineProblems(data.problems);
           }
         });
     } else {
       setExamineProblems([]);
-      setFetchedData(null); // 清空数据
     }
   }, [selectedUserId]);
 
@@ -107,7 +104,7 @@ export default function AdminPage() {
       return true; // 格式和范围都正确
     };
 
-    const getIdsFromInput = (input: string, maxId: number) => {
+    const getIdsFromInput = (input: string) => {
       const ids: number[] = [];
       const parts = input.split(",");
 
@@ -153,42 +150,36 @@ export default function AdminPage() {
     // 处理力学
     const mechanicsExamineProblemIds = getIdsFromInput(
       mechanicsReview,
-      problemCounts?.mechanics || 0
     ).sort((a, b) => a - b);
     setMechanicsReview("");
 
     // 处理电磁学
     const electricityExamineProblemIds = getIdsFromInput(
       electricityReview,
-      problemCounts?.electricity || 0
     ).sort((a, b) => a - b);
     setElectricityReview("");
 
     // 处理热学
     const thermodynamicsExamineProblemIds = getIdsFromInput(
       thermodynamicsReview,
-      problemCounts?.thermodynamics || 0
     ).sort((a, b) => a - b);
     setThermodynamicsReview("");
 
     // 处理光学
     const opticsExamineProblemIds = getIdsFromInput(
       opticsReview,
-      problemCounts?.optics || 0
     ).sort((a, b) => a - b);
     setOpticsReview("");
 
     // 处理近代物理
     const modernExamineProblemIds = getIdsFromInput(
       modernReview,
-      problemCounts?.modern || 0
     ).sort((a, b) => a - b);
     setModernReview("");
 
     // 处理四大及以上
     const advancedExamineProblemIds = getIdsFromInput(
       advancedReview,
-      problemCounts?.advanced || 0
     ).sort((a, b) => a - b);
     setAdvancedReview("");
 
@@ -223,7 +214,6 @@ export default function AdminPage() {
         fetch(`/api/data/getexamineproblems?userId=${selectedUserId}`)
           .then((res) => res.json())
           .then((data) => {
-            setFetchedData(data);
             if (data.success) {
               setExamineProblems(data.problems);
             }
