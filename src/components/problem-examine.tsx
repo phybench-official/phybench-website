@@ -27,9 +27,58 @@ import { Eye, ChevronLeft } from "lucide-react";
 import type { ProblemData } from "@/lib/types";
 import { statusMap, tagMap } from "@/lib/constants";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Textarea } from "./ui/textarea";
 
-export function ProblemView({ problem }: { problem: ProblemData }) {
+export function ProblemExamine({ problem }: { problem: ProblemData }) {
   const router = useRouter();
+
+  // 状态管理
+  const [remark, setRemark] = useState(problem.remark || "");
+  const [score, setScore] = useState<string>(
+    problem.score ? problem.score.toString() : ""
+  ); // 修改为字符串
+  const [status, setStatus] = useState<
+    "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+  >(problem.status as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED");
+  const [nominated, setNominated] = useState<string>(
+    !problem.nominated || problem.nominated == "No" ? "No" : "Yes"
+  ); // 默认值为字符串
+
+  // 提交审核信息
+  const handleSubmit = async () => {
+    // 检查分数是否为有效数字
+    const scoreNumber = parseInt(score);
+    if (isNaN(scoreNumber)) {
+      alert("请确保审核积分是一个有效的数字");
+      return;
+    }
+
+    const response = await fetch("/api/data/updateproblem", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        problemId: problem.id,
+        remark,
+        status,
+        score: scoreNumber, // 提交时使用数字
+        nominated,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // 成功处理
+      alert(data.message);
+      router.push("/examine"); // 或者你可以重载当前页面以获取最新数据
+    } else {
+      // 错误处理
+      alert(data.message);
+    }
+  };
 
   return (
     <div className="container grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 max-w-7xl">
@@ -38,7 +87,7 @@ export function ProblemView({ problem }: { problem: ProblemData }) {
           variant="outline"
           size="sm"
           className="flex items-center gap-1 cursor-pointer"
-          onClick={() => router.push("/submit")}
+          onClick={() => router.push("/examine")}
         >
           <ChevronLeft className="h-4 w-4" /> 返回题目列表
         </Button>
@@ -108,51 +157,16 @@ export function ProblemView({ problem }: { problem: ProblemData }) {
             </div>
           )}
 
-          <div className="pt-2 border-t">
-            <h4 className="font-semibold mb-2">提交者信息</h4>
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex flex-row items-center gap-2">
-                <p className="text-sm font-medium">
-                  {problem.user.realname ||
-                    problem.user.username ||
-                    "未命名用户"}
-                </p>
-                <p className="text-xs">{problem.user.name}</p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {new Date(problem.createdAt).toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          {
-            <div className="pt-2 border-t">
-              <h4 className="font-medium mb-2">供题人</h4>
-              <p className="text-sm italic">
-                {!problem.offererEmail ? "本人供题" : problem.offererEmail}
-              </p>
-            </div>
-          }
-
           {problem.remark && (
             <div className="pt-2 border-t">
               <h4 className="font-medium mb-2">审核意见</h4>
               <p className="text-sm italic">{problem.remark}</p>
             </div>
           )}
-
-          {
-            <div className="pt-2 border-t">
-              <h4 className="font-medium mb-2">是否被提名为好题</h4>
-              <p className="text-sm italic">
-                {problem.nominated === "Yes" ? "是" : "否"}
-              </p>
-            </div>
-          }
         </CardContent>
       </Card>
 
-      {/* 第二列：题干、答案、解答过程 */}
+      {/* 其他列：题干、答案、解答过程 */}
       <Card className="lg:col-span-1 overflow-auto max-h-[80vh]">
         <CardHeader>
           <CardTitle>题目内容</CardTitle>
@@ -304,6 +318,77 @@ export function ProblemView({ problem }: { problem: ProblemData }) {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+      <Card className="lg:col-span-1">
+        <CardHeader>
+          <CardTitle>审核信息</CardTitle>
+          <CardDescription>
+            编辑审核状态、积分和评语，决定是否提名为好题
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1">审核状态</label>
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(
+                    e.target.value as
+                      | "PENDING"
+                      | "RETURNED"
+                      | "APPROVED"
+                      | "REJECTED"
+                  )
+                }
+                className="input"
+              >
+                <option value="PENDING">待审核</option>
+                <option value="APPROVED">已通过</option>
+                <option value="REJECTED">已拒绝</option>
+                <option value="RETURNED">已打回</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1">审核积分</label>
+              <input
+                type="text" // 修改为文本类型
+                value={score}
+                onChange={(e) => setScore(e.target.value)} // 保持为字符串
+                className="input"
+                placeholder="请输入一个自然数" // 添加提示文本
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1">是否提名为好题</label>
+              <select
+                value={nominated}
+                onChange={(e) => setNominated(e.target.value)}
+                className="input"
+              >
+                <option value="Yes">是</option>
+                <option value="No">否</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-1">审核评语</label>
+              <Textarea
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                className="input"
+                rows={3}
+                placeholder="请输入审核评语"
+              />
+            </div>
+
+            <Button onClick={handleSubmit} className="mt-4" variant="default">
+              提交审核信息
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

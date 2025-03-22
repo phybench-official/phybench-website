@@ -49,6 +49,7 @@ export default function Component({ user }: { user: any }) {
   const [selectedType, setSelectedType] = useState("");
   const [description, setDescription] = useState("");
   const [note, setNote] = useState("");
+  const [offererEmail, setOffererEmail] = useState("");
 
   // 题目答案和变量
   const [solution, setSolution] = useState("");
@@ -151,6 +152,7 @@ export default function Component({ user }: { user: any }) {
             selectedType,
             description,
             note,
+            offererEmail,
             problem,
             solution,
             answer,
@@ -198,6 +200,8 @@ export default function Component({ user }: { user: any }) {
             setDescription={setDescription}
             note={note}
             setNote={setNote}
+            offererEmail={offererEmail}
+            setOffererEmail={setOffererEmail}
           />
         );
       case 2:
@@ -246,14 +250,14 @@ export default function Component({ user }: { user: any }) {
     <div className="mx-auto w-full h-full space-y-8 text-center px-24 flex flex-col items-center">
       <div className="grid grid-cols-5 w-full items-center gap-4">
         <div className="justify-self-start">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1 cursor-pointer col-span-1"
-          onClick={() => router.push("/submit")}
-        >
-          <ChevronLeft className="h-4 w-4" /> 返回题目列表
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1 cursor-pointer col-span-1"
+            onClick={() => router.push("/submit")}
+          >
+            <ChevronLeft className="h-4 w-4" /> 返回题目列表
+          </Button>
         </div>
         <Stepper
           defaultValue={1}

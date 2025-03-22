@@ -3,12 +3,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { FetchChat } from "./fetch-chat";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RenderMarkdown from "./render-markdown";
 

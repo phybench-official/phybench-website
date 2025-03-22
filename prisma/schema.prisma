@@ -29,7 +29,12 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
-  problems Problem[]
+  problems        Problem[]                                    // 用户上传的题目
+  examineProblems Problem[] @relation("UserExamineProblems")   // 用户可审的题目
+  offerProblems   Problem[] @relation("UserOfferProblems")     // 用户提供的题目
+
+  score       Int          @default(0)                         // 用户的积分
+  scoreEvents ScoreEvent[] @relation("UserScoreEvents")        // 用户的积分事件
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -105,14 +110,19 @@ model Problem {
   variables        ProblemVariable[]         // 题目涉及的变量（包括数值范围）
   solution         String                    // 题目解答过程
   answer           String                    // 题目答案，一个表达式
+  offererEmail     String?                   // 供题人邮箱（选填）
+  offererId        String?                   // 供题人Id
   aiPerformances   AiPerformance[]           // AI表现（提交时选填，允许列表为空）
   status           ProblemStatus @default(PENDING)             // 审核状态
-  score            Int?                      // 题目积分（由审核人员给出）
-  remark           String?                   // 审核评语（由审核人员给出）
+  score            Int?                                        // 题目积分（由审核员给出）
+  remark           String?                                     // 审核评语（由审核员给出）
+  examiners        User[]  @relation("UserExamineProblems")    // 审核员
+  nominated        String?  @default("No")                     // 审核提名
+  scoreEvents      ScoreEvent[]   @relation("ProblemScoreEvents")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  offer User? @relation("UserOfferProblems", fields: [offererId], references: [id], onDelete: Cascade)
 }
 
 enum ProblemTag {
@@ -165,3 +175,27 @@ enum AiPerformanceTag {
   SUBMITTED            // 学生上传问题时自附的AI表现
   EVALUATION           // 与测评相关的AI表现
 }
+
+// 积分事件对象
+model ScoreEvent {
+  id Int @id @default(autoincrement())
+  tag ScoreEventTag    // 积分事件类型
+  score Int            // 获得积分
+  userId String
+  user User @relation("UserScoreEvents", fields: [userId], references: [id], onDelete: Cascade)
+  problemId Int? 
+  problem Problem? @relation("ProblemScoreEvents", fields: [problemId], references: [id]) 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ScoreEventTag {
+  OFFER       // 提供题目获得积分
+  SUBMIT      // 上传题目获得积分
+  EXAMINE     // 审核题目获得积分
+  DEBUG       // 为网站开发反馈bug获得积分
+  PUNISH      // 被惩罚，减积分
+}
+
+

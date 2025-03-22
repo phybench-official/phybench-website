@@ -36,6 +36,8 @@ interface ProblemData {
   status: keyof typeof statusMap;
   score?: number | null;
   remark?: string | null;
+  nominated?: string | null;
+  offererEmail?: string | null;
   createdAt: Date;
   updatedAt: Date;
   user: {
@@ -43,7 +45,7 @@ interface ProblemData {
     username?: string | null;
     realname?: string | null;
     email: string;
-  }
+  };
 }
 
 export type { AIPerformance, ProblemVariable, ProblemData };
