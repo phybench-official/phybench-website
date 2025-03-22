@@ -21,6 +21,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       user: {
         select: {
           name: true,
+          role: true,
           realname: true,
           username: true,
           email: true
@@ -30,6 +31,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   });
 
   if (!problem) return notFound();
+  if (problem.user.email !== session.user.email && session.user.role !== "admin") return <NotAuthorized />;
 
   return (
     <div className="w-screen py-20 flex flex-col items-center">
