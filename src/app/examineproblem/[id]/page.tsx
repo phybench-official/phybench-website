@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { NotAuthorized } from "@/components/ui/not-authorized";
 import { NotPermitted } from "@/components/ui/not-permitted";
-import { ProblemView } from "@/components/problem-view";
+import { ProblemExamine } from "@/components/problem-examine";
 import { notFound } from "next/navigation";
 import { prisma } from "@/prisma";
 
@@ -23,6 +23,7 @@ export default async function Page({
     include: {
       variables: true,
       aiPerformances: true,
+      examiners: true,
       user: {
         select: {
           name: true,
@@ -36,15 +37,21 @@ export default async function Page({
   });
 
   if (!problem) return notFound();
-  if (
-    problem.user.email !== session.user.email &&
-    session.user.role !== "admin"
-  )
+
+  let isExaminer = false;
+  for (const examiner of problem.examiners) {
+    if (examiner.email === session.user.email) {
+      isExaminer = true;
+      break;
+    }
+  }
+  if (!isExaminer) {
     return <NotPermitted />;
+  }
 
   return (
     <div className="w-screen py-20 flex flex-col items-center">
-      <ProblemView problem={problem} />
+      <ProblemExamine problem={problem} />
     </div>
   );
 }

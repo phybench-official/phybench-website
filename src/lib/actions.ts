@@ -18,9 +18,14 @@ export async function fetchProblems(page: number, perPage: number) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");
   if (!session.user.email) throw new Error("Email not found");
-  const where = session.user.role === "admin" ? {} : { 
-    userId: await prisma.user.findUnique({ where: { email: session.user.email } }).then(user => user?.id)
-  };
+  const where =
+    session.user.role === "admin"
+      ? {}
+      : {
+          userId: await prisma.user
+            .findUnique({ where: { email: session.user.email } })
+            .then((user) => user?.id),
+        };
   const [problems, count] = await Promise.all([
     prisma.problem.findMany({
       where,
@@ -56,4 +61,25 @@ export async function deleteProblem(problemId: number) {
     where: { problemId },
   });
   await prisma.problem.delete({ where: { id: problemId } });
+}
+
+export async function fetchExamineProblems(page: number, perPage: number) {
+  const session = await auth();
+  if (!session) throw new Error("Not authorized");
+  if (!session.user.email) throw new Error("Email not found");
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true, examineProblems: true }, // 直接选择 examineProblems 字段
+  });
+
+  // 获取可审的题目，并进行分页
+  const problems =
+    user?.examineProblems.slice((page - 1) * perPage, page * perPage) || [];
+
+  // 统计总数
+  const count = user?.examineProblems.length || 0;
+
+  const totalPages = Math.ceil(count / perPage);
+  return { problems, totalPages };
 }
