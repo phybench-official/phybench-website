@@ -59,6 +59,7 @@ export async function PATCH(req: NextRequest) {
         break;
       }
     }
+    if (session.user.role === "admin") isExaminer = true;
     if (!isExaminer) {
       return NextResponse.json({ message: "Unpermitted" }, { status: 401 });
     }

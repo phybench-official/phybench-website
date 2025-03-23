@@ -74,12 +74,36 @@ export async function fetchExamineProblems(page: number, perPage: number) {
   });
 
   // 获取可审的题目，并进行分页
-  const problems =
-    user?.examineProblems.slice((page - 1) * perPage, page * perPage) || [];
+  if (session.user.role === "admin") {
+    const where = {};
+    const [problems, count] = await Promise.all([
+      prisma.problem.findMany({
+        where,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          tag: true,
+          status: true,
+          remark: true,
+          score: true,
+          createdAt: true,
+        },
+      }),
+      prisma.problem.count({ where }),
+    ]);
+    const totalPages = Math.ceil(count / perPage);
+    return { problems, totalPages };
+  } else {
+    const problems =
+      user?.examineProblems.slice((page - 1) * perPage, page * perPage) || [];
 
-  // 统计总数
-  const count = user?.examineProblems.length || 0;
+    // 统计总数
+    const count = user?.examineProblems.length || 0;
 
-  const totalPages = Math.ceil(count / perPage);
-  return { problems, totalPages };
+    const totalPages = Math.ceil(count / perPage);
+    return { problems, totalPages };
+  }
 }

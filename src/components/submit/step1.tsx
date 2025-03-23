@@ -96,9 +96,9 @@ export default function Step1({
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <label className="block text-sm font-medium mt-2">题目描述</label>
+              <label className="block text-sm font-medium mt-2">题目标签</label>
               <Input
-                placeholder="请输入进一步描述题目的若干tag，如：刚体动力学 感知 几何 有图（详见项目文档）"
+                placeholder="请输入描述题目的若干tag，如：力学/分析力学/几何/感知/推理/有图"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="col-span-2"
