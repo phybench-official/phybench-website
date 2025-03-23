@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       'micromark-extension-math': 'micromark-extension-llm-math'
     }
+    return config;
   },
   // redirect /submit to /submit/1 permanently
   // redirect /examine to /examine/1 permanently
