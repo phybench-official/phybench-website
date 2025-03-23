@@ -45,6 +45,7 @@ export default async function Page({
       break;
     }
   }
+  if (session.user.role === "admin") isExaminer = true;
   if (!isExaminer) {
     return <NotPermitted />;
   }

@@ -208,7 +208,9 @@ export default function ExaminePage({ currentPage }: { currentPage: number }) {
               <PaginationItem>
                 <PaginationPrevious
                   href={
-                    currentPage > 1 ? `/submit/${Number(currentPage) - 1}` : "#"
+                    currentPage > 1
+                      ? `/examine/${Number(currentPage) - 1}`
+                      : "#"
                   }
                   isActive={Number(currentPage) > 1}
                 />
@@ -228,7 +230,7 @@ export default function ExaminePage({ currentPage }: { currentPage: number }) {
                   return (
                     <PaginationItem key={`page-${pageNum}`}>
                       <PaginationLink
-                        href={`/submit/${pageNum}`}
+                        href={`/examine/${pageNum}`}
                         isActive={pageNum === currentPage}
                       >
                         {pageNum}
@@ -242,7 +244,7 @@ export default function ExaminePage({ currentPage }: { currentPage: number }) {
                 <PaginationNext
                   href={
                     currentPage < totalPages
-                      ? `/submit/${Number(currentPage) + 1}`
+                      ? `/examine/${Number(currentPage) + 1}`
                       : "#"
                   }
                   isActive={Number(currentPage) < totalPages}
@@ -265,7 +267,7 @@ export default function ExaminePage({ currentPage }: { currentPage: number }) {
                 size="sm"
                 onClick={() => {
                   if (nextPage >= 1 && nextPage <= totalPages) {
-                    router.push(`/submit/${nextPage}`);
+                    router.push(`/examine/${nextPage}`);
                   }
                 }}
               >
