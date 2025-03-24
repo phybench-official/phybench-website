@@ -6,7 +6,7 @@ import { ProblemTag } from "@prisma/client";
 // 获取特定题目的信息
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
 
@@ -47,15 +47,24 @@ export async function GET(
       );
     }
 
+    const currentUserId = await prisma.user.findUnique({
+      where: {
+        email: session.user.email || ""
+      },
+      select: {
+        id: true
+      }
+    }).then((user) => user?.id);
+
     // 验证用户权限（只有题目创建者或审核员可以编辑）
-    if (problem.userId !== session.user.id) {
+    if (currentUserId !== problem.userId) {
       // 检查用户是否为审核员
       const isExaminer = await prisma.problem.findFirst({
         where: {
           id: problemId,
           examiners: {
             some: {
-              id: session.user.id
+              id: currentUserId
             }
           }
         }
@@ -84,7 +93,7 @@ export async function GET(
 // 更新特定题目
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
 
@@ -120,16 +129,24 @@ export async function PATCH(
         { status: 404 }
       );
     }
+    const currentUserId = await prisma.user.findUnique({
+      where: {
+        email: session.user.email || ""
+      },
+      select: {
+        id: true
+      }
+    }).then((user) => user?.id);
 
     // 验证用户权限（只有题目创建者或审核员可以编辑）
-    if (existingProblem.userId !== session.user.id) {
+    if (existingProblem.userId !== currentUserId) {
       // 检查用户是否为审核员
       const isExaminer = await prisma.problem.findFirst({
         where: {
           id: problemId,
           examiners: {
             some: {
-              id: session.user.id
+              id: currentUserId
             }
           }
         }

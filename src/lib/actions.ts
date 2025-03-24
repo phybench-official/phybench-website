@@ -127,7 +127,7 @@ export async function examProblem(data: {
     if (session.user.role === "admin") {
       isExaminer = true;
     } else {
-      isExaminer = problem.examiners.some(examiner => examiner.id === user.id);
+      isExaminer = problem.examiners.some(examiner => examiner.email === user.email);
     }
 
     if (!isExaminer) {

@@ -46,7 +46,7 @@ interface ProblemData {
     realname?: string | null;
     email: string;
   };
-  offer: {
+  offer?: {
     email: string;
   } | null;
 }
