@@ -46,6 +46,19 @@ interface ProblemData {
     realname?: string | null;
     email: string;
   };
+  offer: {
+    email: string;
+  } | null;
+}
+
+export interface User {
+  id?: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  role: string,
+  realname: string,
+  username: string,
 }
 
 export type { AIPerformance, ProblemVariable, ProblemData };

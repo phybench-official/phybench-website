@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import ExaminePage from "@/components/examine/main-examine";
+import BrowsePage from "@/components/submit/main-browse";
 import { NotAuthorized } from "@/components/ui/not-authorized";
 
 export default async function Page({
@@ -12,7 +12,7 @@ export default async function Page({
   const { page } = await params;
   return (
     <div className="w-screen py-24">
-      <ExaminePage currentPage={page} />
+      <BrowsePage currentPage={page} isExam />
     </div>
   );
 }

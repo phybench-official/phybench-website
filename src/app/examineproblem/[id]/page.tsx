@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { NotAuthorized } from "@/components/ui/not-authorized";
 import { NotPermitted } from "@/components/ui/not-permitted";
-import { ProblemExamine } from "@/components/problem-examine";
+import { ProblemView } from "@/components/problem-view";
 import { notFound } from "next/navigation";
 import { prisma } from "@/prisma";
 
@@ -52,7 +52,7 @@ export default async function Page({
 
   return (
     <div className="w-screen py-20 flex flex-col items-center">
-      <ProblemExamine problem={problem} />
+      <ProblemView problem={problem} editable />
     </div>
   );
 }

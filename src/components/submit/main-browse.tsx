@@ -44,7 +44,7 @@ interface Problem {
 
 function SkeletonCard() {
   return (
-    <div className="mt-8 xl:mx-32 lg:mx-24 flex flex-col items-center">
+    <div className="mt-24 xl:mx-32 lg:mx-24 flex flex-col items-center transition-all duration-500 ease-in-out">
       <div className="grid grid-cols-3 gap-4 w-full min-h-[50vh]">
         {Array(9).fill(0).map((_, index) => (
           <Card key={index} className="flex flex-col justify-between">
@@ -70,7 +70,7 @@ function SkeletonCard() {
   )
 }
 
-export default function BrowsePage({ currentPage }: { currentPage: number }) {
+export default function BrowsePage({ currentPage, isExam = false }: { currentPage: number, isExam?: boolean }) {
   // 获取题目列表与总页数
   const [problems, setProblems] = useState<Problem[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -80,7 +80,7 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
 
   const router = useRouter();
   useEffect(() => {
-    fetchProblems(currentPage, PER_PAGE).then(({ problems, totalPages }) => {
+    fetchProblems(currentPage, PER_PAGE, isExam).then(({ problems, totalPages }) => {
       setProblems(problems);
       setTotalPages(totalPages);
       setLoading(false);
@@ -90,6 +90,7 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
   // 生成分页数组的函数
   const getPaginationItems = () => {
     if (totalPages <= 1) return [];
+    currentPage = parseInt(currentPage as unknown as string);
     const items = [];
     const showEllipsisStart = currentPage > 3;
     const showEllipsisEnd = currentPage < totalPages - 2;
@@ -133,20 +134,24 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
       <div className="flex flex-row justify-between w-full mb-4">
         <div>
           <h1 className="text-2xl font-bold">问题列表</h1>
-          <p className="text-gray-700 dark:text-gray-300">共 {totalPages} 页 </p>
+          <p className="text-gray-700 dark:text-gray-300 text-sm">当前 {currentPage}页 / 共 {totalPages} 页 </p>
         </div>
-        <Button onClick={() => {
-          router.push("/submit/add");
-        }} className=" cursor-pointer">
-          <Plus /> 添加问题
-        </Button>
+        {
+          !isExam && (
+            <Button onClick={() => {
+              router.push("/submit/add");
+            }} className=" cursor-pointer">
+              <Plus /> 添加问题
+            </Button>
+          )
+        }
       </div>
 
       {/* main list */}
       <div className="grid grid-cols-3 gap-4 w-full">
         {!problems.length && (
           <div className="col-span-3 text-center text-gray-500 dark:text-gray-400 h-[50vh]">
-            暂无问题
+            { isExam ? "暂无可审问题；如果希望审核题目，请关注群内消息、报名审核活动！" : "暂无提交问题" }
           </div>
         )}
         {problems.map((problem) => (
@@ -154,7 +159,7 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
             <CardHeader>
               <CardTitle 
                 className="leading-5 cursor-pointer hover:font-bold"
-                onClick={() => router.push(`/problem/${problem.id}`)}
+                onClick={isExam ? () => router.push(`/examineproblem/${problem.id}`) : () => router.push(`/problem/${problem.id}`)}
               >
                 {problem.title}
               </CardTitle>
@@ -193,37 +198,41 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
                     : "待审核"
                 }
               </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="destructive" size="sm" className=" cursor-pointer">
-                    <Trash2 />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>删除问题</DialogTitle>
-                  </DialogHeader>
-                  <p>
-                  是否真的要删除问题 <span className="font-semibold">{problem.title}</span>？
-                  </p>
-                  <DialogFooter>
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        deleteProblem(problem.id).then(() => {
-                          router.refresh();
-                          toast.success("问题已删除");
-                        });
-                      }}
-                    >
-                      删除
-                    </Button>
-                    <DialogClose asChild>
-                      <Button>取消</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              {
+                !isExam && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className=" cursor-pointer">
+                        <Trash2 />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>删除问题</DialogTitle>
+                      </DialogHeader>
+                      <p>
+                      是否真的要删除问题 <span className="font-semibold">{problem.title}</span>？
+                      </p>
+                      <DialogFooter>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            deleteProblem(problem.id).then(() => {
+                              router.refresh();
+                              toast.success("问题已删除");
+                            });
+                          }}
+                        >
+                          删除
+                        </Button>
+                        <DialogClose asChild>
+                          <Button>取消</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )
+              }
             </CardFooter>
           </Card>
           ))
@@ -236,7 +245,9 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious 
-                  href={currentPage > 1 ? `/submit/${Number(currentPage) - 1}` : '#'} 
+                  href={currentPage > 1 ? (
+                    isExam ? `/examine/${Number(currentPage) - 1}` : `/submit/${Number(currentPage) - 1}`
+                  ) : '#'} 
                   isActive={Number(currentPage) > 1} 
                 />
               </PaginationItem>
@@ -255,7 +266,7 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
                   return (
                     <PaginationItem key={`page-${pageNum}`}>
                       <PaginationLink 
-                        href={`/submit/${pageNum}`} 
+                        href={isExam ? `/examine/${pageNum}` : `/submit/${pageNum}`}
                         isActive={pageNum === currentPage}
                       >
                         {pageNum}
@@ -267,7 +278,9 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
               
               <PaginationItem>
                 <PaginationNext 
-                  href={currentPage < totalPages ? `/submit/${Number(currentPage) + 1}` : '#'} 
+                  href={currentPage < totalPages ? (
+                    isExam ? `/examine/${Number(currentPage) + 1}` : `/submit/${Number(currentPage) + 1}`
+                  ) : '#'} 
                   isActive={Number(currentPage) < totalPages} 
                 />
               </PaginationItem>
@@ -285,7 +298,12 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
               />
               <Button variant="secondary" size="sm" onClick={() => {
                 if (nextPage >= 1 && nextPage <= totalPages) {
-                  router.push(`/submit/${nextPage}`);
+                  if (isExam) {
+                    router.push(`/examine/${nextPage}`);
+                  }
+                  else {
+                    router.push(`/submit/${nextPage}`);
+                  }
                 }
               }}>
                 跳转
