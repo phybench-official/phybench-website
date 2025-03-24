@@ -1,17 +1,7 @@
 "use client";
-import { Card, CardHeader, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -21,13 +11,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus } from "lucide-react";
-import { fetchProblems, deleteProblem } from "@/lib/actions";
-import { toast } from "sonner";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { deleteProblem, fetchProblems } from "@/lib/actions";
 import { tagMap } from "@/lib/constants";
+import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // 定义每页显示数量
 const PER_PAGE = 15;
@@ -211,8 +211,20 @@ export default function BrowsePage({ currentPage }: { currentPage: number }) {
                       variant="destructive"
                       onClick={() => {
                         deleteProblem(problem.id).then(() => {
-                          router.refresh();
+                          // 直接更新本地状态，从列表中删除该问题
+                          setProblems(problems.filter(p => p.id !== problem.id));
+                          
+                          // 处理边缘情况：如果当前页面已空（最后一条记录被删除）
+                          if (problems.length === 1 && currentPage > 1) {
+                            router.push(`/submit/${currentPage - 1}`);
+                          } else {
+                            router.refresh(); // 仍保留刷新以确保数据一致性
+                          }
+                          
                           toast.success("问题已删除");
+                        }).catch(error => {
+                          console.error("删除失败:", error);
+                          toast.error("删除失败，请重试");
                         });
                       }}
                     >
