@@ -32,7 +32,7 @@ export async function fetchProblems(page: number, perPage: number, isExam = fals
     {
       OR: [
         { userId: currentUser },
-        { offererId: currentUser },
+        { offererEmail: session.user.email },
       ],
     }
   )
