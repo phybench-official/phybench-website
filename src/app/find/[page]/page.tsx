@@ -5,14 +5,13 @@ import { NotAuthorized } from "@/components/ui/not-authorized";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ page: string }> | { page: string };
+  params: Promise<{ page: number }>;
 }) {
   const session = await auth();
   if (!session) return <NotAuthorized />;
 
-  // 处理params可能是Promise的情况
-  const resolvedParams = 'then' in params ? await params : params;
-  const currentPage = parseInt(resolvedParams.page) || 1;
+  const { page } = await params;
+  const currentPage = page;
   
   return <ScoreboardPage currentPage={currentPage} />;
 }
