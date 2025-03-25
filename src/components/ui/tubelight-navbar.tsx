@@ -22,7 +22,7 @@ const icons = {
   "Home": Home,
   "Upload": Upload,
   "MessageCircle": MessageCircle,
-  "List": List,
+  "List": List, //添加积分榜图标
 }
 
 export function NavBar({ items, className }: NavBarProps) {

@@ -38,7 +38,7 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
               {selectedType ? <Badge>{selectedType}</Badge> : <Badge variant="destructive">缺失</Badge>}
             </div>
             <div>
-              <strong>提交人: </strong>
+              <strong>编辑人: </strong>
               {user?.realname || user?.name
                 ? (user.realname || user.name)
                 : <span className="text-red-500">缺失</span>}
@@ -47,8 +47,8 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
               <strong>题目来源: </strong>
               {source ? source : <span className="text-red-500">缺失</span>}
             </div>
-            <div>
-              <strong className="text-sky-800 dark:text-sky-200">已上传的AI表现:</strong>
+            <div className="flex flex-col items-start">
+              <strong className="mt-4">已上传的AI表现:</strong>
               {aiResponses && aiResponses.length > 0 ? (
                 <div className="flex flex-col space-y-2">
                   {aiResponses.map((res, index) => (

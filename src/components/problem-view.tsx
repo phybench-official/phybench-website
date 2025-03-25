@@ -27,21 +27,170 @@ import { Eye, ChevronLeft } from "lucide-react";
 import type { ProblemData } from "@/lib/types";
 import { statusMap, tagMap } from "@/lib/constants";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { examProblem } from "@/lib/actions";
+import { toast } from "sonner";
 
-export function ProblemView({ problem }: { problem: ProblemData }) {
+function ExamDialog({ problem }: { problem: ProblemData }) {
+  const router = useRouter();
+  const [remark, setRemark] = useState(problem.remark || "");
+  const [score, setScore] = useState<string>(
+    problem.score ? problem.score.toString() : ""
+  );
+  const [status, setStatus] = useState<
+    "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+  >(problem.status as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED");
+  const [nominated, setNominated] = useState<string>(
+    !problem.nominated || problem.nominated === "No" ? "No" : "Yes"
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+
+    try {
+      // 验证积分是否为有效数字
+      const scoreNumber = parseInt(score);
+      if (isNaN(scoreNumber)) {
+        toast.error("请确保审核积分是一个有效的数字");
+        return;
+      }
+
+      const result = await examProblem({
+        problemId: problem.id,
+        remark,
+        status,
+        score: scoreNumber,
+        nominated,
+      });
+
+      if (result.success) {
+        toast.success("审核成功");
+        setOpen(false);
+        router.refresh();
+      } else {
+        toast.error(result.message || "审核失败");
+      }
+    } catch (error) {
+      toast.error("审核过程中发生错误");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="flex items-center gap-1 cursor-pointer">
+          审核题目
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>审核题目</DialogTitle>
+          <DialogDescription>
+            编辑审核状态、积分和评语，决定是否提名为好题
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="status">审核状态</Label>
+            <Select 
+              value={status} 
+              onValueChange={(value) => setStatus(value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED")}
+            >
+              <SelectTrigger id="status">
+                <SelectValue placeholder="选择审核状态" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="PENDING">待审核</SelectItem>
+                <SelectItem value="APPROVED">已通过</SelectItem>
+                <SelectItem value="REJECTED">已拒绝</SelectItem>
+                <SelectItem value="RETURNED">已打回</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="score">审核积分</Label>
+            <Input
+              id="score"
+              type="text"
+              placeholder="请输入一个自然数"
+              value={score}
+              onChange={(e) => setScore(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nominated">是否提名为好题</Label>
+            <Select 
+              value={nominated} 
+              onValueChange={setNominated}
+            >
+              <SelectTrigger id="nominated">
+                <SelectValue placeholder="是否提名为好题" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Yes">是</SelectItem>
+                <SelectItem value="No">否</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="remark">审核评语</Label>
+            <Textarea
+              id="remark"
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              placeholder="请输入审核评语"
+              rows={3}
+            />
+          </div>
+
+          <Button 
+            onClick={handleSubmit} 
+            className="w-full" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "提交中..." : "提交审核信息"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function ProblemView({ problem, editable = false }: { problem: ProblemData, editable?: boolean }) {
   const router = useRouter();
 
   return (
     <div className="container grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 max-w-7xl">
-      <div className="lg:col-span-3 mb-2">
+      <div className="lg:col-span-3 mb-2 w-full flex flex-row justify-between items-center">
         <Button
           variant="outline"
           size="sm"
           className="flex items-center gap-1 cursor-pointer"
-          onClick={() => router.push("/submit")}
+          onClick={() => router.back()}
         >
           <ChevronLeft className="h-4 w-4" /> 返回题目列表
         </Button>
+
+        {editable && (
+          <div className="flex flex-row items-center gap-2">
+            <Button size="sm" variant="secondary" className="flex items-center gap-1 cursor-pointer" onClick={() => router.push(`/submit/edit/${problem.id}`)}>
+              编辑题目
+            </Button>
+            <ExamDialog problem={problem} />
+          </div>
+        )}
       </div>
 
       {/* 第一列：题目基本信息 */}
