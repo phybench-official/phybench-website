@@ -13,7 +13,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { MarkdownEditor } from "./markdown-editor";
+import { UserSelector } from "./user-selector";
+import { CircleHelp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function Step1({
@@ -67,7 +75,19 @@ export default function Step1({
               />
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <label className="block text-sm font-medium mt-2">题目来源</label>
+              <label className="text-sm font-medium mt-2 flex flex-row items-center justify-self-center">
+                题目来源
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <CircleHelp className="w-4 h-4 ml-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>请输入描述题目的来源，如：爱培优/2022/暑假/复赛营/1/题7</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </label>
               <Input
                 placeholder="请输入题目来源"
                 value={source}
@@ -96,9 +116,21 @@ export default function Step1({
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <label className="block text-sm font-medium mt-2">题目标签</label>
+              <label className="text-sm font-medium mt-2 flex flex-row items-center justify-self-center">
+                题目标签
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <CircleHelp className="w-4 h-4 ml-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>请输入描述题目的若干tag，如：力学/分析力学/几何/感知/推理/有图</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </label>
               <Input
-                placeholder="请输入描述题目的若干tag，如：力学/分析力学/几何/感知/推理/有图"
+                placeholder="请输入描述题目的若干tag"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="col-span-2"
@@ -115,13 +147,11 @@ export default function Step1({
             </div>
             <div className="grid grid-cols-3 gap-4">
               <label className="block text-sm font-medium mt-2">
-                供题人邮箱
+                供题人
               </label>
-              <Input
-                placeholder="请输入供题人邮箱（可选）"
-                value={offererEmail}
-                onChange={(e) => setOffererEmail(e.target.value)}
-                className="col-span-2"
+              <UserSelector
+                offererEmail={offererEmail}
+                setOffererEmail={setOffererEmail}
               />
             </div>
           </div>

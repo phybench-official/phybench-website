@@ -36,11 +36,12 @@ const steps = [
   },
 ];
 
-export default function Component({ user }: { user: any }) {
+export default function Component({ user, problemId }: { user: any, problemId?: number }) {
   // step状态
   const [page, setPage] = useState({ step: 1, direction: 1 });
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 题目基本信息
   const [title, setTitle] = useState("");
@@ -60,22 +61,102 @@ export default function Component({ user }: { user: any }) {
   const [aiResponses, setAiResponses] = useState<AIResponse[]>([]);
 
   useEffect(() => {
-    // 读取本地草稿数据
-    const draft = localStorage.getItem("problemDraft");
-    if (draft) {
-      const data = JSON.parse(draft);
-      if (data.title) setTitle(data.title);
-      if (data.source) setSource(data.source);
-      if (data.selectedType) setSelectedType(data.selectedType);
-      if (data.description) setDescription(data.description);
-      if (data.note) setNote(data.note);
-      if (data.problem) setProblem(data.problem);
-      if (data.solution) setSolution(data.solution);
-      if (data.answer) setAnswer(data.answer);
-      if (data.variables) setVariables(data.variables);
-      if (data.aiResponses) setAiResponses(data.aiResponses);
-    }
-  }, []);
+    // 如果有problemId，则从服务器获取题目数据
+    const fetchProblemData = async () => {
+      if (problemId) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`/api/data/problem/${problemId}`);
+          
+          if (!response.ok) {
+            // 如果403
+            if (response.status === 403) {
+              toast.error("没有权限编辑此题目");
+              router.push("/submit");
+              return;
+            }
+            toast.error("获取题目信息失败");
+            throw new Error("获取题目信息失败");
+          }
+          
+          const data = await response.json();
+          
+          // 填充表单数据
+          setTitle(data.title || "");
+          setProblem(data.content || "");
+          setSource(data.source || "");
+          
+          // 将ProblemTag枚举值转换为中文显示
+          let typeText = "";
+          switch (data.tag) {
+            case "MECHANICS": typeText = "力学"; break;
+            case "ELECTRICITY": typeText = "电磁学"; break;
+            case "THERMODYNAMICS": typeText = "热学"; break;
+            case "OPTICS": typeText = "光学"; break;
+            case "MODERN": typeText = "近代物理"; break;
+            case "ADVANCED": typeText = "四大力学及以上知识"; break;
+            default: typeText = "其它";
+          }
+          setSelectedType(typeText);
+          
+          setDescription(data.description || "");
+          setNote(data.note || "");
+          setOffererEmail(data.offererEmail || "");
+          setSolution(data.solution || "");
+          setAnswer(data.answer || "");
+          
+          // 处理变量
+          if (data.variables && data.variables.length > 0) {
+            const formattedVariables = data.variables.map((v: any) => ({
+              id: v.id,
+              name: v.name,
+              min: v.lowerBound.toString(),
+              max: v.upperBound.toString()
+            }));
+            setVariables(formattedVariables);
+          }
+          
+          // 处理AI响应
+          if (data.aiPerformances && data.aiPerformances.length > 0) {
+            const formattedResponses = data.aiPerformances.map((perf: any) => ({
+              id: perf.id,
+              name: perf.aiName,
+              process: perf.aiSolution,
+              answer: perf.aiAnswer,
+              correctness: perf.isCorrect ? "correct" : "incorrect",
+              comment: perf.comment || ""
+            }));
+            setAiResponses(formattedResponses);
+          }
+          
+          toast.success("已加载题目信息");
+        } catch (error: any) {
+          toast.error(error.message || "加载题目信息失败");
+          console.error("获取题目错误:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        // 读取本地草稿数据
+        const draft = localStorage.getItem("problemDraft");
+        if (draft) {
+          const data = JSON.parse(draft);
+          if (data.title) setTitle(data.title);
+          if (data.source) setSource(data.source);
+          if (data.selectedType) setSelectedType(data.selectedType);
+          if (data.description) setDescription(data.description);
+          if (data.note) setNote(data.note);
+          if (data.problem) setProblem(data.problem);
+          if (data.solution) setSolution(data.solution);
+          if (data.answer) setAnswer(data.answer);
+          if (data.variables) setVariables(data.variables);
+          if (data.aiResponses) setAiResponses(data.aiResponses);
+        }
+      }
+    };
+    
+    fetchProblemData();
+  }, [problemId]);
 
   const handlePrev = () => {
     if (page.step > 1) {
@@ -117,22 +198,24 @@ export default function Component({ user }: { user: any }) {
     if (page.step < 4) {
       if (!validateForm()) return;
       // 保存当前题目信息至本地
-      localStorage.setItem(
-        "problemDraft",
-        JSON.stringify({
-          title,
-          source,
-          selectedType,
-          description,
-          note,
-          problem,
-          solution,
-          answer,
-          variables,
-          aiResponses,
-        })
-      );
-      toast.success("题目信息已保存至浏览器本地");
+      if (!problemId) {
+        localStorage.setItem(
+          "problemDraft",
+          JSON.stringify({
+            title,
+            source,
+            selectedType,
+            description,
+            note,
+            problem,
+            solution,
+            answer,
+            variables,
+            aiResponses,
+          })
+        );
+        toast.success("题目信息已保存至浏览器本地");
+      }
       setPage((prev) => ({ step: prev.step + 1, direction: 1 }));
     } else {
       // 最终提交逻辑
@@ -141,8 +224,13 @@ export default function Component({ user }: { user: any }) {
       try {
         setIsSubmitting(true);
 
-        const response = await fetch("/api/data/addproblem", {
-          method: "POST",
+        const method = problemId ? "PATCH" : "POST";
+        const url = problemId 
+          ? `/api/data/problem/${problemId}` 
+          : "/api/data/problem";
+
+        const response = await fetch(url, {
+          method: method,
           headers: {
             "Content-Type": "application/json",
           },
@@ -167,9 +255,11 @@ export default function Component({ user }: { user: any }) {
           throw new Error(data.message || "提交失败");
         }
 
-        toast.success("题目提交成功!");
+        toast.success(problemId ? "题目更新成功!" : "题目提交成功!");
         // 提交成功后删除本地草稿数据
-        localStorage.removeItem("problemDraft");
+        if (!problemId) {
+          localStorage.removeItem("problemDraft");
+        }
         // 成功后跳转到提交页面
         setTimeout(() => {
           router.push("/submit/1");
@@ -254,7 +344,7 @@ export default function Component({ user }: { user: any }) {
             variant="outline"
             size="sm"
             className="flex items-center gap-1 cursor-pointer col-span-1"
-            onClick={() => router.push("/submit")}
+            onClick={() => router.back()}
           >
             <ChevronLeft className="h-4 w-4" /> 返回题目列表
           </Button>
@@ -280,46 +370,57 @@ export default function Component({ user }: { user: any }) {
         <div className=" col-span-1 w-24 justify-self-end"></div>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={page.step}
-          custom={page.direction}
-          variants={variants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          transition={{ duration: 0.5 }}
-          className="w-full px-24 max-h-full"
-        >
-          {renderStepContent()}
-        </motion.div>
-      </AnimatePresence>
+      {isLoading ? (
+        <div className="flex items-center justify-center w-full h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4">正在加载题目信息...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={page.step}
+              custom={page.direction}
+              variants={variants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.5 }}
+              className="w-full px-24 max-h-full"
+            >
+              {renderStepContent()}
+            </motion.div>
+          </AnimatePresence>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={page.step}
-          className="flex justify-between w-xl"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -20, opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Button
-            onClick={handlePrev}
-            disabled={page.step === 1}
-            className="cursor-pointer"
-          >
-            上一步
-          </Button>
-          <Button
-            onClick={handleNext}
-            className="cursor-pointer"
-            disabled={isSubmitting}
-          >
-            {page.step === 4 ? (isSubmitting ? "提交中..." : "提交") : "下一步"}
-          </Button>
-        </motion.div>
-      </AnimatePresence>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={page.step}
+              className="flex justify-between w-xl"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Button
+                onClick={handlePrev}
+                disabled={page.step === 1}
+                className="cursor-pointer"
+              >
+                上一步
+              </Button>
+              <Button
+                onClick={handleNext}
+                className="cursor-pointer"
+                disabled={isSubmitting}
+              >
+                {page.step === 4 ? (isSubmitting ? "提交中..." : (problemId ? "更新" : "提交")) : "下一步"}
+              </Button>
+            </motion.div>
+          </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }
