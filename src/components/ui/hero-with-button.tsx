@@ -8,7 +8,7 @@ function Hero1() {
     <div className="w-full z-50">
       <div className="container mx-auto">
         <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
-          <a href="https://docs.phybench.cn" target="_blank" rel="noopener noreferrer">
+          <a href="https://docs.phybench.cn" target="_blank" rel="noreferrer">
             <Button variant="secondary" size="sm" className="gap-4 cursor-pointer group" >
               阅读项目文档 <MoveRight className="w-4 h-4 group-hover:translate-x-[-1px] group-hover:scale-120 transition-all" />
             </Button>

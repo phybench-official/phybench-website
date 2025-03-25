@@ -1,5 +1,14 @@
-import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import FindPage from "@/components/main-find";
+import { NotAuthorized } from "@/components/ui/not-authorized";
 
-export default function Page() {
-  redirect("/find/1");
+export default async function Page() {
+  const session = await auth();
+  if (!session) return <NotAuthorized />;
+
+  return (
+    <div>
+      <FindPage />
+    </div>
+  );
 }

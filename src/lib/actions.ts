@@ -73,8 +73,6 @@ export async function fetchExamineProblems(page: number, perPage: number) {
     select: { id: true, examineProblems: true }, // 直接选择 examineProblems 字段
   });
 
-  if (!user) throw new Error("User not found");
-
   // 获取可审的题目，并进行分页
   if (session.user.role === "admin") {
     const where = {};
