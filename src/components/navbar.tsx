@@ -1,7 +1,7 @@
-import { NavBar } from "@/components/ui/tubelight-navbar";
 import { SparklesText } from "@/components/ui/sparkles-text";
-import { ModeToggle } from "./ui/toggle-mode";
+import { NavBar } from "@/components/ui/tubelight-navbar";
 import { AccountInfo } from "./account-info";
+import { ModeToggle } from "./ui/toggle-mode";
 
 export function MyNavBar() {
   const navItems = [

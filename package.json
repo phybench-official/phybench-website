@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pm2start": "PORT=3005 pm2 start npm --name 'phy-bench' -- start"
+    "pm2start": "PORT=3005 pm2 start npm --name 'phy-bench' -- start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.1.13",
@@ -64,13 +68,26 @@
     "@eslint/eslintrc": "^3",
     "@prisma/extension-optimize": "^1.1.8",
     "@tailwindcss/postcss": "^4.0.12",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.0.9",
+    "@vitest/ui": "^3.0.9",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
+    "happy-dom": "^17.4.4",
+    "identity-obj-proxy": "^3.0.0",
+    "jsdom": "^26.0.0",
+    "node-fetch": "^2.7.0",
     "prisma": "^6.5.0",
     "tailwindcss": "^4.0.12",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5",
+    "vitest": "^3.0.9"
   }
 }
