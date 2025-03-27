@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
+import { useTheme } from "next-themes";
 
 const VERT = `#version 300 es
 in vec2 position;
@@ -8,7 +9,8 @@ void main() {
 }
 `;
 
-const FRAG = `#version 300 es
+// 基础片段着色器代码，不包含主题特定的结尾
+const BASE_FRAG = `#version 300 es
 precision highp float;
 
 uniform float uTime;
@@ -97,15 +99,29 @@ void main() {
   height = exp(height);
   height = (uv.y * 2.0 - height + 0.2);
   float intensity = 0.6 * height;
+
+  // intensity = max(0.0, intensity);
   
   float midPoint = 0.20;
   float auroraAlpha = smoothstep(midPoint - uBlend * 0.5, midPoint + uBlend * 0.5, intensity);
   
   vec3 auroraColor = intensity * rampColor;
-  
-  fragColor = vec4(auroraColor * auroraAlpha, auroraAlpha);
-}
+
 `;
+
+const getFragShader = (theme: string | undefined) => {
+  return BASE_FRAG + (
+    theme === "dark"
+      ? "fragColor = mix(vec4(0.0), vec4(auroraColor, auroraAlpha), auroraAlpha);}"
+      : `
+      auroraAlpha = 0.8 * auroraAlpha;
+      vec3 background = vec3(1.0, 0.8333, 0.8647); // 白色背景
+      vec3 blendedColor = mix(background, auroraColor, auroraAlpha);
+      fragColor = vec4(blendedColor, auroraAlpha);
+      }`
+      // "fragColor = mix(vec4(1.0), vec4(auroraColor, auroraAlpha), auroraAlpha);}"
+  );
+};
 
 interface AuroraProps {
   colorStops?: string[];
@@ -120,11 +136,23 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
   const propsRef = useRef<AuroraProps>({ colorStops, amplitude, blend, ...restProps });
   propsRef.current = { colorStops, amplitude, blend, ...restProps };
 
-  const ctnDom = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
 
+  const ctnDom = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<{ renderer?: Renderer; program?: Program; mesh?: Mesh; cleanup: () => void }>({
+    cleanup: () => {}
+  });
+
+  // 创建或更新渲染器和着色器程序
   useEffect(() => {
     const ctn = ctnDom.current;
     if (!ctn) return;
+
+    // 清理旧的渲染器
+    rendererRef.current.cleanup();
+
+    // 获取当前主题的着色器代码
+    const FRAG = getFragShader(resolvedTheme);
 
     const renderer = new Renderer({
       alpha: true,
@@ -148,8 +176,8 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
       const width = ctn.offsetWidth;
       const height = ctn.offsetHeight;
       renderer.setSize(width, height);
-      if (program) {
-        program.uniforms.uResolution.value = [width, height];
+      if (rendererRef.current.program) {
+        rendererRef.current.program.uniforms.uResolution.value = [width, height];
       }
     }
     window.addEventListener("resize", resize);
@@ -180,6 +208,11 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
     const mesh = new Mesh(gl, { geometry, program });
     ctn.appendChild(gl.canvas);
 
+    // 保存引用以便后续更新和清理
+    rendererRef.current.renderer = renderer;
+    rendererRef.current.program = program;
+    rendererRef.current.mesh = mesh;
+
     let animateId = 0;
     const update = (t: number) => {
       animateId = requestAnimationFrame(update);
@@ -200,7 +233,8 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
 
     resize();
 
-    return () => {
+    // 更新清理函数
+    rendererRef.current.cleanup = () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener("resize", resize);
       if (ctn && gl.canvas.parentNode === ctn) {
@@ -208,10 +242,12 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
       }
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [amplitude]);
+
+    return rendererRef.current.cleanup;
+  }, [resolvedTheme, amplitude]); // 当resolvedTheme改变时重新创建着色器
 
   return (
-    <div ref={ctnDom} className="w-full h-full flex items-center justify-center">
+    <div ref={ctnDom} className="w-full h-full flex items-center justify-center z-[-10] bg-linear-to-br from-indigo-300/15 to-pink-400/10 dark:bg-transparent">
       {children}
     </div>
   );
