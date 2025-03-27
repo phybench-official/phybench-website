@@ -4,25 +4,16 @@ import React, { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { Home, Upload, MessageCircle, List } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 interface NavItem {
   name: string
   url: string
-  icon: string
 }
 
 interface NavBarProps {
   items: NavItem[]
   className?: string
-}
-
-const icons = {
-  "Home": Home,
-  "Upload": Upload,
-  "MessageCircle": MessageCircle,
-  "List": List, //添加积分榜图标
 }
 
 export function NavBar({ items, className }: NavBarProps) {
@@ -61,13 +52,12 @@ export function NavBar({ items, className }: NavBarProps) {
   return (
     <div
       className={cn(
-        "fixed bottom-0 h-20 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6",
+        "fixed top-20 h-20 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6",
         className,
       )}
     >
       <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
         {items.map((item) => {
-          const Icon = icons[item.icon as keyof typeof icons]
           const isActive = activeTab === item.name
 
           return (
@@ -76,15 +66,15 @@ export function NavBar({ items, className }: NavBarProps) {
               href={item.url}
               onClick={() => setActiveTab(item.name)}
               className={cn(
-                "relative cursor-pointer text-sm font-semibold px-6 py-2 rounded-full transition-colors",
+                "relative cursor-pointer text-sm font-semibold px-4 text-nowrap w-full sm:px-6 py-2 rounded-full transition-colors",
                 "text-foreground/80 hover:text-primary",
                 isActive && "bg-muted text-primary",
               )}
             >
-              <span className="hidden md:inline">{item.name}</span>
-              <span className="md:hidden">
+              <span className="inline">{item.name}</span>
+              {/* <span className="md:hidden">
                 <Icon size={18} strokeWidth={2.5} />
-              </span>
+              </span> */}
               {isActive && (
                 <motion.div
                   layoutId="lamp"

@@ -56,7 +56,7 @@ export default async function UserInfo({ user }:{ user: User }) {
   };
 
   return (
-    <div className="w-full lg:px-24 grid grid-cols-3 justify-center items-center gap-6 mb-12">
+    <div className="w-full px-4 md:px-24 grid-cols-1 grid md:grid-cols-3 justify-center items-center gap-6 mb-12">
       <Card className=" border-2 border-slate-400 dark:border-slate-800">
         <CardHeader>
           <CardTitle className="text-2xl">用户信息</CardTitle>
@@ -95,7 +95,7 @@ export default async function UserInfo({ user }:{ user: User }) {
         </CardFooter>
       </Card>
 
-      <Card className=" col-span-2 border-2 border-slate-400 dark:border-slate-800">
+      <Card className=" md:col-span-2 border-2 border-slate-400 dark:border-slate-800">
         <CardHeader>
           <CardTitle className="text-xl">积分记录</CardTitle>
           <CardDescription>用户积分变动历史</CardDescription>

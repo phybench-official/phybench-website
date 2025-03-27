@@ -172,7 +172,7 @@ export function ProblemView({ problem, editable = false }: { problem: ProblemDat
   const router = useRouter();
 
   return (
-    <div className="container grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 max-w-7xl">
+    <div className="container mt-16 md:mt-0 px-4 md:px-0 grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 max-w-7xl">
       <div className="lg:col-span-3 mb-2 w-full flex flex-row justify-between items-center">
         <Button
           variant="outline"
@@ -391,7 +391,7 @@ export function ProblemView({ problem, editable = false }: { problem: ProblemDat
                       </CardContent>
                     </Card>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl min-w-2xl">
+                  <DialogContent className="max-w-4xl md:min-w-2xl max-h-[90vh]  overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center justify-between pr-6">
                         <span>
@@ -407,10 +407,10 @@ export function ProblemView({ problem, editable = false }: { problem: ProblemDat
                         提交于 {new Date(ai.createdAt).toLocaleString()}
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 overflow-y-auto">
                       <div className="space-y-2">
                         <h4 className="font-medium">解答过程</h4>
-                        <div className="p-4 bg-muted rounded-md max-h-[60vh] overflow-auto">
+                        <div className="p-4 bg-muted rounded-md max-h-[50vh] overflow-auto">
                           <RenderMarkdown content={ai.aiSolution} />
                         </div>
                       </div>
