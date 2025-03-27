@@ -158,7 +158,6 @@ body {
 
 /* 超长公式显示 */
 .katex,.katex-html, .katex-display {
-  display: block;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;

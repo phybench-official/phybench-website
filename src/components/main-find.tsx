@@ -1,309 +1,359 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy } from "lucide-react";
+import { Trophy, Star, BookOpen, ChevronUp } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// 定义常量和接口
-const PER_PAGE = 20;
-
-interface User {
+// 积分排行榜用户类型
+type UserScore = {
   id: string;
-  name?: string;
-  realname?: string;
-  username?: string;
+  email: string;
+  name: string | null;
+  username: string | null;
+  realname: string | null;
   score: number;
-}
+};
 
-// 加载状态骨架屏组件
-function SkeletonCard() {
-  return (
-    <div className="w-full p-8">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-        <Skeleton className="h-8 w-1/4 mb-4" />
-        <Skeleton className="h-6 w-1/3 mb-6" />
-        <div className="space-y-4">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div>
-                  <Skeleton className="h-5 w-32 mb-1" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </div>
-              <Skeleton className="h-8 w-16 rounded-full" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+// 题目数排行榜用户类型
+type UserProblemCount = UserScore & {
+  problemCount: number;
+};
 
-export function ScoreboardPage({ currentPage }: { currentPage: number }) {
-  // 状态管理
-  const [users, setUsers] = useState<User[]>([]);
-  const [totalPages, setTotalPages] = useState(0);
-  const [nextPage, setNextPage] = useState(currentPage);
-  const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
+export function Scoreboard() {
+  // 积分排行榜相关状态
+  const [scoreUsers, setScoreUsers] = useState<UserScore[]>([]);
+  const [scoreLoading, setScoreLoading] = useState(true);
+  const [scoreLoadingMore, setScoreLoadingMore] = useState(false);
+  const [scorePage, setScorePage] = useState(1);
+  const [scoreHasMore, setScoreHasMore] = useState(true);
+  const scoreObserverRef = useRef<IntersectionObserver | null>(null);
+  const scoreLastElementRef = useRef<HTMLDivElement>(null);
 
-  const router = useRouter();
+  // 题目数排行榜相关状态
+  const [problemUsers, setProblemUsers] = useState<UserProblemCount[]>([]);
+  const [problemLoading, setProblemLoading] = useState(true);
+  const [problemLoadingMore, setProblemLoadingMore] = useState(false);
+  const [problemPage, setProblemPage] = useState(1);
+  const [problemHasMore, setProblemHasMore] = useState(true);
+  const problemObserverRef = useRef<IntersectionObserver | null>(null);
+  const problemLastElementRef = useRef<HTMLDivElement>(null);
 
-  // 获取积分榜数据
+  // 获取积分排行榜数据
+  const fetchScoreUsers = useCallback(async (page: number) => {
+    try {
+      if (page === 1) setScoreLoading(true);
+      else setScoreLoadingMore(true);
+      
+      const response = await fetch(`/api/data/getscoreboard?type=score&page=${page}&pageSize=20`);
+      
+      if (!response.ok) {
+        throw new Error('服务器响应错误');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setScoreUsers(prev => page === 1 ? data.data : [...prev, ...data.data]);
+        setScoreHasMore(data.data.length === 20);
+      } else {
+        toast.error("获取积分排行榜失败");
+      }
+    } catch (error) {
+      toast.error("获取积分排行榜时发生错误");
+      console.error(error);
+    } finally {
+      setScoreLoading(false);
+      setScoreLoadingMore(false);
+    }
+  }, []);
+
+  // 获取题目数排行榜数据
+  const fetchProblemUsers = useCallback(async (page: number) => {
+    try {
+      if (page === 1) setProblemLoading(true);
+      else setProblemLoadingMore(true);
+      
+      const response = await fetch(`/api/data/getscoreboard?type=problems&page=${page}&pageSize=20`);
+      
+      if (!response.ok) {
+        throw new Error('服务器响应错误');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setProblemUsers(prev => page === 1 ? data.data : [...prev, ...data.data]);
+        setProblemHasMore(data.data.length === 20);
+      } else {
+        toast.error("获取题目排行榜失败");
+      }
+    } catch (error) {
+      toast.error("获取题目排行榜时发生错误");
+      console.error(error);
+    } finally {
+      setProblemLoading(false);
+      setProblemLoadingMore(false);
+    }
+  }, []);
+
+  // 初始加载数据
   useEffect(() => {
-    const fetchScoreboard = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/data/getscoreboard?page=${currentPage}&limit=${PER_PAGE}`
-        );
-        const data = await response.json();
+    fetchScoreUsers(1);
+    fetchProblemUsers(1);
+  }, [fetchScoreUsers, fetchProblemUsers]);
 
-        if (data.success) {
-          setUsers(data.users);
-          setTotalPages(Math.ceil(data.total / PER_PAGE));
-          console.log("获取积分榜数据成功:", data);
+  // 设置IntersectionObserver用于无限滚动
+  useEffect(() => {
+    // 积分排行榜的observer
+    scoreObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && scoreHasMore && !scoreLoadingMore) {
+          setScorePage(prev => prev + 1);
         }
-      } catch (error) {
-        console.error("获取积分榜失败:", error);
-      } finally {
-        setLoading(false);
-      }
+      },
+      { threshold: 0.5 }
+    );
+
+    // 题目数排行榜的observer
+    problemObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && problemHasMore && !problemLoadingMore) {
+          setProblemPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    return () => {
+      if (scoreObserverRef.current) scoreObserverRef.current.disconnect();
+      if (problemObserverRef.current) problemObserverRef.current.disconnect();
     };
+  }, [scoreHasMore, scoreLoadingMore, problemHasMore, problemLoadingMore]);
 
-    fetchScoreboard();
-
-    // 自动刷新逻辑
-    const intervalId = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 60000);
-
-    return () => clearInterval(intervalId);
-  }, [currentPage, refreshKey]);
-
-  // 生成分页数组
-  const getPaginationItems = () => {
-    if (totalPages <= 1) return [];
-    const items = [];
-    const showEllipsisStart = currentPage > 3;
-    const showEllipsisEnd = currentPage < totalPages - 2;
-
-    items.push(1);
-    if (showEllipsisStart) {
-      items.push(-1); // 表示省略号
-    } else {
-      if (totalPages >= 2) items.push(2);
-    }
-
-    for (
-      let i = Math.max(3, currentPage - 1);
-      i <= Math.min(totalPages - 2, currentPage + 1);
-      i++
-    ) {
-      if (items.indexOf(i) === -1) {
-        items.push(i);
-      }
+  // 监听观察点元素
+  useEffect(() => {
+    if (scoreLastElementRef.current && scoreObserverRef.current) {
+      scoreObserverRef.current.observe(scoreLastElementRef.current);
     }
     
-    if (showEllipsisEnd) {
-      items.push(-2); // 表示省略号
-    } else {
-      if (totalPages >= 3) items.push(totalPages - 1);
+    if (problemLastElementRef.current && problemObserverRef.current) {
+      problemObserverRef.current.observe(problemLastElementRef.current);
     }
-    
-    if (totalPages > 1 && items.indexOf(totalPages) === -1) {
-      items.push(totalPages);
+  }, [scoreUsers, problemUsers]);
+
+  // 加载更多积分排行榜数据
+  useEffect(() => {
+    if (scorePage > 1) {
+      fetchScoreUsers(scorePage);
     }
-    
-    return items;
-  };
+  }, [scorePage, fetchScoreUsers]);
 
-  // 获取奖杯颜色
-  const getTrophyColor = (index: number) => {
-    if (index === 0) return "text-yellow-500"; // 金牌
-    if (index === 1) return "text-gray-400"; // 银牌
-    if (index === 2) return "text-amber-700"; // 铜牌
-    return "text-slate-400"; // 其他
-  };
-
-  // 页面跳转处理
-  const handlePageJump = () => {
-    if (nextPage >= 1 && nextPage <= totalPages) {
-      router.push(`/find/${nextPage}`);
+  // 加载更多题目数排行榜数据
+  useEffect(() => {
+    if (problemPage > 1) {
+      fetchProblemUsers(problemPage);
     }
+  }, [problemPage, fetchProblemUsers]);
+
+  // 返回顶部功能
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
-  // 手动刷新处理
-  const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1);
+  // 获取用户显示名
+  const getUserDisplayName = (user: UserScore) => {
+    return user.realname || user.username || "未知用户";
   };
-
-  const paginationItems = getPaginationItems();
-
-  if (loading) {
-    return <SkeletonCard />;
-  }
 
   return (
-    <div className="min-h-screen overflow-y-auto">
-      <div className="p-8">
-        {/* 只保留刷新数据按钮 */}
-        <div className="flex justify-end">
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            className="hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            刷新数据
-          </Button>
-        </div>
-
-        {/* 用户积分列表 */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-semibold mb-2">用户排名</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">按照积分从高到低排序展示</p>
-          
-          <div className="space-y-4">
-            {users.length === 0 ? (
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-center text-gray-500 dark:text-gray-400">
-                暂无积分数据
-              </div>
-            ) : (
-              users.map((user, index) => {
-                const rankNumber = (currentPage - 1) * PER_PAGE + index + 1;
-                const displayName = user.realname || user.username || user.name || "未命名用户";
-                
-                return (
-                  <div 
-                    key={user.id} 
-                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-                      index < 3 && currentPage === 1 
-                        ? 'bg-gray-50/80 dark:bg-gray-700/80' 
-                        : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-650'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-8">
-                        {rankNumber <= 3 && currentPage === 1 ? (
-                          <Trophy className={`h-6 w-6 ${getTrophyColor(index)}`} />
-                        ) : (
-                          <span className="text-lg font-semibold text-gray-500 dark:text-gray-400">
-                            {rankNumber}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* 头像 - 使用用户名的首字母 */}
-                      <div className="h-10 w-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-600">
-                        <span className="font-medium text-sm">
-                          {displayName.slice(0, 2).toUpperCase()}
-                        </span>
-                      </div>
-                      
-                      {/* 只显示姓名，移除额外的用户信息行 */}
-                      <div className="font-medium">{displayName}</div>
-                    </div>
-                    
-                    <Badge className="text-lg px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                      {user.score} 分
-                    </Badge>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* 分页控件 */}
-        {totalPages > 1 && (
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <div className="flex flex-col items-center space-y-4">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href={
-                        currentPage > 1
-                          ? `/find/${Number(currentPage) - 1}`
-                          : "#"
-                      }
-                      isActive={Number(currentPage) > 1}
-                    />
-                  </PaginationItem>
-
-                  {paginationItems.map((pageNum, index) => {
-                    if (pageNum < 0) {
-                      return (
-                        <PaginationItem key={`ellipsis-${index}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    } else {
-                      return (
-                        <PaginationItem key={`page-${pageNum}`}>
-                          <PaginationLink
-                            href={`/find/${pageNum}`}
-                            isActive={pageNum === currentPage}
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    }
-                  })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href={
-                        currentPage < totalPages
-                          ? `/find/${Number(currentPage) + 1}`
-                          : "#"
-                      }
-                      isActive={Number(currentPage) < totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600 dark:text-gray-400">跳转到:</span>
-                <Input
-                  type="number"
-                  value={nextPage}
-                  min={1}
-                  max={totalPages}
-                  className="w-20 text-center"
-                  onChange={(e) => setNextPage(parseInt(e.target.value))}
-                />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handlePageJump}
-                  className="px-4"
-                >
-                  跳转
-                </Button>
-              </div>
+    <div className="container mt-32 sm:mt-20 mx-auto h-full px-4 py-8">
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 px-2 gap-6 my-auto">
+        {/* 积分排行榜卡片 */}
+        <Card className="w-full">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl flex items-center">
+                <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
+                积分排行榜
+              </CardTitle>
+              <Badge variant="outline" className="flex items-center">
+                <Star className="h-3.5 w-3.5 mr-1 text-yellow-500" />
+                积分
+              </Badge>
             </div>
-          </div>
-        )}
+            <CardDescription>根据用户积分高低进行排名</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px] pr-4">
+              {scoreLoading ? (
+                // 加载中显示骨架屏
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4 mb-4">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  {scoreUsers.map((user, index) => (
+                    <div
+                      key={user.id + index}
+                      className={`flex items-center py-3 px-4 border-b last:border-b-0 ${
+                        index < 3 ? 'bg-amber-50/50 dark:bg-amber-800/20' : ''
+                      }`}
+                    >
+                      {/* 排名 */}
+                      <div className={`flex-shrink-0 w-8 text-center font-semibold ${
+                        index === 0 ? 'text-yellow-300' :
+                        index === 1 ? 'text-cyan-400' :
+                        index === 2 ? 'text-red-700' : ''
+                      }`}>
+                        {index + 1}
+                      </div>
+                      
+                      {/* 用户名 */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{getUserDisplayName(user)}</p>
+                      </div>
+                      
+                      {/* 积分 */}
+                      <div className="flex items-center space-x-1 text-yellow-600 font-semibold">
+                        <Star className="h-4 w-4" />
+                        <span>{user.score}</span>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* 观察点元素，用于无限滚动 */}
+                  {scoreHasMore && (
+                    <div
+                      ref={scoreLastElementRef}
+                      className="py-4 text-center"
+                    >
+                      {scoreLoadingMore ? (
+                        <Skeleton className="h-8 w-24 mx-auto" />
+                      ) : (
+                        <span className="text-sm text-gray-500">滚动加载更多...</span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        {/* 题目数排行榜卡片 */}
+        <Card className="w-full">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl flex items-center">
+                <Trophy className="h-5 w-5 mr-2 text-blue-500" />
+                题目贡献排行榜
+              </CardTitle>
+              <Badge variant="outline" className="flex items-center">
+                <BookOpen className="h-3.5 w-3.5 mr-1 text-blue-500" />
+                题目数
+              </Badge>
+            </div>
+            <CardDescription>根据用户提交题目数量进行排名</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px] pr-4">
+              {problemLoading ? (
+                // 加载中显示骨架屏
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4 mb-4">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  {problemUsers.map((user, index) => (
+                    <div
+                      key={user.id + index}
+                      className={`flex items-center px-4 py-3 border-b last:border-b-0 ${
+                        index < 3 ? 'bg-amber-50/50 dark:bg-amber-800/20' : ''
+                      }`}
+                    >
+                      {/* 排名 */}
+                      <div className={`flex-shrink-0 w-8 text-center font-semibold ${
+                        index === 0 ? 'text-yellow-300' :
+                        index === 1 ? 'text-cyan-400' :
+                        index === 2 ? 'text-red-700' : ''
+                      }`}>
+                        {index + 1}
+                      </div>
+                      
+                      {/* 用户名 */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{getUserDisplayName(user)}</p>
+                      </div>
+                      
+                      {/* 题目数 */}
+                      <div className="flex items-center space-x-1 text-blue-500 font-semibold">
+                        <BookOpen className="h-4 w-4" />
+                        <span>{user.problemCount}</span>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* 观察点元素，用于无限滚动 */}
+                  {problemHasMore && (
+                    <div
+                      ref={problemLastElementRef}
+                      className="py-4 text-center"
+                    >
+                      {problemLoadingMore ? (
+                        <Skeleton className="h-8 w-24 mx-auto" />
+                      ) : (
+                        <span className="text-sm text-gray-500">滚动加载更多...</span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
+      
+      {/* 返回顶部按钮 */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="fixed bottom-6 right-6 rounded-full shadow-lg"
+        onClick={scrollToTop}
+      >
+        <ChevronUp className="h-5 w-5" />
+      </Button>
     </div>
   );
 }
+

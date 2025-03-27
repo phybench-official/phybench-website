@@ -44,8 +44,8 @@ interface Problem {
 
 function SkeletonCard() {
   return (
-    <div className="mt-24 xl:mx-32 lg:mx-24 flex flex-col items-center transition-all duration-500 ease-in-out">
-      <div className="grid grid-cols-3 gap-4 w-full min-h-[50vh]">
+    <div className="mt-24 mx-6 xl:mx-32 lg:mx-24 flex flex-col items-center transition-all duration-500 ease-in-out">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full min-h-[50vh]">
         {Array(9).fill(0).map((_, index) => (
           <Card key={index} className="flex flex-col justify-between">
             <CardHeader>
@@ -129,7 +129,7 @@ export default function BrowsePage({ currentPage, isExam = false }: { currentPag
   }
 
   return (
-    <div className="mt-4 xl:mx-32 lg:mx-24 flex flex-col items-center">
+    <div className="mt-12 md:mt-4 xl:mx-32 lg:mx-24 md:mx-20 mx-4 flex flex-col items-center">
       {/* title and add button */}
       <div className="flex flex-row justify-between w-full mb-4">
         <div>
@@ -138,19 +138,27 @@ export default function BrowsePage({ currentPage, isExam = false }: { currentPag
         </div>
         {
           !isExam && (
-            <Button onClick={() => {
-              router.push("/submit/add");
-            }} className=" cursor-pointer">
-              <Plus /> 添加问题
-            </Button>
+            <>
+              <Button disabled className="inline md:hidden cursor-pointer">
+                添加问题
+              </Button>
+              <Button onClick={() => {
+                router.push("/submit/add");
+              }} className="md:flex hidden cursor-pointer">
+                <Plus /> 添加问题
+              </Button>
+            </>
           )
         }
       </div>
 
       {/* main list */}
-      <div className="grid grid-cols-3 gap-4 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+        <div className="md:hidden text-center text-gray-800 dark:text-gray-200">
+          目前移动端尚未支持提交和审核功能 <br/> 请使用电脑端访问
+        </div>
         {!problems.length && (
-          <div className="col-span-3 text-center text-gray-500 dark:text-gray-400 h-[50vh]">
+          <div className="md:col-span-3 text-center text-gray-500 dark:text-gray-400 h-[50vh]">
             { isExam ? "暂无可审问题；如果希望审核题目，请关注群内消息、报名审核活动！" : "暂无提交问题" }
           </div>
         )}
@@ -287,7 +295,7 @@ export default function BrowsePage({ currentPage, isExam = false }: { currentPag
             </PaginationContent>
             
             {/* 输入框切换页码 */}
-            <div className="flex justify-center mt-2">
+            <div className="hidden md:flex justify-center mt-2">
               <Input
                 type="number"
                 value={nextPage}

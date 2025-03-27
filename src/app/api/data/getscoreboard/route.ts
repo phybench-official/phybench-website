@@ -5,68 +5,81 @@ import { prisma } from "@/prisma";
 export async function GET(req: NextRequest) {
   const session = await auth();
 
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+  if (!session) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
-    const url = new URL(req.url);
-    const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
-    const limit = Math.max(1, Math.min(100, Number(url.searchParams.get("limit")) || 20));
-    const skip = (page - 1) * limit;
-
-    // 检查数据库中积分字段是否存在
-    // console.log("正在获取所有用户...");
-    // const sampleUser = await prisma.user.findFirst({
-    //   select: {
-    //     id: true,
-    //     name: true,
-    //     score: true,
-    //   }
-    // });
-    // console.log("样本用户:", sampleUser);
-
-    // 获取按积分排序的用户列表 - 不过滤积分为0的用户
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        realname: true,
-        username: true,
-        score: true,
-        // 移除 image 字段，不再返回可能导致问题的外部图片URL
-      },
-      orderBy: {
-        score: 'desc',
-      },
-      skip,
-      take: limit,
-    });
-
-    // 获取用户总数
-    const total = await prisma.user.count();
-    // 仅计算积分大于0的用户数（不影响主列表显示）
-    const activeUsers = await prisma.user.count({
-      where: {
-        score: {
-          gt: 0
-        }
-      }
-    });
-
-    // 计算总页数
-    const totalPages = Math.ceil(total / limit);
-
-    return NextResponse.json({
-      success: true,
-      users,
-      total,
-      activeUsers,
-      totalPages,
-      currentPage: page,
-      pageSize: limit
-    });
+    const searchParams = req.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '20');
+    const type = searchParams.get('type') || 'score'; // 'score' 或 'problems'
+    
+    const skip = (page - 1) * pageSize;
+    
+    if (type === 'score') {
+      // 按积分排名
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          username: true,
+          realname: true,
+          score: true,
+        },
+        orderBy: {
+          score: 'desc',
+        },
+        skip,
+        take: pageSize,
+      });
+      
+      
+      return NextResponse.json({
+        success: true,
+        data: users,
+      });
+    } else {
+      // 按题目数排名
+      const usersWithProblemCount = await prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          realname: true,
+          email: true,
+          score: true,
+          _count: {
+            select: {
+              problems: true,
+            },
+          },
+        },
+        orderBy: {
+          problems: {
+            _count: 'desc',
+          },
+        },
+        skip,
+        take: pageSize,
+      });
+      
+      const formattedUsers = usersWithProblemCount.map(user => ({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        realname: user.realname,
+        email: user.email,
+        score: user.score,
+        problemCount: user._count.problems,
+      }));
+      
+      return NextResponse.json({
+        success: true,
+        data: formattedUsers,
+      });
+    }
   } catch (error) {
-    console.error("获取积分榜时出错:", error);
     return NextResponse.json(
       { success: false, message: "服务器错误，获取失败", error: String(error) },
       { status: 500 }

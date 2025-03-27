@@ -262,7 +262,7 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
         }
         // 成功后跳转到提交页面
         setTimeout(() => {
-          router.push("/submit/1");
+          router.back();
         }, 1500);
       } catch (error: any) {
         toast.error(error.message || "提交过程中出现错误");
