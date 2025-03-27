@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 function Hero1() {
   const router = useRouter();
   return (
-    <div className="w-full z-50">
+    <div className="w-full z-50 relative">
       <div className="container mx-auto">
         <div className="flex gap-8 py-20 lg:py-40 items-center justify-center flex-col">
           <a href="https://docs.phybench.cn" target="_blank" rel="noopener noreferrer">
