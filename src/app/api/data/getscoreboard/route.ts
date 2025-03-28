@@ -27,17 +27,26 @@ export async function GET(req: NextRequest) {
           realname: true,
           score: true,
         },
-        orderBy: {
-          score: 'desc',
-        },
+        orderBy: [
+          {
+            score: 'desc',
+          },
+          {
+            createdAt: 'asc',
+          }
+        ],
         skip,
         take: pageSize,
       });
       
+      // 获取总记录数
+      const totalCount = await prisma.user.count();
       
       return NextResponse.json({
         success: true,
         data: users,
+        totalCount,
+        hasMore: skip + users.length < totalCount
       });
     } else {
       // 按题目数排名
@@ -55,11 +64,16 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        orderBy: {
-          problems: {
-            _count: 'desc',
+        orderBy: [
+          {
+            problems: {
+              _count: 'desc',
+            },
           },
-        },
+          {
+            createdAt: 'asc',
+          }
+        ],
         skip,
         take: pageSize,
       });
@@ -74,9 +88,14 @@ export async function GET(req: NextRequest) {
         problemCount: user._count.problems,
       }));
       
+      // 获取总记录数
+      const totalCount = await prisma.user.count();
+      
       return NextResponse.json({
         success: true,
         data: formattedUsers,
+        totalCount,
+        hasMore: skip + formattedUsers.length < totalCount
       });
     }
   } catch (error) {
