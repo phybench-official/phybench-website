@@ -27,15 +27,35 @@ import { Eye, ChevronLeft } from "lucide-react";
 import type { ProblemData } from "@/lib/types";
 import { statusMap, tagMap } from "@/lib/constants";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input"
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { examProblem } from "@/lib/actions";
 import { toast } from "sonner";
 
-function ExamDialog({ problem }: { problem: ProblemData }) {
+function ExamDialog({
+  problem,
+  examinerNo,
+  examinerAssignedStatus,
+  examinerAssignedScore,
+  examinerRemark,
+  examinerNominated,
+}: {
+  problem: ProblemData;
+  examinerNo: number;
+  examinerAssignedStatus: string;
+  examinerAssignedScore: number;
+  examinerRemark: string;
+  examinerNominated: string;
+}) {
   const router = useRouter();
   const [remark, setRemark] = useState(problem.remark || "");
   const [score, setScore] = useState<string>(
@@ -93,7 +113,7 @@ function ExamDialog({ problem }: { problem: ProblemData }) {
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>审核题目</DialogTitle>
+          <DialogTitle>审核题目：您是{examinerNo}号审题人</DialogTitle>
           <DialogDescription>
             编辑审核状态、积分和评语，决定是否提名为好题
           </DialogDescription>
@@ -101,9 +121,13 @@ function ExamDialog({ problem }: { problem: ProblemData }) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="status">审核状态</Label>
-            <Select 
-              value={status} 
-              onValueChange={(value) => setStatus(value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED")}
+            <Select
+              value={status}
+              onValueChange={(value) =>
+                setStatus(
+                  value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+                )
+              }
             >
               <SelectTrigger id="status">
                 <SelectValue placeholder="选择审核状态" />
@@ -130,10 +154,7 @@ function ExamDialog({ problem }: { problem: ProblemData }) {
 
           <div className="space-y-2">
             <Label htmlFor="nominated">是否提名为好题</Label>
-            <Select 
-              value={nominated} 
-              onValueChange={setNominated}
-            >
+            <Select value={nominated} onValueChange={setNominated}>
               <SelectTrigger id="nominated">
                 <SelectValue placeholder="是否提名为好题" />
               </SelectTrigger>
@@ -155,9 +176,9 @@ function ExamDialog({ problem }: { problem: ProblemData }) {
             />
           </div>
 
-          <Button 
-            onClick={handleSubmit} 
-            className="w-full" 
+          <Button
+            onClick={handleSubmit}
+            className="w-full"
             disabled={isSubmitting}
           >
             {isSubmitting ? "提交中..." : "提交审核信息"}
@@ -168,7 +189,23 @@ function ExamDialog({ problem }: { problem: ProblemData }) {
   );
 }
 
-export function ProblemView({ problem, editable = false }: { problem: ProblemData, editable?: boolean }) {
+export function ProblemView({
+  problem,
+  editable = false,
+  examinerNo = 1,
+  examinerAssignedStatus = "PENDING",
+  examinerAssignedScore = 0,
+  examinerRemark = "",
+  examinerNominated = "No",
+}: {
+  problem: ProblemData;
+  editable?: boolean;
+  examinerNo: number;
+  examinerAssignedStatus: string;
+  examinerAssignedScore: number;
+  examinerRemark: string;
+  examinerNominated: string;
+}) {
   const router = useRouter();
 
   return (
@@ -185,10 +222,22 @@ export function ProblemView({ problem, editable = false }: { problem: ProblemDat
 
         {editable && (
           <div className="flex flex-row items-center gap-2">
-            <Button size="sm" variant="secondary" className="flex items-center gap-1 cursor-pointer" onClick={() => router.push(`/submit/edit/${problem.id}`)}>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="flex items-center gap-1 cursor-pointer"
+              onClick={() => router.push(`/submit/edit/${problem.id}`)}
+            >
               编辑题目
             </Button>
-            <ExamDialog problem={problem} />
+            <ExamDialog
+              problem={problem}
+              examinerNo={examinerNo}
+              examinerAssignedStatus={examinerAssignedStatus}
+              examinerAssignedScore={examinerAssignedScore}
+              examinerRemark={examinerRemark}
+              examinerNominated={examinerNominated}
+            />
           </div>
         )}
       </div>

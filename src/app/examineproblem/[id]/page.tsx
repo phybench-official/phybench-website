@@ -50,9 +50,41 @@ export default async function Page({
     return <NotPermitted />;
   }
 
+  // 获取审核员编号与该审核员既往审核信息
+  const response = await fetch("/api/data/getexaminerno", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userEmail: session.user.email,
+      problemID: parseInt(id),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  const examinerNo = data.examinerNo;
+  const examinerAssignedStatus = data.examinerAssignedStatus;
+  const examinerAssignedScore = data.examinerAssignedScore;
+  const examinerRemark = data.examinerRemark;
+  const examinerNominated = data.examinerNominated;
+
   return (
     <div className="w-screen py-20 flex flex-col items-center">
-      <ProblemView problem={problem} editable />
+      <ProblemView
+        problem={problem}
+        editable={true}
+        examinerNo={examinerNo}
+        examinerAssignedStatus={examinerAssignedStatus}
+        examinerAssignedScore={examinerAssignedScore}
+        examinerRemark={examinerRemark}
+        examinerNominated={examinerNominated}
+      />
     </div>
   );
 }

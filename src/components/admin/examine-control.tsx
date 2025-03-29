@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // 定义用户和问题的类型
@@ -26,7 +27,7 @@ interface ProblemCounts {
   advanced: number;
 }
 
-export default function AdminPage() {
+export default function ExamineControlPage() {
   const [examineProblems, setExamineProblems] = useState<Problem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
@@ -148,39 +149,39 @@ export default function AdminPage() {
     }
 
     // 处理力学
-    const mechanicsExamineProblemIds = getIdsFromInput(
-      mechanicsReview,
-    ).sort((a, b) => a - b);
+    const mechanicsExamineProblemIds = getIdsFromInput(mechanicsReview).sort(
+      (a, b) => a - b
+    );
     setMechanicsReview("");
 
     // 处理电磁学
     const electricityExamineProblemIds = getIdsFromInput(
-      electricityReview,
+      electricityReview
     ).sort((a, b) => a - b);
     setElectricityReview("");
 
     // 处理热学
     const thermodynamicsExamineProblemIds = getIdsFromInput(
-      thermodynamicsReview,
+      thermodynamicsReview
     ).sort((a, b) => a - b);
     setThermodynamicsReview("");
 
     // 处理光学
-    const opticsExamineProblemIds = getIdsFromInput(
-      opticsReview,
-    ).sort((a, b) => a - b);
+    const opticsExamineProblemIds = getIdsFromInput(opticsReview).sort(
+      (a, b) => a - b
+    );
     setOpticsReview("");
 
     // 处理近代物理
-    const modernExamineProblemIds = getIdsFromInput(
-      modernReview,
-    ).sort((a, b) => a - b);
+    const modernExamineProblemIds = getIdsFromInput(modernReview).sort(
+      (a, b) => a - b
+    );
     setModernReview("");
 
     // 处理四大及以上
-    const advancedExamineProblemIds = getIdsFromInput(
-      advancedReview,
-    ).sort((a, b) => a - b);
+    const advancedExamineProblemIds = getIdsFromInput(advancedReview).sort(
+      (a, b) => a - b
+    );
     setAdvancedReview("");
 
     // 准备要提交的数据
@@ -226,6 +227,11 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen overflow-y-auto">
+      <Link href="/admin">
+        <button className="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+          返回AdminPage主页
+        </button>
+      </Link>
       <div className="p-8">
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-semibold mb-4">
@@ -367,7 +373,7 @@ export default function AdminPage() {
           onClick={handleSubmit}
           className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
         >
-          修改
+          修改审核权限
         </button>
       </div>
     </div>
