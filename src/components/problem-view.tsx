@@ -57,15 +57,13 @@ function ExamDialog({
   examinerNominated: string;
 }) {
   const router = useRouter();
-  const [remark, setRemark] = useState(problem.remark || "");
-  const [score, setScore] = useState<string>(
-    problem.score ? problem.score.toString() : ""
-  );
+  const [remark, setRemark] = useState(examinerRemark);
+  const [score, setScore] = useState<string>(examinerAssignedScore.toString());
   const [status, setStatus] = useState<
     "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
-  >(problem.status as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED");
+  >(examinerAssignedStatus as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED");
   const [nominated, setNominated] = useState<string>(
-    !problem.nominated || problem.nominated === "No" ? "No" : "Yes"
+    examinerNominated === "Yes" ? "Yes" : "No"
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
