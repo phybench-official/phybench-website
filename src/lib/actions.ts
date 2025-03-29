@@ -117,8 +117,6 @@ export async function examProblem(data: {
       where: { id: data.problemId },
       include: { examiners: true },
     });
-
-
     if (!problem) {
       return { success: false, message: "未找到题目" };
     }
@@ -192,6 +190,122 @@ export async function examProblem(data: {
     return { 
       success: false, 
       message: "服务器错误，请稍后再试" 
+    };
+  }
+}
+
+export async function fetchProblemStats() {
+  try {
+    const session = await auth();
+    if (!session) throw new Error("Not authorized");
+    // 获取总题目数
+    const totalProblems = await prisma.problem.count();
+    // 获取各类别题目数量
+    const problemsByTag = await prisma.problem.groupBy({
+      by: ['tag'],
+      _count: true,
+    });
+    // 获取用户总数
+    const totalUsers = await prisma.user.count();
+    // 获取待审核题目数量
+    const pendingProblems = await prisma.problem.count({
+      where: { status: 'PENDING' }
+    });
+    // 将结果转换为前端所需的格式
+    const tagStats = problemsByTag.map(item => ({
+      tag: item.tag,
+      count: item._count,
+    }));
+    
+    return {
+      success: true,
+      totalProblems,
+      tagStats,
+      totalUsers,
+      pendingProblems
+    };
+  } catch (error) {
+    console.error("获取题目统计数据失败:", error);
+    return {
+      success: false,
+      message: "获取题目统计数据失败"
+    };
+  }
+}
+
+export async function fetchLastWeekProblems() {
+  try {
+    const session = await auth();
+    if (!session) throw new Error("Not authorized");
+    // 获取过去7天的日期范围（不包括今天）
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 设置为今天的开始时间
+    const dates = [];
+    for (let i = 7; i > 0; i--) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+      dates.push(date);
+    }
+    // 准备查询数据
+    const weekData = await Promise.all(
+      dates.map(async (date) => {
+        const startDate = new Date(date);
+        startDate.setHours(0, 0, 0, 0);
+        
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999);
+        
+        const count = await prisma.problem.count({
+          where: {
+            createdAt: {
+              gte: startDate,
+              lte: endDate
+            }
+          }
+        });
+        
+        return {
+          date: date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }),
+          count: count
+        };
+      })
+    );
+    // 计算周环比数据
+    const totalThisWeek = weekData.reduce((sum, day) => sum + day.count, 0);
+    // 获取上一周的数据以计算周环比
+    const lastWeekStart = new Date();
+    lastWeekStart.setDate(today.getDate() - 14);
+    lastWeekStart.setHours(0, 0, 0, 0);
+    const lastWeekEnd = new Date();
+    lastWeekEnd.setDate(today.getDate() - 8);
+    lastWeekEnd.setHours(23, 59, 59, 999);
+
+    const lastWeekCount = await prisma.problem.count({
+      where: {
+        createdAt: {
+          gte: lastWeekStart,
+          lte: lastWeekEnd
+        }
+      }
+    });
+    
+    // 计算周环比变化率
+    let weeklyChange = 0;
+    if (lastWeekCount > 0) {
+      weeklyChange = ((totalThisWeek - lastWeekCount) / lastWeekCount) * 100;
+    }
+    
+    return {
+      success: true,
+      weekData,
+      weeklyChange: weeklyChange.toFixed(1), // 保留一位小数
+      totalThisWeek
+    };
+  } catch (error) {
+    console.error("获取过去一周题目数据失败:", error);
+    return {
+      success: false,
+      message: "获取过去一周题目数据失败"
     };
   }
 }

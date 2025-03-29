@@ -184,7 +184,7 @@ export function Scoreboard() {
   };
 
   return (
-    <div className="container mt-32 sm:mt-20 mx-auto h-full px-4 py-8">
+    <div className="container mt-8 sm:mt-12 mx-auto h-full px-4 py-8">
       
       <div className="grid grid-cols-1 md:grid-cols-2 px-2 gap-6 my-auto">
         {/* 积分排行榜卡片 */}
