@@ -113,7 +113,7 @@ export default function BrowsePage({ currentPage, isExam = false }: { currentPag
       items.push(-2); // -2 表示省略号
     } else {
       // 靠近结尾，显示倒数第二页
-      if (totalPages >= 3) items.push(totalPages - 1);
+      if (totalPages >= 4) items.push(totalPages - 1);
     }
     if (totalPages > 1 && items.indexOf(totalPages) === -1) {
       items.push(totalPages);
@@ -171,7 +171,7 @@ export default function BrowsePage({ currentPage, isExam = false }: { currentPag
               >
                 {problem.title}
               </CardTitle>
-              <CardDescription className="flex flex-row text-sm">
+              <CardDescription className="flex flex-row space-x-1 text-sm">
                 <Badge variant="secondary" className={`${tagMap[problem.tag].color} text-white`}>
                   {tagMap[problem.tag].label}
                 </Badge>
