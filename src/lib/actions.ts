@@ -309,3 +309,120 @@ export async function fetchLastWeekProblems() {
     };
   }
 }
+
+export async function getExaminerNumber(
+  userEmail: string,
+  problemId: number
+) {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error("未授权");
+  }
+
+  try {
+    if (!problemId) {
+      throw new Error("缺少题目ID");
+    }
+
+    // 根据 problemId 查找题目
+    const dbProblem = await prisma.problem.findUnique({
+      where: {
+        id: Number(problemId),
+      },
+      select: {
+        examiners: {
+          select: { id: true },
+        },
+        scoreEvents: {
+          select: {
+            tag: true,
+            userId: true,
+            problemStatus: true,
+            problemScore: true,
+            problemRemark: true,
+            problemNominated: true,
+          },
+        },
+      },
+    });
+
+    if (!dbProblem) {
+      throw new Error("未找到题目记录");
+    }
+
+    if (!userEmail) {
+      throw new Error("缺少用户邮箱");
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: {
+        email: userEmail,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!dbUser) {
+      throw new Error("未找到邮箱对应的用户");
+    }
+
+    const userId = dbUser.id;
+
+    if (!userId) {
+      throw new Error("缺少用户ID");
+    }
+
+    // 后端鉴权，只有管理员/此时在examiners列表中的用户才能审核
+    const examinersIndex = dbProblem.examiners.findIndex(
+      (examiner) => examiner.id === userId
+    );
+
+    if (examinersIndex === -1 && session.user.role !== "admin") {
+      throw new Error("您没有权限审核此题，请联系管理员");
+    }
+
+    // 查找 scoreEvents 中是否存在符合条件的事件
+    const index = dbProblem.scoreEvents.findIndex(
+      (event) => event.tag === "EXAMINE" && event.userId === userId
+    );
+
+    if (index !== -1) {
+      // 如果存在，返回其编号（index + 1）
+      return {
+        examinerNo: index + 1,
+        examinerAssignedStatus: dbProblem.scoreEvents[index].problemStatus,
+        examinerAssignedScore: dbProblem.scoreEvents[index].problemScore,
+        examinerRemark: dbProblem.scoreEvents[index].problemRemark,
+        examinerNominated: dbProblem.scoreEvents[index].problemNominated,
+      };
+    } else {
+      // 如果不存在，创建一个新的 ScoreEvent
+      await prisma.scoreEvent.create({
+        data: {
+          tag: "EXAMINE",
+          score: 1,
+          userId: userId,
+          problemId: Number(problemId),
+          problemStatus: "PENDING",
+          problemScore: 0,
+          problemRemark: "",
+          problemNominated: "No",
+        },
+      });
+
+      // 返回新创建的事件的编号
+      return {
+        examinerNo: dbProblem.scoreEvents.length + 1,
+        examinerAssignedStatus: "PENDING",
+        examinerAssignedScore: 0,
+        examinerRemark: "",
+        examinerNominated: "No",
+      };
+    }
+  } catch (error) {
+    console.error("获取审核员编号时出错:", error);
+    throw new Error("获取审核员信息失败: " + (error instanceof Error ? error.message : "未知错误"));
+  }
+}

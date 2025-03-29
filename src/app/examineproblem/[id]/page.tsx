@@ -4,6 +4,7 @@ import { NotPermitted } from "@/components/ui/not-permitted";
 import { ProblemView } from "@/components/problem-view";
 import { notFound } from "next/navigation";
 import { prisma } from "@/prisma";
+import { getExaminerNumber } from "@/lib/actions";
 
 export default async function Page({
   params,
@@ -50,29 +51,23 @@ export default async function Page({
     return <NotPermitted />;
   }
 
-  // 获取审核员编号与该审核员既往审核信息
-  const response = await fetch("/api/data/getexaminerno", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userEmail: session.user.email,
-      problemID: parseInt(id),
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  // 使用 server action 获取审核员编号与既往审核信息
+  let examinerData;
+  try {
+    examinerData = await getExaminerNumber(
+      session.user.email!,
+      parseInt(id)
+    );
+  } catch (error) {
+    console.error("获取审核员信息失败:", error);
+    throw new Error(`获取审核员信息失败: ${error instanceof Error ? error.message : "未知错误"}`);
   }
 
-  const data = await response.json();
-
-  const examinerNo = data.examinerNo;
-  const examinerAssignedStatus = data.examinerAssignedStatus;
-  const examinerAssignedScore = data.examinerAssignedScore;
-  const examinerRemark = data.examinerRemark;
-  const examinerNominated = data.examinerNominated;
+  const examinerNo = examinerData.examinerNo;
+  const examinerAssignedStatus = examinerData.examinerAssignedStatus;
+  const examinerAssignedScore = examinerData.examinerAssignedScore;
+  const examinerRemark = examinerData.examinerRemark;
+  const examinerNominated = examinerData.examinerNominated;
 
   return (
     <div className="w-screen py-20 flex flex-col items-center">
