@@ -103,7 +103,5 @@ export async function GET(req: NextRequest) {
       { success: false, message: "服务器错误，获取失败", error: String(error) },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

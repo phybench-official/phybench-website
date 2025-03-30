@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { UnderConstruction } from "@/components/ui/under-construction";
 
 export default function DownloadProblemPage() {

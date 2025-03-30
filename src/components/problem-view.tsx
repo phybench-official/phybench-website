@@ -24,11 +24,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Eye, ChevronLeft } from "lucide-react";
-import type { ProblemData } from "@/lib/types";
+import type { ExaminerInfo, ProblemData } from "@/lib/types";
 import { statusMap, tagMap } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,35 +38,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { examProblem } from "@/lib/actions";
+import { examProblem, getExaminerNumber } from "@/lib/actions";
 import { toast } from "sonner";
 
 function ExamDialog({
   problem,
-  examinerNo,
-  examinerAssignedStatus,
-  examinerAssignedScore,
-  examinerRemark,
-  examinerNominated,
 }: {
   problem: ProblemData;
-  examinerNo: number;
-  examinerAssignedStatus: string;
-  examinerAssignedScore: number;
-  examinerRemark: string;
-  examinerNominated: string;
 }) {
+  
   const router = useRouter();
-  const [remark, setRemark] = useState(examinerRemark);
-  const [score, setScore] = useState<string>(examinerAssignedScore.toString());
+  const [examinerInfo, setExaminerInfo] = useState<ExaminerInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [remark, setRemark] = useState("");
+  const [score, setScore] = useState<string>("0");
   const [status, setStatus] = useState<
     "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
-  >(examinerAssignedStatus as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED");
-  const [nominated, setNominated] = useState<string>(
-    examinerNominated === "Yes" ? "Yes" : "No"
-  );
+  >("PENDING");
+  const [nominated, setNominated] = useState<string>("No");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+
+  // 获取审核信息
+  useEffect(() => {
+    async function fetchExaminerInfo() {
+      try {
+        setLoading(true);
+        const info = await getExaminerNumber(problem.id);
+        setExaminerInfo(info);
+        // 设置表单初始值
+        setRemark(info?.examinerRemark || "");
+        setScore((info?.examinerAssignedScore || 0).toString());
+        setStatus((info?.examinerAssignedStatus as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED") || "PENDING");
+        setNominated(info?.examinerNominated === "Yes" ? "Yes" : "No");
+      } catch (error) {
+        toast.error("获取审核信息失败");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (open) {
+      fetchExaminerInfo();
+    }
+  }, [problem.id, open]);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -111,77 +127,83 @@ function ExamDialog({
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>审核题目：您是{examinerNo}号审题人</DialogTitle>
+          <DialogTitle>
+            {loading ? "加载中..." : `审核题目：您是${examinerInfo?.examinerNo}号审题人`}
+          </DialogTitle>
           <DialogDescription>
             编辑审核状态、积分和评语，决定是否提名为好题
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="status">审核状态</Label>
-            <Select
-              value={status}
-              onValueChange={(value) =>
-                setStatus(
-                  value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
-                )
-              }
+        {loading ? (
+          <div className="flex justify-center items-center py-8">加载审核信息...</div>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="status">审核状态</Label>
+              <Select
+                value={status}
+                onValueChange={(value) =>
+                  setStatus(
+                    value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+                  )
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="选择审核状态" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PENDING">待审核</SelectItem>
+                  <SelectItem value="APPROVED">已通过</SelectItem>
+                  <SelectItem value="REJECTED">已拒绝</SelectItem>
+                  <SelectItem value="RETURNED">已打回</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="score">审核积分</Label>
+              <Input
+                id="score"
+                type="text"
+                placeholder="请输入一个自然数"
+                value={score}
+                onChange={(e) => setScore(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nominated">是否提名为好题</Label>
+              <Select value={nominated} onValueChange={setNominated}>
+                <SelectTrigger id="nominated">
+                  <SelectValue placeholder="是否提名为好题" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">是</SelectItem>
+                  <SelectItem value="No">否</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="remark">审核评语</Label>
+              <Textarea
+                id="remark"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                placeholder="请输入审核评语"
+                rows={3}
+              />
+            </div>
+
+            <Button
+              onClick={handleSubmit}
+              className="w-full"
+              disabled={isSubmitting}
             >
-              <SelectTrigger id="status">
-                <SelectValue placeholder="选择审核状态" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PENDING">待审核</SelectItem>
-                <SelectItem value="APPROVED">已通过</SelectItem>
-                <SelectItem value="REJECTED">已拒绝</SelectItem>
-                <SelectItem value="RETURNED">已打回</SelectItem>
-              </SelectContent>
-            </Select>
+              {isSubmitting ? "提交中..." : "提交审核信息"}
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="score">审核积分</Label>
-            <Input
-              id="score"
-              type="text"
-              placeholder="请输入一个自然数"
-              value={score}
-              onChange={(e) => setScore(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="nominated">是否提名为好题</Label>
-            <Select value={nominated} onValueChange={setNominated}>
-              <SelectTrigger id="nominated">
-                <SelectValue placeholder="是否提名为好题" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Yes">是</SelectItem>
-                <SelectItem value="No">否</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="remark">审核评语</Label>
-            <Textarea
-              id="remark"
-              value={remark}
-              onChange={(e) => setRemark(e.target.value)}
-              placeholder="请输入审核评语"
-              rows={3}
-            />
-          </div>
-
-          <Button
-            onClick={handleSubmit}
-            className="w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "提交中..." : "提交审核信息"}
-          </Button>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -190,19 +212,11 @@ function ExamDialog({
 export function ProblemView({
   problem,
   editable = false,
-  examinerNo = 1,
-  examinerAssignedStatus = "PENDING",
-  examinerAssignedScore = 0,
-  examinerRemark = "",
-  examinerNominated = "No",
+  examable = false,
 }: {
   problem: ProblemData;
   editable?: boolean;
-  examinerNo: number;
-  examinerAssignedStatus: string;
-  examinerAssignedScore: number;
-  examinerRemark: string;
-  examinerNominated: string;
+  examable?: boolean;
 }) {
   const router = useRouter();
 
@@ -228,14 +242,11 @@ export function ProblemView({
             >
               编辑题目
             </Button>
-            <ExamDialog
-              problem={problem}
-              examinerNo={examinerNo}
-              examinerAssignedStatus={examinerAssignedStatus}
-              examinerAssignedScore={examinerAssignedScore}
-              examinerRemark={examinerRemark}
-              examinerNominated={examinerNominated}
-            />
+            {examable && (
+              <ExamDialog 
+                problem={problem} 
+              />
+            )}
           </div>
         )}
       </div>

@@ -1,7 +1,6 @@
 "use server";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
-import { ProblemStatus } from "@prisma/client";
 
 export async function updateUsername(formData: FormData) {
   const session = await auth();
@@ -299,12 +298,14 @@ export async function fetchLastWeekProblems() {
   }
 }
 
-export async function getExaminerNumber(userEmail: string, problemId: number) {
+export async function getExaminerNumber(problemId: number) {
   const session = await auth();
 
-  if (!session) {
+  if (!session || !session.user?.email) {
     throw new Error("未授权");
   }
+
+  const userEmail = session.user.email;
 
   try {
     if (!problemId) {
@@ -337,10 +338,6 @@ export async function getExaminerNumber(userEmail: string, problemId: number) {
       throw new Error("未找到题目记录");
     }
 
-    if (!userEmail) {
-      throw new Error("缺少用户邮箱");
-    }
-
     const dbUser = await prisma.user.findUnique({
       where: {
         email: userEmail,
@@ -355,10 +352,6 @@ export async function getExaminerNumber(userEmail: string, problemId: number) {
     }
 
     const userId = dbUser.id;
-
-    if (!userId) {
-      throw new Error("缺少用户ID");
-    }
 
     // 后端鉴权，只有管理员/此时在examiners列表中的用户才能审核
     const examinersIndex = dbProblem.examiners.findIndex(
