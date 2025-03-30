@@ -49,10 +49,14 @@ export default async function Page({
   if (!isExaminer) {
     return <NotPermitted />;
   }
-
+  
   return (
     <div className="w-screen py-20 flex flex-col items-center">
-      <ProblemView problem={problem} editable />
+      <ProblemView
+        problem={problem}
+        editable={true}
+        examable={true}
+      />
     </div>
   );
 }

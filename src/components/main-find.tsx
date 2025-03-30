@@ -39,6 +39,7 @@ export function Scoreboard() {
   const [scoreHasMore, setScoreHasMore] = useState(true);
   const scoreObserverRef = useRef<IntersectionObserver | null>(null);
   const scoreLastElementRef = useRef<HTMLDivElement>(null);
+  const [scoreTotalCount, setScoreTotalCount] = useState(0);
 
   // 题目数排行榜相关状态
   const [problemUsers, setProblemUsers] = useState<UserProblemCount[]>([]);
@@ -48,6 +49,7 @@ export function Scoreboard() {
   const [problemHasMore, setProblemHasMore] = useState(true);
   const problemObserverRef = useRef<IntersectionObserver | null>(null);
   const problemLastElementRef = useRef<HTMLDivElement>(null);
+  const [problemTotalCount, setProblemTotalCount] = useState(0);
 
   // 获取积分排行榜数据
   const fetchScoreUsers = useCallback(async (page: number) => {
@@ -66,6 +68,7 @@ export function Scoreboard() {
       if (data.success) {
         setScoreUsers(prev => page === 1 ? data.data : [...prev, ...data.data]);
         setScoreHasMore(data.data.length === 20);
+        setScoreTotalCount(data.totalCount);
       } else {
         toast.error("获取积分排行榜失败");
       }
@@ -95,6 +98,7 @@ export function Scoreboard() {
       if (data.success) {
         setProblemUsers(prev => page === 1 ? data.data : [...prev, ...data.data]);
         setProblemHasMore(data.data.length === 20);
+        setProblemTotalCount(data.totalCount);
       } else {
         toast.error("获取题目排行榜失败");
       }
@@ -180,7 +184,7 @@ export function Scoreboard() {
   };
 
   return (
-    <div className="container mt-32 sm:mt-20 mx-auto h-full px-4 py-8">
+    <div className="container mt-8 sm:mt-12 mx-auto h-full px-4 py-8">
       
       <div className="grid grid-cols-1 md:grid-cols-2 px-2 gap-6 my-auto">
         {/* 积分排行榜卡片 */}
@@ -196,7 +200,7 @@ export function Scoreboard() {
                 积分
               </Badge>
             </div>
-            <CardDescription>根据用户积分高低进行排名</CardDescription>
+            <CardDescription>根据用户积分高低进行排名 共{scoreTotalCount}</CardDescription>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[500px] pr-4">
@@ -232,7 +236,7 @@ export function Scoreboard() {
                       </div>
                       
                       {/* 用户名 */}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 ml-2">
                         <p className="font-medium truncate">{getUserDisplayName(user)}</p>
                       </div>
                       
@@ -276,7 +280,7 @@ export function Scoreboard() {
                 题目数
               </Badge>
             </div>
-            <CardDescription>根据用户提交题目数量进行排名</CardDescription>
+            <CardDescription>根据用户提交题目数量进行排名 共{problemTotalCount}</CardDescription>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[500px] pr-4">
@@ -312,7 +316,7 @@ export function Scoreboard() {
                       </div>
                       
                       {/* 用户名 */}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 ml-2">
                         <p className="font-medium truncate">{getUserDisplayName(user)}</p>
                       </div>
                       

@@ -61,4 +61,13 @@ export interface User {
   username: string,
 }
 
-export type { AIPerformance, ProblemVariable, ProblemData };
+
+interface ExaminerInfo {
+  examinerNo: number;
+  examinerAssignedStatus: string | null;
+  examinerAssignedScore: number | null;
+  examinerRemark: string | null;
+  examinerNominated: string | null;
+};
+
+export type { AIPerformance, ProblemVariable, ProblemData, ExaminerInfo };

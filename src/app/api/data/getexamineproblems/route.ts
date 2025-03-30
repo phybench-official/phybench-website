@@ -38,7 +38,5 @@ export async function GET(req: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
