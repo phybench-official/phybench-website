@@ -81,6 +81,10 @@ export default {
           username: token.username as string,
         },
       }
-    }
+    },
+    authorized: async ({ auth }) => {
+      // Logged in users are authenticated, otherwise redirect to login page
+      return !!auth
+    },
   }
 } satisfies NextAuthConfig
