@@ -164,7 +164,7 @@ export default function Step3({
                         <SelectItem value="gemini-2.0-flash">gemini-2.0-flash</SelectItem>
                         <SelectItem value="gemini-2.0-flash-thinking-exp">gemini-2.0-flash-thinking-exp</SelectItem>
                         <SelectItem value="gemini-2.0-pro">gemini-2.0-pro-exp</SelectItem>
-                        <SelectItem value="gemini-2.5-pro">gemini-2.5-pro-exp</SelectItem>
+                        <SelectItem value="gemini-2.5-pro-exp">gemini-2.5-pro-exp</SelectItem>
                       </SelectGroup>
                       <SelectGroup>
                         <SelectLabel>Anthropic Claude</SelectLabel>
