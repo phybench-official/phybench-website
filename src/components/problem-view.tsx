@@ -292,9 +292,10 @@ export function ProblemView({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>题目信息</span>
-            <Badge className={`${statusMap[problem.status].color}`}>
+            {problem.status}
+            {/* <Badge className={`${statusMap[problem.status].color}`}>
               {statusMap[problem.status].label}
-            </Badge>
+            </Badge> */}
           </CardTitle>
           <CardDescription>查看题目详细信息</CardDescription>
         </CardHeader>
@@ -396,7 +397,7 @@ export function ProblemView({
       </Card>
 
       {/* 审核意见滑动窗口 */}
-      {/* <div className="lg:col-span-1 overflow-auto">
+      <div className="lg:col-span-1 overflow-auto">
         <Card>
           <CardHeader>
             <CardTitle>审核意见</CardTitle>
@@ -423,7 +424,7 @@ export function ProblemView({
             )}
           </CardContent>
         </Card>
-      </div> */}
+      </div>
 
       {/* 第二列：题干、答案、解答过程 */}
       <Card className="lg:col-span-1 overflow-auto max-h-[80vh]">
