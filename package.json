@@ -13,6 +13,9 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} src/lib/seed-dev.ts"
+  },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.1.13",
     "@ai-sdk/openai": "^1.2.1",
@@ -72,7 +75,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^20",
+    "@types/node": "^20.17.30",
     "@types/node-fetch": "^2.6.12",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -88,7 +91,7 @@
     "prisma": "^6.5.0",
     "tailwindcss": "^4.0.12",
     "ts-node": "^10.9.2",
-    "typescript": "^5",
+    "typescript": "^5.8.2",
     "vitest": "^3.0.9"
   }
 }

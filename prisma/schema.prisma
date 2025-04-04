@@ -117,6 +117,7 @@ model Problem {
   offererId        String?                   // 供题人Id
   aiPerformances   AiPerformance[]           // AI表现（提交时选填，允许列表为空）
   status           ProblemStatus @default(PENDING)             // 审核状态
+  translatedStatus ProblemStatus @default(PENDING)             // 翻译状态
   score            Int?                                        // 题目积分（由审核员给出）
   remark           String?                                     // 审核评语（由审核员给出）
   examiners        User[]  @relation("UserExamineProblems")    // 审核员
@@ -156,8 +157,6 @@ enum ProblemStatus {
   REJECTED      // 已拒绝
   ARCHIVED      // 已归档
 }
-
-
 
 // AI表现对象
 model AiPerformance {
