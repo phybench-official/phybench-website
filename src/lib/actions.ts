@@ -91,7 +91,7 @@ export const fetchAllUsers = async () => {
 export async function examProblem(data: {
   problemId: number;
   remark?: string;
-  status: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED";
   score: number;
   nominated: string;
 }) {
@@ -180,29 +180,30 @@ export async function examProblem(data: {
       },
     });
 
-    const hasOfferer = problem.offererEmail ? true : false;
-    // 查找编题人的积分事件
-    const submitterIndex = problem.scoreEvents.findIndex(
-      (event) => event.tag === "SUBMIT" && event.userId === problem.userId
-    );
-    if (submitterIndex === -1) {
-      await prisma.scoreEvent.create({
-        data: {
-          tag: "SUBMIT",
-          score: hasOfferer ? data.score : data.score,
-          userId: problem.userId,
-          problemId: problem.id,
-        },
-      });
-    } else {
-      const submitScoreEvent = problem.scoreEvents[submitterIndex];
-      await prisma.scoreEvent.update({
-        where: { id: submitScoreEvent.id },
-        data: {
-          score: hasOfferer ? data.score / 2 : data.score,
-        },
-      });
-    }
+    // 我认为没有错但就他妈的有错的代码
+    // const hasOfferer = problem.offererEmail ? true : false;
+    // // 查找编题人的积分事件
+    // const submitterIndex = problem.scoreEvents.findIndex(
+    //   (event) => event.tag === "SUBMIT" && event.userId === problem.userId
+    // );
+    // if (submitterIndex === -1) {
+    //   await prisma.scoreEvent.create({
+    //     data: {
+    //       tag: "SUBMIT",
+    //       score: data.score,
+    //       userId: problem.userId,
+    //       problemId: problem.id,
+    //     },
+    //   });
+    // } else {
+    //   const submitScoreEvent = problem.scoreEvents[submitterIndex];
+    //   await prisma.scoreEvent.update({
+    //     where: { id: submitScoreEvent.id },
+    //     data: {
+    //       score: hasOfferer ? data.score / 2 : data.score,
+    //     },
+    //   });
+    // }
     // if (hasOfferer) {
     //   if (!problem.offererEmail) {
     //     return { success: false, message: "错误访问offererEmail字段！" };
