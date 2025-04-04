@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
+import { hash } from "crypto";
 
 export async function updateUsername(formData: FormData) {
   const session = await auth();
@@ -125,6 +126,9 @@ export async function examProblem(data: {
             id: true,
           },
         },
+        offererEmail: true,
+        userId: true,
+        id: true,
         scoreEvents: { select: { id: true, userId: true, tag: true } },
       },
     });
@@ -166,6 +170,43 @@ export async function examProblem(data: {
         problemNominated: data.nominated,
       },
     });
+
+    // 直接覆盖题目正式审核结果
+    await prisma.problem.update({
+      where: { id: data.problemId },
+      data: {
+        status: data.status,
+        score: data.score,
+        remark: data.remark,
+        nominated: data.nominated,
+      },
+    });
+
+    const hasOfferer = problem.offererEmail ? true : false;
+    // 查找编题人的积分事件
+    const submitterIndex = problem.scoreEvents.findIndex(
+      (event) => event.tag === "SUBMIT" && event.userId === problem.userId
+    );
+    if (submitterIndex === -1) {
+      await prisma.scoreEvent.create({
+        data: {
+          tag: "SUBMIT",
+          score: hasOfferer ? data.score / 2 : data.score,
+          userId: problem.userId,
+          problemId: problem.id,
+        },
+      });
+    } else {
+      const submitScoreEvent = problem.scoreEvents[submitterIndex];
+      await prisma.scoreEvent.update({
+        where: { id: submitScoreEvent.id },
+        data: {
+          score: hasOfferer ? data.score / 2 : data.score,
+        },
+      });
+    }
+    if (hasOfferer) {
+    }
     return {
       success: true,
       message: "审核成功",
@@ -331,6 +372,10 @@ export async function getExaminerNumber(problemId: number) {
             problemNominated: true,
           },
         },
+        status: true,
+        score: true,
+        remark: true,
+        nominated: true,
       },
     });
 
@@ -384,20 +429,20 @@ export async function getExaminerNumber(problemId: number) {
           score: 0,
           userId: userId,
           problemId: Number(problemId),
-          problemStatus: "PENDING",
-          problemScore: 0,
-          problemRemark: "",
-          problemNominated: "No",
+          problemStatus: dbProblem.status,
+          problemScore: dbProblem.score,
+          problemRemark: dbProblem.remark,
+          problemNominated: dbProblem.nominated,
         },
       });
 
       // 返回新创建的事件的编号
       return {
         examinerNo: dbProblem.scoreEvents.length + 1,
-        examinerAssignedStatus: "PENDING",
-        examinerAssignedScore: 0,
-        examinerRemark: "",
-        examinerNominated: "No",
+        examinerAssignedStatus: dbProblem.status,
+        examinerAssignedScore: dbProblem.score,
+        examinerRemark: dbProblem.remark,
+        examinerNominated: dbProblem.nominated,
       };
     }
   } catch (error) {
