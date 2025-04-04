@@ -36,14 +36,13 @@ export default async function Page({
           email: true,
         },
       },
-      scoreEvents: {
+      translators: {
         select: {
-          tag: true,
-          userId: true,
-          problemScore: true,
-          problemRemark: true,
-          problemStatus: true,
-          problemNominated: true,
+          id: true,
+          name: true,
+          username: true,
+          realname: true,
+          email: true,
         },
       },
     },

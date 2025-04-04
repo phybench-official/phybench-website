@@ -7,8 +7,13 @@ import { toast } from "sonner"; // 使用 sonner 提示库
 import RenderMarkdown from "@/components/render-markdown"; // 引入 RenderMarkdown
 interface Problem {
   content: string;
-  id: string;
-  translatedStatus?: "ARCHIVED" | "PENDING";
+  id: number;
+  translatedStatus?:
+    | "PENDING"
+    | "RETURNED"
+    | "APPROVED"
+    | "REJECTED"
+    | "ARCHIVED";
   translatedContent?: string;
   solution?: string;
   translatedSolution?: string;
@@ -102,7 +107,9 @@ export function TranslateView({ problem }: { problem: Problem }) {
   );
 
   // 新增保存状态的函数
-  const saveStatus = async (newStatus: "ARCHIVED" | "PENDING") => {
+  const saveStatus = async (
+    newStatus: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED"
+  ) => {
     try {
       const res = await fetch("/api/data/translate", {
         method: "POST",
@@ -180,19 +187,18 @@ export function TranslateView({ problem }: { problem: Problem }) {
       {/* Top row: problem content and its translation */}
       <ProblemContent problem={problem} />
       <EditableTranslation
-        content={englishTranslation}
+        content={englishTranslation || ""}
         onSave={saveEnglishTranslation}
       />
 
       {/* Bottom row: solution content and its translation */}
-      <SolutionContent solution={problem.solution} />
+      <SolutionContent solution={problem.solution || ""} />
       <EditableTranslation
-        content={translatedSolution}
+        content={translatedSolution || ""}
         onSave={saveTranslatedSolution}
       />
 
       {/* 现有内容保持不变 */}
-      {/*  新增状态控制组件 */}
       <div className="mb-4">
         <h2>当前状态: {translatedStatus == "PENDING" ? "待处理" : "已归档"}</h2>
         <Button onClick={() => saveStatus("ARCHIVED")}>标记为归档</Button>

@@ -55,8 +55,6 @@ export default async function Page({
     <div className="w-screen py-20 flex flex-col items-center">
       <TranslateView
         problem={problem}
-        editable={true}
-        examable={true}
       />
     </div>
   );

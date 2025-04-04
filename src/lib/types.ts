@@ -43,12 +43,12 @@ interface ProblemData {
   createdAt: Date;
   updatedAt: Date;
   translators: {
-    id: number;
-    name: string;
-    username: string;
-    realname: string;
+    id: string;
+    name: string | null;
+    username: string | null;
+    realname: string | null;
     email: string;
-  };
+  }[];
   user: {
     name?: string | null;
     username?: string | null;
