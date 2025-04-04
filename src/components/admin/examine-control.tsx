@@ -71,7 +71,7 @@ export default function ExamineControlPage() {
 
   useEffect(() => {
     // 获取问题统计
-    fetch("/api/data/getproblemcounts")
+    fetch("/api/data/getexamineproblemcounts")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

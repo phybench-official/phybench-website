@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     const getProblemsByTag = async (tag: ProblemTag) => {
       // 修改为 ProblemTag
       return await prisma.problem.findMany({
-        where: { tag },
+        where: { tag: tag, status: "PENDING" },
         select: { id: true },
       });
     };
