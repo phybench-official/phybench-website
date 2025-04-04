@@ -43,17 +43,18 @@ import { toast } from "sonner";
 
 function ExamDialog({
   problem,
+  isAdmin = false,
 }: {
   problem: ProblemData;
+  isAdmin?: boolean;
 }) {
-  
   const router = useRouter();
   const [examinerInfo, setExaminerInfo] = useState<ExaminerInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [remark, setRemark] = useState("");
   const [score, setScore] = useState<string>("0");
   const [status, setStatus] = useState<
-    "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+    "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED"
   >("PENDING");
   const [nominated, setNominated] = useState<string>("No");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,7 +70,13 @@ function ExamDialog({
         // 设置表单初始值
         setRemark(info?.examinerRemark || "");
         setScore((info?.examinerAssignedScore || 0).toString());
-        setStatus((info?.examinerAssignedStatus as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED") || "PENDING");
+        setStatus(
+          (info?.examinerAssignedStatus as
+            | "PENDING"
+            | "RETURNED"
+            | "APPROVED"
+            | "REJECTED") || "PENDING"
+        );
         setNominated(info?.examinerNominated === "Yes" ? "Yes" : "No");
       } catch (error) {
         toast.error("获取审核信息失败");
@@ -128,14 +135,18 @@ function ExamDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {loading ? "加载中..." : `审核题目：您是${examinerInfo?.examinerNo}号审题人`}
+            {loading
+              ? "加载中..."
+              : `审核题目：您是${examinerInfo?.examinerNo}号审题人`}
           </DialogTitle>
           <DialogDescription>
             编辑审核状态、积分和评语，决定是否提名为好题
           </DialogDescription>
         </DialogHeader>
         {loading ? (
-          <div className="flex justify-center items-center py-8">加载审核信息...</div>
+          <div className="flex justify-center items-center py-8">
+            加载审核信息...
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -144,7 +155,12 @@ function ExamDialog({
                 value={status}
                 onValueChange={(value) =>
                   setStatus(
-                    value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+                    value as
+                      | "PENDING"
+                      | "RETURNED"
+                      | "APPROVED"
+                      | "REJECTED"
+                      | "ARCHIVED"
                   )
                 }
               >
@@ -156,6 +172,7 @@ function ExamDialog({
                   <SelectItem value="APPROVED">已通过</SelectItem>
                   <SelectItem value="REJECTED">已拒绝</SelectItem>
                   <SelectItem value="RETURNED">已打回</SelectItem>
+                  {isAdmin && <SelectItem value="ARCHIVED">已入库</SelectItem>}
                 </SelectContent>
               </Select>
             </div>
@@ -213,10 +230,12 @@ export function ProblemView({
   problem,
   editable = false,
   examable = false,
+  isAdmin = false,
 }: {
   problem: ProblemData;
   editable?: boolean;
   examable?: boolean;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
 
@@ -242,11 +261,7 @@ export function ProblemView({
             >
               编辑题目
             </Button>
-            {examable && (
-              <ExamDialog 
-                problem={problem} 
-              />
-            )}
+            {examable && <ExamDialog problem={problem} isAdmin={isAdmin} />}
           </div>
         )}
       </div>
