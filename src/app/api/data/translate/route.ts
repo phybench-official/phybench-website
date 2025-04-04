@@ -23,17 +23,6 @@ export async function POST(request: Request) {
   }
 
   // Build update object with the provided fields.
-  const updateData: { 
-    translatedContent?: string; 
-    translatedSolution?: string; 
-    translatedStatus?: string; 
-  } = {};
-  if (typeof translatedContent === "string") {
-    updateData.translatedContent = translatedContent;
-  }
-  if (typeof translatedSolution === "string") {
-    updateData.translatedSolution = translatedSolution;
-  }
   // 新增状态字段处理
   if (typeof translatedStatus === "string") {
     if (!["ARCHIVED", "PENDING"].includes(translatedStatus)) {
@@ -42,6 +31,23 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+  }
+  
+  const updateData: { 
+    translatedContent?: string; 
+    translatedSolution?: string; 
+    translatedStatus?: any; 
+  } = {};
+  
+  if (translatedContent !== undefined) {
+    updateData.translatedContent = translatedContent;
+  }
+  
+  if (translatedSolution !== undefined) {
+    updateData.translatedSolution = translatedSolution;
+  }
+  
+  if (translatedStatus !== undefined) {
     updateData.translatedStatus = translatedStatus;
   }
 

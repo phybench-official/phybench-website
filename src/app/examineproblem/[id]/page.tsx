@@ -33,6 +33,15 @@ export default async function Page({
           email: true,
         },
       },
+      translators: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          realname: true,
+          email: true,
+        },
+      }
     },
   });
 
