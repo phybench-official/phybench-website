@@ -20,7 +20,10 @@ export default async function Page({
     where: {
       id: parseInt(id),
     },
-    include: {
+    select: {
+      id: true,
+      userId: true,
+      tag: true,
       variables: true,
       aiPerformances: true,
       examiners: true,
@@ -31,6 +34,16 @@ export default async function Page({
           realname: true,
           username: true,
           email: true,
+        },
+      },
+      scoreEvents: {
+        select: {
+          tag: true,
+          userId: true,
+          problemScore: true,
+          problemRemark: true,
+          problemStatus: true,
+          problemNominated: true,
         },
       },
     },

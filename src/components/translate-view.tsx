@@ -8,7 +8,7 @@ import RenderMarkdown from "@/components/render-markdown"; // 引入 RenderMarkd
 interface Problem {
   content: string;
   id: string;
-  translatedStatus?: 'ARCHIVED' | 'PENDING';
+  translatedStatus?: "ARCHIVED" | "PENDING";
   translatedContent?: string;
   solution?: string;
   translatedSolution?: string;
@@ -20,10 +20,10 @@ export function ProblemContent({ problem }: { problem: Problem }) {
       <CardContent>
         <h2>题目内容</h2>
         <RenderMarkdown content={problem.content} />
-        <Button 
+        <Button
           onClick={() => {
-            navigator.clipboard.writeText(problem.content || '');
-            toast.success('题目内容已复制');
+            navigator.clipboard.writeText(problem.content || "");
+            toast.success("题目内容已复制");
           }}
           className="mt-2"
         >
@@ -42,7 +42,10 @@ interface EditableTranslationProps {
 }
 
 // 修改后的 EditableTranslation 组件
-export function EditableTranslation({ content, onSave }: EditableTranslationProps) {
+export function EditableTranslation({
+  content,
+  onSave,
+}: EditableTranslationProps) {
   const [text, setText] = useState(content || "");
 
   return (
@@ -70,9 +73,9 @@ function SolutionContent({ solution }: SolutionContentProps) {
   const handleCopySolution = () => {
     if (solution) {
       navigator.clipboard.writeText(solution);
-      toast.success('解答内容已复制');
+      toast.success("解答内容已复制");
     } else {
-      toast.info('暂无解答内容可复制');
+      toast.info("暂无解答内容可复制");
     }
   };
 
@@ -83,10 +86,7 @@ function SolutionContent({ solution }: SolutionContentProps) {
         {/* 渲染 Markdown 内容，处理空值 */}
         <RenderMarkdown content={solution || "暂无解答内容"} />
         {/* 复制按钮 */}
-        <Button 
-          onClick={handleCopySolution}
-          className="mt-2"
-        >
+        <Button onClick={handleCopySolution} className="mt-2">
           复制解答
         </Button>
       </CardContent>
@@ -97,10 +97,12 @@ function SolutionContent({ solution }: SolutionContentProps) {
 // Main TranslateView component.
 export function TranslateView({ problem }: { problem: Problem }) {
   // 新增状态管理
-  const [translatedStatus, setTranslatedStatus] = useState(problem.translatedStatus || 'PENDING');
+  const [translatedStatus, setTranslatedStatus] = useState(
+    problem.translatedStatus || "PENDING"
+  );
 
   // 新增保存状态的函数
-  const saveStatus = async (newStatus: 'ARCHIVED' | 'PENDING') => {
+  const saveStatus = async (newStatus: "ARCHIVED" | "PENDING") => {
     try {
       const res = await fetch("/api/data/translate", {
         method: "POST",
@@ -190,15 +192,11 @@ export function TranslateView({ problem }: { problem: Problem }) {
       />
 
       {/* 现有内容保持不变 */}
-      // 新增状态控制组件
+      {/*  新增状态控制组件 */}
       <div className="mb-4">
-        <h2>当前状态: {translatedStatus}</h2>
-        <Button onClick={() => saveStatus("ARCHIVED")}>
-          标记为归档
-        </Button>
-        <Button onClick={() => saveStatus("PENDING")}>
-          标记为待处理
-        </Button>
+        <h2>当前状态: {translatedStatus == "PENDING" ? "待处理" : "已归档"}</h2>
+        <Button onClick={() => saveStatus("ARCHIVED")}>标记为归档</Button>
+        <Button onClick={() => saveStatus("PENDING")}>标记为待处理</Button>
       </div>
     </div>
   );

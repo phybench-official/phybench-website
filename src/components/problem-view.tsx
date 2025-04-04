@@ -75,7 +75,8 @@ function ExamDialog({
             | "PENDING"
             | "RETURNED"
             | "APPROVED"
-            | "REJECTED") || "PENDING"
+            | "REJECTED"
+            | "ARCHIVED") || "PENDING"
         );
         setNominated(info?.examinerNominated === "Yes" ? "Yes" : "No");
       } catch (error) {
@@ -226,6 +227,15 @@ function ExamDialog({
   );
 }
 
+interface ExaminerComment {
+  tag: string;
+  userId: string;
+  problemScore: number;
+  problemRemark: string;
+  problemStatus: string;
+  problemNominated: string;
+}
+
 export function ProblemView({
   problem,
   editable = false,
@@ -238,6 +248,17 @@ export function ProblemView({
   isAdmin?: boolean;
 }) {
   const router = useRouter();
+
+  const [examinerComments, setExaminerComments] = useState<ExaminerComment[]>(
+    []
+  );
+
+  useEffect(() => {
+    const comments = problem.scoreEvents.filter(
+      (event) => event.tag === "EXAMINE"
+    );
+    setExaminerComments(comments);
+  }, [problem]);
 
   return (
     <div className="container mt-16 md:mt-0 px-4 md:px-0 grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 max-w-7xl">
@@ -373,6 +394,36 @@ export function ProblemView({
           }
         </CardContent>
       </Card>
+
+      {/* 审核意见滑动窗口 */}
+      {/* <div className="lg:col-span-1 overflow-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>审核意见</CardTitle>
+            <CardDescription>各个审核人的意见反馈</CardDescription>
+          </CardHeader>
+          <CardContent className="flex overflow-x-auto space-x-4">
+            {examinerComments.length === 0 ? (
+              <p className="text-center">暂无审核意见</p>
+            ) : (
+              examinerComments.map((comment, index) => (
+                <div
+                  key={index}
+                  className="min-w-[300px] p-4 border rounded-lg"
+                >
+                  <h5 className="font-semibold">审核人: {comment.userId}</h5>
+                  <p className="text-sm">状态: {comment.problemStatus}</p>
+                  <p className="text-sm">积分: {comment.problemScore}</p>
+                  <p className="text-sm">评语: {comment.problemRemark}</p>
+                  <p className="text-sm">
+                    提名状态: {comment.problemNominated}
+                  </p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      </div> */}
 
       {/* 第二列：题干、答案、解答过程 */}
       <Card className="lg:col-span-1 overflow-auto max-h-[80vh]">

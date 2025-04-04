@@ -57,10 +57,7 @@ export async function fetchProblems(
   return { problems, totalPages };
 }
 
-export async function fetchTranslateProblems(
-  page: number,
-  perPage: number,
-) {
+export async function fetchTranslateProblems(page: number, perPage: number) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");
   if (!session.user.email) throw new Error("Email not found");
@@ -68,14 +65,12 @@ export async function fetchTranslateProblems(
     .findUnique({ where: { email: session.user.email } })
     .then((user) => user?.id);
 
-  const where = 
-     session.user.role === "admin"
+  const where =
+    session.user.role === "admin"
       ? {}
       : {
           OR: [{ translators: { some: { id: currentUser } } }],
-        }
-    ;
-
+        };
   const [problems, count] = await Promise.all([
     prisma.problem.findMany({
       where,
@@ -223,65 +218,67 @@ export async function examProblem(data: {
       },
     });
 
-    // 我认为没有错但就他妈的有错的代码
-    // const hasOfferer = problem.offererEmail ? true : false;
+    const hasOfferer = problem.offererEmail ? true : false;
     // // 查找编题人的积分事件
-    // const submitterIndex = problem.scoreEvents.findIndex(
-    //   (event) => event.tag === "SUBMIT" && event.userId === problem.userId
-    // );
-    // if (submitterIndex === -1) {
-    //   await prisma.scoreEvent.create({
-    //     data: {
-    //       tag: "SUBMIT",
-    //       score: data.score,
-    //       userId: problem.userId,
-    //       problemId: problem.id,
-    //     },
-    //   });
-    // } else {
-    //   const submitScoreEvent = problem.scoreEvents[submitterIndex];
-    //   await prisma.scoreEvent.update({
-    //     where: { id: submitScoreEvent.id },
-    //     data: {
-    //       score: hasOfferer ? data.score / 2 : data.score,
-    //     },
-    //   });
-    // }
-    // if (hasOfferer) {
-    //   if (!problem.offererEmail) {
-    //     return { success: false, message: "错误访问offererEmail字段！" };
-    //   }
-    //   const offerer = prisma.user.findUnique({
-    //     where: { email: problem.offererEmail },
-    //     select: {
-    //       id: true,
-    //     },
-    //   });
-    //   if (!offerer) {
-    //     return { success: false, message: "未找到供题者！" };
-    //   }
-    //   const offererIndex = problem.scoreEvents.findIndex(
-    //     (event) => event.tag === "OFFER" && event.userId === offerer.id
-    //   );
-    //   if (offererIndex === -1) {
-    //     await prisma.scoreEvent.create({
-    //       data: {
-    //         tag: "OFFER",
-    //         score: data.score / 2,
-    //         userId: offerer.id,
-    //         problemId: problem.id,
-    //       },
-    //     });
-    //   } else {
-    //     const offerScoreEvent = problem.scoreEvents[offererIndex];
-    //     await prisma.scoreEvent.update({
-    //       where: { id: offerScoreEvent.id },
-    //       data: {
-    //         score: data.score / 2,
-    //       },
-    //     });
-    //   }
-    // }
+    const submitterIndex = problem.scoreEvents.findIndex(
+      (event) => event.tag === "SUBMIT" && event.userId === problem.userId
+    );
+    if (submitterIndex === -1) {
+      await prisma.scoreEvent.create({
+        data: {
+          tag: "SUBMIT",
+          score: hasOfferer ? data.score / 2 : data.score,
+          userId: problem.userId,
+          problemId: problem.id,
+        },
+      });
+    } else {
+      const submitScoreEvent = problem.scoreEvents[submitterIndex];
+      await prisma.scoreEvent.update({
+        where: { id: submitScoreEvent.id },
+        data: {
+          score: hasOfferer ? data.score / 2 : data.score,
+        },
+      });
+    }
+    if (hasOfferer) {
+      if (!problem.offererEmail) {
+        return { success: false, message: "错误访问offererEmail字段！" };
+      }
+
+      const offerer = await prisma.user.findUnique({
+        where: { email: problem.offererEmail },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!offerer) {
+        return { success: false, message: "未找到供题者ID！" };
+      }
+      const offererIndex = problem.scoreEvents.findIndex(
+        (event) => event.tag === "OFFER" && event.userId === offerer.id
+      );
+
+      if (offererIndex === -1) {
+        await prisma.scoreEvent.create({
+          data: {
+            tag: "OFFER",
+            score: data.score / 2,
+            userId: offerer.id,
+            problemId: problem.id,
+          },
+        });
+      } else {
+        const offerScoreEvent = problem.scoreEvents[offererIndex];
+        await prisma.scoreEvent.update({
+          where: { id: offerScoreEvent.id },
+          data: {
+            score: data.score / 2,
+          },
+        });
+      }
+    }
     return {
       success: true,
       message: "审核成功",

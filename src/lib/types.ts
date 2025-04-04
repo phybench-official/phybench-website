@@ -48,7 +48,7 @@ interface ProblemData {
     username: string;
     realname: string;
     email: string;
-  }
+  };
   user: {
     name?: string | null;
     username?: string | null;
@@ -58,18 +58,25 @@ interface ProblemData {
   offer?: {
     email: string;
   } | null;
+  scoreEvents: {
+    tag: string;
+    userId: string;
+    problemScore: number;
+    problemRemark: string;
+    problemStatus: string;
+    problemNominated: string;
+  }[];
 }
 
 export interface User {
-  id?: string
-  name?: string | null
-  email?: string | null
-  image?: string | null
-  role: string,
-  realname: string,
-  username: string,
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: string;
+  realname: string;
+  username: string;
 }
-
 
 interface ExaminerInfo {
   examinerNo: number;
@@ -77,6 +84,6 @@ interface ExaminerInfo {
   examinerAssignedScore: number | null;
   examinerRemark: string | null;
   examinerNominated: string | null;
-};
+}
 
 export type { AIPerformance, ProblemVariable, ProblemData, ExaminerInfo };

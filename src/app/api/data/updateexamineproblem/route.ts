@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       return await prisma.problem.findMany({
         where: { tag: tag, status: "PENDING" },
         select: { id: true },
+        orderBy: { id: "asc" }, // 按 id 升序排序
       });
     };
 
