@@ -20,9 +20,6 @@
 # production
 /build
 
-# prisma backup
-/prisma/backup
-
 # misc
 .DS_Store
 *.pem
