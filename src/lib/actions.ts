@@ -58,6 +58,49 @@ export async function fetchProblems(
   return { problems, totalPages };
 }
 
+export async function fetchTranslateProblems(
+  page: number,
+  perPage: number,
+) {
+  const session = await auth();
+  if (!session) throw new Error("Not authorized");
+  if (!session.user.email) throw new Error("Email not found");
+  const currentUser = await prisma.user
+    .findUnique({ where: { email: session.user.email } })
+    .then((user) => user?.id);
+
+  const where = 
+     session.user.role === "admin"
+      ? {}
+      : {
+          OR: [{ translators: { some: { id: currentUser } } }],
+        }
+    ;
+
+  const [problems, count] = await Promise.all([
+    prisma.problem.findMany({
+      where,
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { createdAt: "desc" },
+      select: {
+        content: true,
+        solution: true,
+        id: true,
+        title: true,
+        tag: true,
+        status: true,
+        remark: true,
+        score: true,
+        createdAt: true,
+      },
+    }),
+    prisma.problem.count({ where }),
+  ]);
+  const totalPages = Math.ceil(count / perPage);
+  return { problems, totalPages };
+}
+
 export async function deleteProblem(problemId: number) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");

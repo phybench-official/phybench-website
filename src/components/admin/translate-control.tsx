@@ -27,8 +27,8 @@ interface ProblemCounts {
   advanced: number;
 }
 
-export default function ExamineControlPage() {
-  const [examineProblems, setExamineProblems] = useState<Problem[]>([]);
+export default function TranslateControlPage() {
+  const [translateProblems, setTranslateProblems] = useState<Problem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [problemCounts, setProblemCounts] = useState<ProblemCounts | null>(
@@ -56,22 +56,22 @@ export default function ExamineControlPage() {
 
   useEffect(() => {
     if (selectedUserId) {
-      // 获取指定用户可以审核的题目
-      fetch(`/api/data/getexamineproblems?userId=${selectedUserId}`)
+      // 获取指定用户可以翻译的题目
+      fetch(`/api/data/gettranslateproblems?userId=${selectedUserId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            setExamineProblems(data.problems);
+            setTranslateProblems(data.problems);
           }
         });
     } else {
-      setExamineProblems([]);
+      setTranslateProblems([]);
     }
   }, [selectedUserId]);
 
   useEffect(() => {
     // 获取问题统计
-    fetch("/api/data/getexamineproblemcounts")
+    fetch("/api/data/gettranslateproblemcounts")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -80,7 +80,7 @@ export default function ExamineControlPage() {
       });
   }, []);
 
-  // 提交审核问题
+  // 提交翻译问题
   const handleSubmit = async () => {
     const checkFormat = (input: string, maxId: number) => {
       // 正则表达式：允许空字符串，或数字组成的逗号分隔的字符串
@@ -122,64 +122,64 @@ export default function ExamineControlPage() {
 
     // 格式检查
     if (!checkFormat(mechanicsReview, problemCounts?.mechanics || 0)) {
-      alert("力学审核填写的问题格式不正确或超出有效范围！");
+      alert("力学翻译填写的问题格式不正确或超出有效范围！");
       return;
     }
     if (!checkFormat(electricityReview, problemCounts?.electricity || 0)) {
-      alert("电磁学审核填写的问题格式不正确或超出有效范围！");
+      alert("电磁学翻译填写的问题格式不正确或超出有效范围！");
       return;
     }
     if (
       !checkFormat(thermodynamicsReview, problemCounts?.thermodynamics || 0)
     ) {
-      alert("热学审核填写的问题格式不正确或超出有效范围！");
+      alert("热学翻译填写的问题格式不正确或超出有效范围！");
       return;
     }
     if (!checkFormat(opticsReview, problemCounts?.optics || 0)) {
-      alert("光学审核填写的问题格式不正确或超出有效范围！");
+      alert("光学翻译填写的问题格式不正确或超出有效范围！");
       return;
     }
     if (!checkFormat(modernReview, problemCounts?.modern || 0)) {
-      alert("近代物理审核填写的问题格式不正确或超出有效范围！");
+      alert("近代物理翻译填写的问题格式不正确或超出有效范围！");
       return;
     }
     if (!checkFormat(advancedReview, problemCounts?.advanced || 0)) {
-      alert("四大及以上审核填写的问题格式不正确或超出有效范围！");
+      alert("四大及以上翻译填写的问题格式不正确或超出有效范围！");
       return;
     }
 
     // 处理力学
-    const mechanicsExamineProblemIds = getIdsFromInput(mechanicsReview).sort(
+    const mechanicsTranslateProblemIds = getIdsFromInput(mechanicsReview).sort(
       (a, b) => a - b
     );
     setMechanicsReview("");
 
     // 处理电磁学
-    const electricityExamineProblemIds = getIdsFromInput(
+    const electricityTranslateProblemIds = getIdsFromInput(
       electricityReview
     ).sort((a, b) => a - b);
     setElectricityReview("");
 
     // 处理热学
-    const thermodynamicsExamineProblemIds = getIdsFromInput(
+    const thermodynamicsTranslateProblemIds = getIdsFromInput(
       thermodynamicsReview
     ).sort((a, b) => a - b);
     setThermodynamicsReview("");
 
     // 处理光学
-    const opticsExamineProblemIds = getIdsFromInput(opticsReview).sort(
+    const opticsTranslateProblemIds = getIdsFromInput(opticsReview).sort(
       (a, b) => a - b
     );
     setOpticsReview("");
 
     // 处理近代物理
-    const modernExamineProblemIds = getIdsFromInput(modernReview).sort(
+    const modernTranslateProblemIds = getIdsFromInput(modernReview).sort(
       (a, b) => a - b
     );
     setModernReview("");
 
     // 处理四大及以上
-    const advancedExamineProblemIds = getIdsFromInput(advancedReview).sort(
+    const advancedTranslateProblemIds = getIdsFromInput(advancedReview).sort(
       (a, b) => a - b
     );
     setAdvancedReview("");
@@ -187,19 +187,19 @@ export default function ExamineControlPage() {
     // 准备要提交的数据
     const dataToSubmit = {
       userId: selectedUserId,
-      mechanicsExamineProblemIds,
-      electricityExamineProblemIds,
-      thermodynamicsExamineProblemIds,
-      opticsExamineProblemIds,
-      modernExamineProblemIds,
-      advancedExamineProblemIds,
+      mechanicsTranslateProblemIds,
+      electricityTranslateProblemIds,
+      thermodynamicsTranslateProblemIds,
+      opticsTranslateProblemIds,
+      modernTranslateProblemIds,
+      advancedTranslateProblemIds,
     };
 
     // 在提交之前打印数据
     console.log("要提交的数据:", JSON.stringify(dataToSubmit, null, 2));
 
-    // 提交审核问题到后端
-    const response = await fetch("/api/data/updateexamineproblem", {
+    // 提交翻译问题到后端
+    const response = await fetch("/api/data/updatetranslateproblem", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -209,14 +209,14 @@ export default function ExamineControlPage() {
 
     const result = await response.json();
     if (result.success) {
-      alert("审核问题更新成功！");
-      // 重新获取当前用户的可审题目
+      alert("翻译问题更新成功！");
+      // 重新获取当前用户的可翻译题目
       if (selectedUserId) {
-        fetch(`/api/data/getexamineproblems?userId=${selectedUserId}`)
+        fetch(`/api/data/gettranslateproblems?userId=${selectedUserId}`)
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
-              setExamineProblems(data.problems);
+              setTranslateProblems(data.problems);
             }
           });
       }
@@ -293,15 +293,15 @@ export default function ExamineControlPage() {
             </select>
           </div>
 
-          {/* 右侧：可以审核的题目 */}
+          {/* 右侧：可以翻译的题目 */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">可以审核的题目:</h2>
+            <h2 className="text-xl font-semibold mb-4">可以翻译的题目:</h2>
             <div className="max-h-50 overflow-y-auto">
               {" "}
               {/* 限制高度并启用垂直滚动条 */}
               <ul className="space-y-2">
-                {examineProblems.length > 0 ? (
-                  examineProblems.map((problem) => (
+                {translateProblems.length > 0 ? (
+                  translateProblems.map((problem) => (
                     <li
                       key={problem.id}
                       className="bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
@@ -311,7 +311,7 @@ export default function ExamineControlPage() {
                   ))
                 ) : (
                   <li className="bg-gray-50 p-3 rounded-lg">
-                    没有可以审核的题目！
+                    没有可以翻译的题目！
                   </li>
                 )}
               </ul>
@@ -323,32 +323,32 @@ export default function ExamineControlPage() {
           <div className="grid grid-cols-2 gap-4">
             {[
               {
-                label: "力学审核",
+                label: "力学翻译",
                 value: mechanicsReview,
                 onChange: setMechanicsReview,
               },
               {
-                label: "电磁学审核",
+                label: "电磁学翻译",
                 value: electricityReview,
                 onChange: setElectricityReview,
               },
               {
-                label: "热学审核",
+                label: "热学翻译",
                 value: thermodynamicsReview,
                 onChange: setThermodynamicsReview,
               },
               {
-                label: "光学审核",
+                label: "光学翻译",
                 value: opticsReview,
                 onChange: setOpticsReview,
               },
               {
-                label: "近代物理审核",
+                label: "近代物理翻译",
                 value: modernReview,
                 onChange: setModernReview,
               },
               {
-                label: "四大及以上审核",
+                label: "四大及以上翻译",
                 value: advancedReview,
                 onChange: setAdvancedReview,
               },
@@ -373,7 +373,7 @@ export default function ExamineControlPage() {
           onClick={handleSubmit}
           className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
         >
-          修改审核权限
+          修改翻译权限
         </button>
       </div>
     </div>

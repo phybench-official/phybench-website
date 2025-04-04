@@ -31,6 +31,11 @@ const nextConfig: NextConfig = {
         destination: "/examine/1",
         permanent: true,
       },
+      {
+        source: "/translate",
+        destination: "/translate/1",
+        permanent: true,
+      },
     ];
   },
   output: "standalone",

@@ -108,10 +108,10 @@ model Problem {
   note             String @default("")       // 题目备注
   source           String?                   // 题目来源（选填）
   content          String                    // 题干
-  translatedContent  String  @default("")
+  translatedContent  String  @default("")    // 题目翻译
   variables        ProblemVariable[]         // 题目涉及的变量（包括数值范围）
   solution         String                    // 题目解答过程
-  translatedSolution  String  @default("")
+  translatedSolution  String  @default("")   // 翻译的解答过程
   answer           String                    // 题目答案，一个表达式
   offererEmail     String?                   // 供题人邮箱（选填）
   offererId        String?                   // 供题人Id

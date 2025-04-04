@@ -29,8 +29,10 @@ interface ProblemData {
   note: string;
   source?: string | null;
   content: string;
+  translatedContent?: string;
   variables: ProblemVariable[];
   solution: string;
+  translatedSolution?: string;
   answer: string;
   aiPerformances: AIPerformance[];
   status: keyof typeof statusMap;
@@ -40,6 +42,13 @@ interface ProblemData {
   offererEmail?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  translators: {
+    id: number;
+    name: string;
+    username: string;
+    realname: string;
+    email: string;
+  }
   user: {
     name?: string | null;
     username?: string | null;

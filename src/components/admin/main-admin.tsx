@@ -10,6 +10,11 @@ export default function AdminPage() {
           跳转到审核权限控制页面
         </button>
       </Link>
+      <Link href="/admin/translate-control">
+        <button className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+          跳转到翻译审核权限控制页面
+        </button>
+      </Link>
       <Link href="/admin/download-problem">
         <button className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
           跳转到题目下载页面
