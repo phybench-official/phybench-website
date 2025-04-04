@@ -1,8 +1,6 @@
 "use server";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
-import { hash } from "crypto";
-
 export async function updateUsername(formData: FormData) {
   const session = await auth();
   if (!session) return;
@@ -191,7 +189,7 @@ export async function examProblem(data: {
       await prisma.scoreEvent.create({
         data: {
           tag: "SUBMIT",
-          score: hasOfferer ? data.score / 2 : data.score,
+          score: hasOfferer ? data.score : data.score,
           userId: problem.userId,
           problemId: problem.id,
         },
@@ -205,8 +203,41 @@ export async function examProblem(data: {
         },
       });
     }
-    if (hasOfferer) {
-    }
+    // if (hasOfferer) {
+    //   if (!problem.offererEmail) {
+    //     return { success: false, message: "错误访问offererEmail字段！" };
+    //   }
+    //   const offerer = prisma.user.findUnique({
+    //     where: { email: problem.offererEmail },
+    //     select: {
+    //       id: true,
+    //     },
+    //   });
+    //   if (!offerer) {
+    //     return { success: false, message: "未找到供题者！" };
+    //   }
+    //   const offererIndex = problem.scoreEvents.findIndex(
+    //     (event) => event.tag === "OFFER" && event.userId === offerer.id
+    //   );
+    //   if (offererIndex === -1) {
+    //     await prisma.scoreEvent.create({
+    //       data: {
+    //         tag: "OFFER",
+    //         score: data.score / 2,
+    //         userId: offerer.id,
+    //         problemId: problem.id,
+    //       },
+    //     });
+    //   } else {
+    //     const offerScoreEvent = problem.scoreEvents[offererIndex];
+    //     await prisma.scoreEvent.update({
+    //       where: { id: offerScoreEvent.id },
+    //       data: {
+    //         score: data.score / 2,
+    //       },
+    //     });
+    //   }
+    // }
     return {
       success: true,
       message: "审核成功",
