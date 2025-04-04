@@ -150,6 +150,7 @@ enum ProblemStatus {
   RETURNED      // 已打回
   APPROVED      // 已通过
   REJECTED      // 已拒绝
+  ARCHIVED      // 已归档
 }
 
 
