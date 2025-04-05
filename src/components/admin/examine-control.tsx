@@ -239,7 +239,7 @@ export default function ExamineControlPage() {
             {problemCounts
               ? Object.values(problemCounts).reduce((a, b) => a + b, 0)
               : 0}{" "}
-            道问题，其中
+            道问题待审核，其中
           </h2>
           <ul className="grid grid-cols-2 gap-4">
             <li className="bg-gray-50 p-3 rounded-lg">
