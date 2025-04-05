@@ -219,7 +219,7 @@ export async function examProblem(data: {
     });
 
     const hasOfferer = problem.offererEmail ? true : false;
-    // // 查找编题人的积分事件
+    // 查找编题人的积分事件
     const submitterIndex = problem.scoreEvents.findIndex(
       (event) => event.tag === "SUBMIT" && event.userId === problem.userId,
     );
@@ -241,6 +241,20 @@ export async function examProblem(data: {
         },
       });
     }
+
+    // 刷新编题人的积分
+    const submitterAggregate = await prisma.scoreEvent.aggregate({
+      _sum: {
+        score: true,
+      },
+      where: { userId: problem.userId },
+    });
+    const submitterNewScore = submitterAggregate._sum.score || 0;
+    await prisma.user.update({
+      where: { id: problem.userId },
+      data: { score: submitterNewScore },
+    });
+
     if (hasOfferer) {
       if (!problem.offererEmail) {
         return { success: false, message: "错误访问offererEmail字段！" };
@@ -278,6 +292,18 @@ export async function examProblem(data: {
           },
         });
       }
+      // 刷新供题人的积分
+      const offererAggregate = await prisma.scoreEvent.aggregate({
+        _sum: {
+          score: true,
+        },
+        where: { userId: offerer.id },
+      });
+      const offererNewScore = offererAggregate._sum.score || 0;
+      await prisma.user.update({
+        where: { id: offerer.id },
+        data: { score: offererNewScore },
+      });
     }
     return {
       success: true,
