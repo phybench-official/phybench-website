@@ -7,6 +7,12 @@ const statusMap = {
   REJECTED: { label: "已拒绝", color: "bg-red-500" },
 };
 
+// 翻译状态标签映射
+const translatedStatusMap = {
+  PENDING: { label: "翻译未审", color: "bg-yellow-500" },
+  ARCHIVED: { label: "翻译已审", color: "bg-green-500" },
+};
+
 // 题目类型标签映射
 const tagMap = {
   MECHANICS: { label: "力学", color: "bg-blue-500" },
@@ -18,4 +24,4 @@ const tagMap = {
   OTHER: { label: "其它", color: "bg-gray-600" },
 };
 
-export { tagMap, statusMap };
+export { tagMap, translatedStatusMap, statusMap };

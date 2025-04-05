@@ -26,7 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Eye, ChevronLeft } from "lucide-react";
 import type { ExaminerInfo, ProblemData } from "@/lib/types";
-import { statusMap, tagMap } from "@/lib/constants";
+import { statusMap, translatedStatusMap, tagMap } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -361,6 +361,9 @@ export function ProblemView({
             <Badge className={`${statusMap[problem.status].color}`}>
               {statusMap[problem.status].label}
             </Badge>
+            {isAdmin && (<Badge className={`${translatedStatusMap[problem.translatedStatus].color}`}>
+              {translatedStatusMap[problem.translatedStatus].label}
+            </Badge>)}
           </CardTitle>
           <CardDescription>查看题目详细信息</CardDescription>
         </CardHeader>

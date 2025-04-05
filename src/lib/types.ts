@@ -1,4 +1,4 @@
-import { tagMap, statusMap } from "./constants";
+import { tagMap, translatedStatusMap, statusMap } from "./constants";
 
 interface AIPerformance {
   id: string | number;
@@ -36,6 +36,7 @@ interface ProblemData {
   answer: string;
   aiPerformances: AIPerformance[];
   status: keyof typeof statusMap;
+  translatedStatus: keyof typeof translatedStatusMap;
   score?: number | null;
   remark?: string | null;
   nominated?: string | null;
