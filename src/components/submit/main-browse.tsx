@@ -100,7 +100,7 @@ export default function BrowsePage({
         setProblems(problems);
         setTotalPages(totalPages);
         setLoading(false);
-      }
+      },
     );
   }, [currentPage]);
 
@@ -224,23 +224,23 @@ export default function BrowsePage({
                   problem.status === "APPROVED"
                     ? "text-green-700 dark:text-green-300"
                     : problem.status === "ARCHIVED"
-                    ? "text-green-700 dark:text-green-300"
-                    : problem.status === "REJECTED"
-                    ? "text-red-800 dark:text-red-300"
-                    : problem.status === "RETURNED"
-                    ? "text-yellow-800 dark:text-yellow-300"
-                    : "text-gray-600 dark:text-slate-300"
+                      ? "text-green-700 dark:text-green-300"
+                      : problem.status === "REJECTED"
+                        ? "text-red-800 dark:text-red-300"
+                        : problem.status === "RETURNED"
+                          ? "text-yellow-800 dark:text-yellow-300"
+                          : "text-gray-600 dark:text-slate-300"
                 }
               >
                 {problem.status === "APPROVED"
                   ? "已通过"
                   : problem.status === "ARCHIVED"
-                  ? "已入库"
-                  : problem.status === "REJECTED"
-                  ? "已拒绝"
-                  : problem.status === "RETURNED"
-                  ? "已退回"
-                  : "待审核"}
+                    ? "已入库"
+                    : problem.status === "REJECTED"
+                      ? "已拒绝"
+                      : problem.status === "RETURNED"
+                        ? "已退回"
+                        : "待审核"}
               </div>
               {!isExam && (
                 <Dialog>

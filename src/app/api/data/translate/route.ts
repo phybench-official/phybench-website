@@ -14,12 +14,19 @@ export async function POST(request: Request) {
     jsonData = await request.json();
   } catch (error) {
     console.error("Error parsing JSON:", error);
-    return NextResponse.json({ message: "Invalid JSON input" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Invalid JSON input" },
+      { status: 400 },
+    );
   }
 
-  const { problemId, translatedContent, translatedSolution, translatedStatus } = jsonData;
+  const { problemId, translatedContent, translatedSolution, translatedStatus } =
+    jsonData;
   if (!problemId) {
-    return NextResponse.json({ message: "problemId is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: "problemId is required" },
+      { status: 400 },
+    );
   }
 
   // Build update object with the provided fields.
@@ -28,25 +35,25 @@ export async function POST(request: Request) {
     if (!["ARCHIVED", "PENDING"].includes(translatedStatus)) {
       return NextResponse.json(
         { message: "Invalid translatedStatus value" },
-        { status: 400 }
+        { status: 400 },
       );
     }
   }
-  
-  const updateData: { 
-    translatedContent?: string; 
-    translatedSolution?: string; 
-    translatedStatus?: any; 
+
+  const updateData: {
+    translatedContent?: string;
+    translatedSolution?: string;
+    translatedStatus?: any;
   } = {};
-  
+
   if (translatedContent !== undefined) {
     updateData.translatedContent = translatedContent;
   }
-  
+
   if (translatedSolution !== undefined) {
     updateData.translatedSolution = translatedSolution;
   }
-  
+
   if (translatedStatus !== undefined) {
     updateData.translatedStatus = translatedStatus;
   }
@@ -54,7 +61,7 @@ export async function POST(request: Request) {
   if (Object.keys(updateData).length === 0) {
     return NextResponse.json(
       { message: "No translation fields provided" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -71,7 +78,7 @@ export async function POST(request: Request) {
     console.error("Error updating translation:", error);
     return NextResponse.json(
       { message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

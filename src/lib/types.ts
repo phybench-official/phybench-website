@@ -59,12 +59,17 @@ interface ProblemData {
     email: string;
   } | null;
   scoreEvents: {
+    id?: number;
     tag: string;
     userId: string;
-    problemScore: number;
-    problemRemark: string;
-    problemStatus: string;
-    problemNominated: string;
+    score?: number;
+    problemId?: number | null;
+    problemScore?: number | null;
+    problemRemark?: string | null;
+    problemStatus?: string | null;
+    problemNominated?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
   }[];
 }
 

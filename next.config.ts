@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      'micromark-extension-math': 'micromark-extension-llm-math'
-    }
+      "micromark-extension-math": "micromark-extension-llm-math",
+    };
     return config;
   },
   // redirect /submit to /submit/1 permanently

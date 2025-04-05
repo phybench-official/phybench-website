@@ -5,7 +5,11 @@ import { NotPermitted } from "@/components/ui/not-permitted";
 import { notFound } from "next/navigation";
 import { prisma } from "@/prisma";
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const session = await auth();
   const { id } = await params;
   if (!session) return <NotAuthorized />;
@@ -25,13 +29,17 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     },
   });
   if (!problem) return notFound();
-  if (session.user.role !== "admin" && problem.user.email !== session.user.email && !problem.examiners.some(examiner => examiner.email === session.user.email)) {
+  if (
+    session.user.role !== "admin" &&
+    problem.user.email !== session.user.email &&
+    !problem.examiners.some((examiner) => examiner.email === session.user.email)
+  ) {
     return <NotPermitted />;
   }
 
   return (
     <div className="w-screen h-screen pt-24">
-      <SubmitPage user={session?.user} problemId={parseInt(id)}/>
+      <SubmitPage user={session?.user} problemId={parseInt(id)} />
     </div>
   );
 }

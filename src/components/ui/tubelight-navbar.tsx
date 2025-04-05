@@ -1,47 +1,48 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 interface NavItem {
-  name: string
-  url: string
+  name: string;
+  url: string;
 }
 
 interface NavBarProps {
-  items: NavItem[]
-  className?: string
+  items: NavItem[];
+  className?: string;
 }
 
 export function NavBar({ items, className }: NavBarProps) {
-  const pathname = usePathname()
-  const initialActive = items.find(item => pathname.startsWith(item.url))?.name || items[0].name
-  const [activeTab, setActiveTab] = useState(initialActive)
-  const [isMobile, setIsMobile] = useState(false)
+  const pathname = usePathname();
+  const initialActive =
+    items.find((item) => pathname.startsWith(item.url))?.name || items[0].name;
+  const [activeTab, setActiveTab] = useState(initialActive);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       if (!isMobile && window.innerWidth < 768) {
-        setIsMobile(true)
+        setIsMobile(true);
       } else if (isMobile && window.innerWidth >= 768) {
-        setIsMobile(false)
+        setIsMobile(false);
       }
-    }
+    };
 
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [isMobile])
-  
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobile]);
+
   useEffect(() => {
     // 找出所有匹配的项目
-    const matchingItems = items.filter(item => pathname.startsWith(item.url));
+    const matchingItems = items.filter((item) => pathname.startsWith(item.url));
     if (matchingItems.length > 0) {
-      const bestMatch = matchingItems.reduce((prev, current) => 
-        prev.url.length > current.url.length ? prev : current
+      const bestMatch = matchingItems.reduce((prev, current) =>
+        prev.url.length > current.url.length ? prev : current,
       );
       if (bestMatch.name !== activeTab) {
         setActiveTab(bestMatch.name);
@@ -58,7 +59,7 @@ export function NavBar({ items, className }: NavBarProps) {
     >
       <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
         {items.map((item) => {
-          const isActive = activeTab === item.name
+          const isActive = activeTab === item.name;
 
           return (
             <Link
@@ -94,9 +95,9 @@ export function NavBar({ items, className }: NavBarProps) {
                 </motion.div>
               )}
             </Link>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

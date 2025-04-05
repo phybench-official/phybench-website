@@ -7,14 +7,26 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write .",
     "pm2start": "PORT=3005 pm2 start npm --name 'phy-bench' -- start",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "prepare": "husky"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} src/lib/seed-dev.ts"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.{html,css,js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.1.13",
@@ -84,10 +96,14 @@
     "@vitest/ui": "^3.0.9",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
+    "eslint-config-prettier": "^10.1.1",
     "happy-dom": "^17.4.4",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^26.0.0",
+    "lint-staged": "^15.5.0",
     "node-fetch": "^2.7.0",
+    "prettier": "3.5.3",
     "prisma": "^6.5.0",
     "tailwindcss": "^4.0.12",
     "ts-node": "^10.9.2",

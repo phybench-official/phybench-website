@@ -36,7 +36,7 @@ export async function POST() {
     console.error("Error calculating scores:", error);
     return NextResponse.json(
       { message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

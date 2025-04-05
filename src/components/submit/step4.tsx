@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -6,8 +6,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import RenderMarkdown from "@/components/render-markdown"
+} from "@/components/ui/card";
+import RenderMarkdown from "@/components/render-markdown";
 
 interface Step4Props {
   title: string;
@@ -18,12 +18,21 @@ interface Step4Props {
   user: any;
 }
 
-export default function Step4({ title, selectedType, source, aiResponses, problem, user }: Step4Props) {
+export default function Step4({
+  title,
+  selectedType,
+  source,
+  aiResponses,
+  problem,
+  user,
+}: Step4Props) {
   return (
     <Card className="p-4">
       <CardHeader>
         <CardTitle>确认信息</CardTitle>
-        <CardDescription>请仔细确认以下信息，缺失内容以红色提示</CardDescription>
+        <CardDescription>
+          请仔细确认以下信息，缺失内容以红色提示
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
@@ -35,13 +44,19 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
             </div>
             <div>
               <strong>题目类别: </strong>
-              {selectedType ? <Badge>{selectedType}</Badge> : <Badge variant="destructive">缺失</Badge>}
+              {selectedType ? (
+                <Badge>{selectedType}</Badge>
+              ) : (
+                <Badge variant="destructive">缺失</Badge>
+              )}
             </div>
             <div>
               <strong>编辑人: </strong>
-              {user?.realname || user?.name
-                ? (user.realname || user.name)
-                : <span className="text-red-500">缺失</span>}
+              {user?.realname || user?.name ? (
+                user.realname || user.name
+              ) : (
+                <span className="text-red-500">缺失</span>
+              )}
             </div>
             <div>
               <strong>题目来源: </strong>
@@ -52,11 +67,18 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
               {aiResponses && aiResponses.length > 0 ? (
                 <div className="flex flex-col space-y-2">
                   {aiResponses.map((res, index) => (
-                    <div key={index} className="flex flex-row justify-between space-x-4 p-2 w-full border">
-                      <span className="text-sm font-medium opacity-80">{res.name}</span>
-                      {
-                        res.correctness == "correct" ? <Badge>正确</Badge> : <Badge variant="destructive">错误</Badge>
-                      }
+                    <div
+                      key={index}
+                      className="flex flex-row justify-between space-x-4 p-2 w-full border"
+                    >
+                      <span className="text-sm font-medium opacity-80">
+                        {res.name}
+                      </span>
+                      {res.correctness == "correct" ? (
+                        <Badge>正确</Badge>
+                      ) : (
+                        <Badge variant="destructive">错误</Badge>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -73,9 +95,7 @@ export default function Step4({ title, selectedType, source, aiResponses, proble
           </div>
         </div>
       </CardContent>
-      <CardFooter>
-        {/* 底部可根据需要添加按钮等操作 */}
-      </CardFooter>
+      <CardFooter>{/* 底部可根据需要添加按钮等操作 */}</CardFooter>
     </Card>
   );
 }

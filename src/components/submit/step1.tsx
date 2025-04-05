@@ -18,7 +18,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 import { MarkdownEditor } from "./markdown-editor";
 import { UserSelector } from "./user-selector";
 import { CircleHelp } from "lucide-react";
@@ -83,7 +83,9 @@ export default function Step1({
                       <CircleHelp className="w-4 h-4 ml-1" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>请输入描述题目的来源，如：爱培优/2022/暑假/复赛营/1/题7</p>
+                      <p>
+                        请输入描述题目的来源，如：爱培优/2022/暑假/复赛营/1/题7
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -124,7 +126,9 @@ export default function Step1({
                       <CircleHelp className="w-4 h-4 ml-1" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>请输入描述题目的若干tag，如：力学/分析力学/几何/感知/推理/有图</p>
+                      <p>
+                        请输入描述题目的若干tag，如：力学/分析力学/几何/感知/推理/有图
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -146,9 +150,7 @@ export default function Step1({
               />
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <label className="block text-sm font-medium mt-2">
-                供题人
-              </label>
+              <label className="block text-sm font-medium mt-2">供题人</label>
               <UserSelector
                 offererEmail={offererEmail}
                 setOffererEmail={setOffererEmail}

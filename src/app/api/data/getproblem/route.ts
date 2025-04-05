@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     if (!userEmail) {
       return NextResponse.json(
         { message: "用户邮箱缺失，无法确认用户身份" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       {
         message: "服务器错误，获取失败",
       },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();

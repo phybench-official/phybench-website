@@ -64,7 +64,7 @@ export async function POST() {
       }
       const hasOfferer = problem.offererEmail ? true : false;
       const submitterIndex = problem.scoreEvents.findIndex(
-        (event) => event.tag === "SUBMIT" && event.userId === problem.userId
+        (event) => event.tag === "SUBMIT" && event.userId === problem.userId,
       );
       if (submitterIndex === -1) {
         await prisma.scoreEvent.create({
@@ -75,8 +75,8 @@ export async function POST() {
                 ? event.problemScore / 2
                 : 0
               : event.problemScore
-              ? event.problemScore
-              : 0,
+                ? event.problemScore
+                : 0,
             userId: problem.userId,
             problemId: problem.id,
           },
@@ -91,8 +91,8 @@ export async function POST() {
                 ? event.problemScore / 2
                 : 0
               : event.problemScore
-              ? event.problemScore
-              : 0,
+                ? event.problemScore
+                : 0,
           },
         });
       }
@@ -112,7 +112,7 @@ export async function POST() {
           return NextResponse.json({ message: "error" }, { status: 404 });
         }
         const offererIndex = problem.scoreEvents.findIndex(
-          (event) => event.tag === "OFFER" && event.userId === offerer.id
+          (event) => event.tag === "OFFER" && event.userId === offerer.id,
         );
 
         if (offererIndex === -1) {
@@ -145,7 +145,7 @@ export async function POST() {
     console.error("Error syncing examination opinion:", error);
     return NextResponse.json(
       { message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

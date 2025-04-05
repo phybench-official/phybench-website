@@ -10,13 +10,13 @@ export async function GET(req: NextRequest) {
   }
   try {
     const searchParams = req.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = parseInt(searchParams.get('pageSize') || '20');
-    const type = searchParams.get('type') || 'score'; // 'score' 或 'problems'
-    
+    const page = parseInt(searchParams.get("page") || "1");
+    const pageSize = parseInt(searchParams.get("pageSize") || "20");
+    const type = searchParams.get("type") || "score"; // 'score' 或 'problems'
+
     const skip = (page - 1) * pageSize;
-    
-    if (type === 'score') {
+
+    if (type === "score") {
       // 按积分排名
       const users = await prisma.user.findMany({
         select: {
@@ -29,24 +29,24 @@ export async function GET(req: NextRequest) {
         },
         orderBy: [
           {
-            score: 'desc',
+            score: "desc",
           },
           {
-            createdAt: 'asc',
-          }
+            createdAt: "asc",
+          },
         ],
         skip,
         take: pageSize,
       });
-      
+
       // 获取总记录数
       const totalCount = await prisma.user.count();
-      
+
       return NextResponse.json({
         success: true,
         data: users,
         totalCount,
-        hasMore: skip + users.length < totalCount
+        hasMore: skip + users.length < totalCount,
       });
     } else {
       // 按题目数排名
@@ -67,18 +67,18 @@ export async function GET(req: NextRequest) {
         orderBy: [
           {
             problems: {
-              _count: 'desc',
+              _count: "desc",
             },
           },
           {
-            createdAt: 'asc',
-          }
+            createdAt: "asc",
+          },
         ],
         skip,
         take: pageSize,
       });
-      
-      const formattedUsers = usersWithProblemCount.map(user => ({
+
+      const formattedUsers = usersWithProblemCount.map((user) => ({
         id: user.id,
         name: user.name,
         username: user.username,
@@ -87,21 +87,21 @@ export async function GET(req: NextRequest) {
         score: user.score,
         problemCount: user._count.problems,
       }));
-      
+
       // 获取总记录数
       const totalCount = await prisma.user.count();
-      
+
       return NextResponse.json({
         success: true,
         data: formattedUsers,
         totalCount,
-        hasMore: skip + formattedUsers.length < totalCount
+        hasMore: skip + formattedUsers.length < totalCount,
       });
     }
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "服务器错误，获取失败", error: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

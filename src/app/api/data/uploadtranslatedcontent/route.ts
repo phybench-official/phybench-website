@@ -14,13 +14,16 @@ export async function POST(request: Request) {
     jsonData = await request.json();
   } catch (error) {
     console.error("解析json时出错:", error);
-    return NextResponse.json({ message: "Invalid JSON input" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Invalid JSON input" },
+      { status: 400 },
+    );
   }
 
   if (!Array.isArray(jsonData)) {
     return NextResponse.json(
       { message: "Invalid data format. Expected an array." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -45,7 +48,7 @@ export async function POST(request: Request) {
           console.error(`Error updating problem id ${id}:`, error);
           return { id, success: false, error: error.message };
         }
-      })
+      }),
     );
 
     return NextResponse.json({ message: "Upload processed", results });
@@ -53,7 +56,7 @@ export async function POST(request: Request) {
     console.error("Error processing upload:", error);
     return NextResponse.json(
       { message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

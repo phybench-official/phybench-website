@@ -65,7 +65,7 @@ export default function UploadTranslatedContentPage() {
   return (
     <div className="min-h-screen p-4">
       <Link href="/admin">
-      <button className="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+        <button className="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
           返回AdminPage主页
         </button>
       </Link>

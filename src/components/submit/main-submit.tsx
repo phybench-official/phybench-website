@@ -36,7 +36,13 @@ const steps = [
   },
 ];
 
-export default function Component({ user, problemId }: { user: any, problemId?: number }) {
+export default function Component({
+  user,
+  problemId,
+}: {
+  user: any;
+  problemId?: number;
+}) {
   // step状态
   const [page, setPage] = useState({ step: 1, direction: 1 });
   const router = useRouter();
@@ -67,7 +73,7 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
         setIsLoading(true);
         try {
           const response = await fetch(`/api/data/problem/${problemId}`);
-          
+
           if (!response.ok) {
             // 如果403
             if (response.status === 403) {
@@ -78,44 +84,57 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
             toast.error("获取题目信息失败");
             throw new Error("获取题目信息失败");
           }
-          
+
           const data = await response.json();
-          
+
           // 填充表单数据
           setTitle(data.title || "");
           setProblem(data.content || "");
           setSource(data.source || "");
-          
+
           // 将ProblemTag枚举值转换为中文显示
           let typeText = "";
           switch (data.tag) {
-            case "MECHANICS": typeText = "力学"; break;
-            case "ELECTRICITY": typeText = "电磁学"; break;
-            case "THERMODYNAMICS": typeText = "热学"; break;
-            case "OPTICS": typeText = "光学"; break;
-            case "MODERN": typeText = "近代物理"; break;
-            case "ADVANCED": typeText = "四大力学及以上知识"; break;
-            default: typeText = "其它";
+            case "MECHANICS":
+              typeText = "力学";
+              break;
+            case "ELECTRICITY":
+              typeText = "电磁学";
+              break;
+            case "THERMODYNAMICS":
+              typeText = "热学";
+              break;
+            case "OPTICS":
+              typeText = "光学";
+              break;
+            case "MODERN":
+              typeText = "近代物理";
+              break;
+            case "ADVANCED":
+              typeText = "四大力学及以上知识";
+              break;
+            default:
+              typeText = "其它";
           }
           setSelectedType(typeText);
-          
+
           setDescription(data.description || "");
           setNote(data.note || "");
           setOffererEmail(data.offererEmail || "");
           setSolution(data.solution || "");
           setAnswer(data.answer || "");
-          
+
           // 处理变量
           if (data.variables && data.variables.length > 0) {
             const formattedVariables = data.variables.map((v: any) => ({
               id: v.id,
               name: v.name,
               min: v.lowerBound.toString(),
-              max: v.upperBound.toString()
+              max: v.upperBound.toString(),
             }));
             setVariables(formattedVariables);
           }
-          
+
           // 处理AI响应
           if (data.aiPerformances && data.aiPerformances.length > 0) {
             const formattedResponses = data.aiPerformances.map((perf: any) => ({
@@ -124,11 +143,11 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
               process: perf.aiSolution,
               answer: perf.aiAnswer,
               correctness: perf.isCorrect ? "correct" : "incorrect",
-              comment: perf.comment || ""
+              comment: perf.comment || "",
             }));
             setAiResponses(formattedResponses);
           }
-          
+
           toast.success("已加载题目信息");
         } catch (error: any) {
           toast.error(error.message || "加载题目信息失败");
@@ -154,7 +173,7 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
         }
       }
     };
-    
+
     fetchProblemData();
   }, [problemId]);
 
@@ -212,7 +231,7 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
             answer,
             variables,
             aiResponses,
-          })
+          }),
         );
         toast.success("题目信息已保存至浏览器本地");
       }
@@ -225,8 +244,8 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
         setIsSubmitting(true);
 
         const method = problemId ? "PATCH" : "POST";
-        const url = problemId 
-          ? `/api/data/problem/${problemId}` 
+        const url = problemId
+          ? `/api/data/problem/${problemId}`
           : "/api/data/problem";
 
         const response = await fetch(url, {
@@ -415,7 +434,13 @@ export default function Component({ user, problemId }: { user: any, problemId?: 
                 className="cursor-pointer"
                 disabled={isSubmitting}
               >
-                {page.step === 4 ? (isSubmitting ? "提交中..." : (problemId ? "更新" : "提交")) : "下一步"}
+                {page.step === 4
+                  ? isSubmitting
+                    ? "提交中..."
+                    : problemId
+                      ? "更新"
+                      : "提交"
+                  : "下一步"}
               </Button>
             </motion.div>
           </AnimatePresence>

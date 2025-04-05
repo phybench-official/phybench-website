@@ -14,12 +14,18 @@ export async function POST(request: Request) {
     jsonData = await request.json();
   } catch (error) {
     console.error("Error parsing JSON:", error);
-    return NextResponse.json({ message: "Invalid JSON input" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Invalid JSON input" },
+      { status: 400 },
+    );
   }
 
   const { userId } = jsonData;
   if (!userId) {
-    return NextResponse.json({ message: "User ID is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: "User ID is required" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -43,7 +49,7 @@ export async function POST(request: Request) {
     console.error("Error calculating user score:", error);
     return NextResponse.json(
       { message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

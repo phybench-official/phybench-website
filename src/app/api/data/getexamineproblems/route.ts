@@ -36,7 +36,7 @@ export async function GET(req: Request) {
       {
         message: "服务器错误，获取失败",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

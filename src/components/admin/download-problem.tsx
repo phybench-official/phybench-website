@@ -15,7 +15,9 @@ export default function DownloadProblemPage() {
         throw new Error("Failed to fetch problems");
       }
       const data = await res.json();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

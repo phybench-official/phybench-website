@@ -50,12 +50,10 @@ export default async function Page({
   if (!isTranslator) {
     return <NotPermitted />;
   }
-  
+
   return (
     <div className="w-screen py-20 flex flex-col items-center">
-      <TranslateView
-        problem={problem}
-      />
+      <TranslateView problem={problem} />
     </div>
   );
 }

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     if (!userEmail) {
       return NextResponse.json(
         { message: "用户邮箱缺失，无法确认用户身份" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
               upperBound: parseFloat(variable.max) || 0,
             },
           });
-        })
+        }),
       );
     }
 
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
               tag: "SUBMITTED",
             },
           });
-        })
+        }),
       );
     }
 
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
       {
         message: "服务器错误，提交失败",
       },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();

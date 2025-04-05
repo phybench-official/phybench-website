@@ -56,17 +56,21 @@ export function Scoreboard() {
     try {
       if (page === 1) setScoreLoading(true);
       else setScoreLoadingMore(true);
-      
-      const response = await fetch(`/api/data/getscoreboard?type=score&page=${page}&pageSize=20`);
-      
+
+      const response = await fetch(
+        `/api/data/getscoreboard?type=score&page=${page}&pageSize=20`,
+      );
+
       if (!response.ok) {
-        throw new Error('服务器响应错误');
+        throw new Error("服务器响应错误");
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        setScoreUsers(prev => page === 1 ? data.data : [...prev, ...data.data]);
+        setScoreUsers((prev) =>
+          page === 1 ? data.data : [...prev, ...data.data],
+        );
         setScoreHasMore(data.data.length === 20);
         setScoreTotalCount(data.totalCount);
       } else {
@@ -86,17 +90,21 @@ export function Scoreboard() {
     try {
       if (page === 1) setProblemLoading(true);
       else setProblemLoadingMore(true);
-      
-      const response = await fetch(`/api/data/getscoreboard?type=problems&page=${page}&pageSize=20`);
-      
+
+      const response = await fetch(
+        `/api/data/getscoreboard?type=problems&page=${page}&pageSize=20`,
+      );
+
       if (!response.ok) {
-        throw new Error('服务器响应错误');
+        throw new Error("服务器响应错误");
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        setProblemUsers(prev => page === 1 ? data.data : [...prev, ...data.data]);
+        setProblemUsers((prev) =>
+          page === 1 ? data.data : [...prev, ...data.data],
+        );
         setProblemHasMore(data.data.length === 20);
         setProblemTotalCount(data.totalCount);
       } else {
@@ -123,20 +131,24 @@ export function Scoreboard() {
     scoreObserverRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && scoreHasMore && !scoreLoadingMore) {
-          setScorePage(prev => prev + 1);
+          setScorePage((prev) => prev + 1);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     // 题目数排行榜的observer
     problemObserverRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && problemHasMore && !problemLoadingMore) {
-          setProblemPage(prev => prev + 1);
+        if (
+          entries[0].isIntersecting &&
+          problemHasMore &&
+          !problemLoadingMore
+        ) {
+          setProblemPage((prev) => prev + 1);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     return () => {
@@ -150,7 +162,7 @@ export function Scoreboard() {
     if (scoreLastElementRef.current && scoreObserverRef.current) {
       scoreObserverRef.current.observe(scoreLastElementRef.current);
     }
-    
+
     if (problemLastElementRef.current && problemObserverRef.current) {
       problemObserverRef.current.observe(problemLastElementRef.current);
     }
@@ -185,7 +197,6 @@ export function Scoreboard() {
 
   return (
     <div className="container mt-8 sm:mt-12 mx-auto h-full px-4 py-8">
-      
       <div className="grid grid-cols-1 md:grid-cols-2 px-2 gap-6 my-auto">
         {/* 积分排行榜卡片 */}
         <Card className="w-full">
@@ -200,7 +211,9 @@ export function Scoreboard() {
                 积分
               </Badge>
             </div>
-            <CardDescription>根据用户积分高低进行排名 共{scoreTotalCount}</CardDescription>
+            <CardDescription>
+              根据用户积分高低进行排名 共{scoreTotalCount}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[500px] pr-4">
@@ -223,23 +236,31 @@ export function Scoreboard() {
                     <div
                       key={user.id + index}
                       className={`flex items-center py-3 px-4 border-b last:border-b-0 ${
-                        index < 3 ? 'bg-amber-50/50 dark:bg-amber-800/20' : ''
+                        index < 3 ? "bg-amber-50/50 dark:bg-amber-800/20" : ""
                       }`}
                     >
                       {/* 排名 */}
-                      <div className={`flex-shrink-0 w-8 text-center font-semibold ${
-                        index === 0 ? 'text-yellow-300' :
-                        index === 1 ? 'text-cyan-400' :
-                        index === 2 ? 'text-red-700' : ''
-                      }`}>
+                      <div
+                        className={`flex-shrink-0 w-8 text-center font-semibold ${
+                          index === 0
+                            ? "text-yellow-300"
+                            : index === 1
+                              ? "text-cyan-400"
+                              : index === 2
+                                ? "text-red-700"
+                                : ""
+                        }`}
+                      >
                         {index + 1}
                       </div>
-                      
+
                       {/* 用户名 */}
                       <div className="flex-1 min-w-0 ml-2">
-                        <p className="font-medium truncate">{getUserDisplayName(user)}</p>
+                        <p className="font-medium truncate">
+                          {getUserDisplayName(user)}
+                        </p>
                       </div>
-                      
+
                       {/* 积分 */}
                       <div className="flex items-center space-x-1 text-yellow-600 font-semibold">
                         <Star className="h-4 w-4" />
@@ -247,17 +268,16 @@ export function Scoreboard() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {/* 观察点元素，用于无限滚动 */}
                   {scoreHasMore && (
-                    <div
-                      ref={scoreLastElementRef}
-                      className="py-4 text-center"
-                    >
+                    <div ref={scoreLastElementRef} className="py-4 text-center">
                       {scoreLoadingMore ? (
                         <Skeleton className="h-8 w-24 mx-auto" />
                       ) : (
-                        <span className="text-sm text-gray-500">滚动加载更多...</span>
+                        <span className="text-sm text-gray-500">
+                          滚动加载更多...
+                        </span>
                       )}
                     </div>
                   )}
@@ -280,7 +300,9 @@ export function Scoreboard() {
                 题目数
               </Badge>
             </div>
-            <CardDescription>根据用户提交题目数量进行排名 共{problemTotalCount}</CardDescription>
+            <CardDescription>
+              根据用户提交题目数量进行排名 共{problemTotalCount}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[500px] pr-4">
@@ -303,23 +325,31 @@ export function Scoreboard() {
                     <div
                       key={user.id + index}
                       className={`flex items-center px-4 py-3 border-b last:border-b-0 ${
-                        index < 3 ? 'bg-amber-50/50 dark:bg-amber-800/20' : ''
+                        index < 3 ? "bg-amber-50/50 dark:bg-amber-800/20" : ""
                       }`}
                     >
                       {/* 排名 */}
-                      <div className={`flex-shrink-0 w-8 text-center font-semibold ${
-                        index === 0 ? 'text-yellow-300' :
-                        index === 1 ? 'text-cyan-400' :
-                        index === 2 ? 'text-red-700' : ''
-                      }`}>
+                      <div
+                        className={`flex-shrink-0 w-8 text-center font-semibold ${
+                          index === 0
+                            ? "text-yellow-300"
+                            : index === 1
+                              ? "text-cyan-400"
+                              : index === 2
+                                ? "text-red-700"
+                                : ""
+                        }`}
+                      >
                         {index + 1}
                       </div>
-                      
+
                       {/* 用户名 */}
                       <div className="flex-1 min-w-0 ml-2">
-                        <p className="font-medium truncate">{getUserDisplayName(user)}</p>
+                        <p className="font-medium truncate">
+                          {getUserDisplayName(user)}
+                        </p>
                       </div>
-                      
+
                       {/* 题目数 */}
                       <div className="flex items-center space-x-1 text-blue-500 font-semibold">
                         <BookOpen className="h-4 w-4" />
@@ -327,7 +357,7 @@ export function Scoreboard() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {/* 观察点元素，用于无限滚动 */}
                   {problemHasMore && (
                     <div
@@ -337,7 +367,9 @@ export function Scoreboard() {
                       {problemLoadingMore ? (
                         <Skeleton className="h-8 w-24 mx-auto" />
                       ) : (
-                        <span className="text-sm text-gray-500">滚动加载更多...</span>
+                        <span className="text-sm text-gray-500">
+                          滚动加载更多...
+                        </span>
                       )}
                     </div>
                   )}
@@ -347,7 +379,7 @@ export function Scoreboard() {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* 返回顶部按钮 */}
       <Button
         variant="outline"
@@ -360,4 +392,3 @@ export function Scoreboard() {
     </div>
   );
 }
-

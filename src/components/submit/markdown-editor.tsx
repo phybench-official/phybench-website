@@ -23,17 +23,18 @@ export function MarkdownEditor({
 
   return (
     <>
-      <Tabs defaultValue="edit" onValueChange={(value) => {
-        if (value === 'preview') {
-          setVisibleValue(text);
-        }
-      }} className="w-full flex flex-col flex-1" {...props}>
-        <div className="flex flex-row space-x-4">
-          {
-            title && (
-              <h3 className="text-md font-medium mt-1.5">{title}</h3>
-            )
+      <Tabs
+        defaultValue="edit"
+        onValueChange={(value) => {
+          if (value === "preview") {
+            setVisibleValue(text);
           }
+        }}
+        className="w-full flex flex-col flex-1"
+        {...props}
+      >
+        <div className="flex flex-row space-x-4">
+          {title && <h3 className="text-md font-medium mt-1.5">{title}</h3>}
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="edit">编辑</TabsTrigger>
             <TabsTrigger value="preview">预览</TabsTrigger>
@@ -44,15 +45,23 @@ export function MarkdownEditor({
             placeholder={placeholder}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className={cn("w-full resize-none overflow-y-auto h-[35vh]",classNames)}
+            className={cn(
+              "w-full resize-none overflow-y-auto h-[35vh]",
+              classNames,
+            )}
           />
         </TabsContent>
         <TabsContent value="preview" className="flex-1 overflow-hidden">
-          <div className={cn("border p-2 h-[35vh] overflow-y-auto text-start",classNames)}>
+          <div
+            className={cn(
+              "border p-2 h-[35vh] overflow-y-auto text-start",
+              classNames,
+            )}
+          >
             <RenderMarkdown content={visibleValue} />
           </div>
         </TabsContent>
       </Tabs>
     </>
-  )
+  );
 }

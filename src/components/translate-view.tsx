@@ -103,12 +103,12 @@ function SolutionContent({ solution }: SolutionContentProps) {
 export function TranslateView({ problem }: { problem: Problem }) {
   // 新增状态管理
   const [translatedStatus, setTranslatedStatus] = useState(
-    problem.translatedStatus || "PENDING"
+    problem.translatedStatus || "PENDING",
   );
 
   // 新增保存状态的函数
   const saveStatus = async (
-    newStatus: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED"
+    newStatus: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED",
   ) => {
     try {
       const res = await fetch("/api/data/translate", {
@@ -132,10 +132,10 @@ export function TranslateView({ problem }: { problem: Problem }) {
 
   // Local state for translations.
   const [englishTranslation, setEnglishTranslation] = useState(
-    problem.translatedContent // 原字段名修正
+    problem.translatedContent, // 原字段名修正
   );
   const [translatedSolution, setTranslatedSolution] = useState(
-    problem.translatedSolution
+    problem.translatedSolution,
   );
 
   // Function to save the translated content (题目翻译).

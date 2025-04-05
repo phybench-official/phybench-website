@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link"; // 新增导入
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 export function UnderConstruction() {
   return (
@@ -28,10 +28,12 @@ export function UnderConstruction() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <Link href="/">
-            <Button className="cursor-pointer" type="submit">返回主页</Button>
+            <Button className="cursor-pointer" type="submit">
+              返回主页
+            </Button>
           </Link>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

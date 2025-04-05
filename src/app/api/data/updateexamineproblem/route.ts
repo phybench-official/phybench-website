@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     // );
 
     const thermodynamicsProblems = await getProblemsByTag(
-      ProblemTag.THERMODYNAMICS
+      ProblemTag.THERMODYNAMICS,
     );
     // console.log(
     //   "Thermodynamics Problems 的长度:",
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
         } else {
           return NextResponse.json(
             { message: "服务器错误，更新失败，索引超出范围" },
-            { status: 500 }
+            { status: 500 },
           );
         }
       });
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     // 更新连接问题
     console.log(
       "updatedExamineProblems 的长度:",
-      updatedExamineProblems.length
+      updatedExamineProblems.length,
     );
     for (const problem of updatedExamineProblems) {
       await prisma.user.update({
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
     console.error("更新审核问题时出错:", error);
     return NextResponse.json(
       { message: "服务器错误，更新失败" },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();

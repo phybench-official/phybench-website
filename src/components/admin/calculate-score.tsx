@@ -49,7 +49,7 @@ export default function CalculateScorePage() {
         throw new Error(data.message || "Calculation failed");
       }
       setMessage(
-        `User score updated successfully! New score: ${data.updatedUser.score}`
+        `User score updated successfully! New score: ${data.updatedUser.score}`,
       );
     } catch (error: any) {
       console.error(error);
@@ -67,7 +67,7 @@ export default function CalculateScorePage() {
         </button>
       </Link>
       <h1 className="text-xl mb-4">Calculate User Scores</h1>
-      
+
       {/* Section for calculating all users' scores */}
       <div className="mb-6">
         <h2 className="text-lg mb-2">Calculate ALL Users Scores</h2>
@@ -79,7 +79,7 @@ export default function CalculateScorePage() {
           {loadingAll ? "Calculating All Scores..." : "Calculate All Scores"}
         </button>
       </div>
-      
+
       {/* Section for calculating a single user's score */}
       <div className="mb-6">
         <h2 className="text-lg mb-2">Calculate Score for a Single User</h2>
@@ -98,7 +98,7 @@ export default function CalculateScorePage() {
           {loadingSingle ? "Calculating..." : "Calculate Score"}
         </button>
       </div>
-      
+
       {message && <p className="mt-4">{message}</p>}
     </div>
   );

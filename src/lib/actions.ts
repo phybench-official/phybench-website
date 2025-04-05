@@ -16,7 +16,7 @@ export async function updateUsername(formData: FormData) {
 export async function fetchProblems(
   page: number,
   perPage: number,
-  isExam = false
+  isExam = false,
 ) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");
@@ -122,7 +122,7 @@ export const fetchAllUsers = async () => {
       users.map((user) => ({
         label: user.name + " (" + user.realname + ")",
         value: user.email,
-      }))
+      })),
     );
 };
 
@@ -174,7 +174,7 @@ export async function examProblem(data: {
 
     // 查找此人审此题的积分事件
     const index = problem.scoreEvents.findIndex(
-      (event) => event.tag === "EXAMINE" && event.userId === user.id
+      (event) => event.tag === "EXAMINE" && event.userId === user.id,
     );
     if (index === -1) {
       return { success: false, message: "未找到此人审此题的积分事件" };
@@ -187,7 +187,7 @@ export async function examProblem(data: {
       isExaminer = true;
     } else {
       isExaminer = problem.examiners.some(
-        (examiner) => examiner.id === user.id
+        (examiner) => examiner.id === user.id,
       );
     }
 
@@ -221,7 +221,7 @@ export async function examProblem(data: {
     const hasOfferer = problem.offererEmail ? true : false;
     // // 查找编题人的积分事件
     const submitterIndex = problem.scoreEvents.findIndex(
-      (event) => event.tag === "SUBMIT" && event.userId === problem.userId
+      (event) => event.tag === "SUBMIT" && event.userId === problem.userId,
     );
     if (submitterIndex === -1) {
       await prisma.scoreEvent.create({
@@ -257,7 +257,7 @@ export async function examProblem(data: {
         return { success: false, message: "未找到供题者ID！" };
       }
       const offererIndex = problem.scoreEvents.findIndex(
-        (event) => event.tag === "OFFER" && event.userId === offerer.id
+        (event) => event.tag === "OFFER" && event.userId === offerer.id,
       );
 
       if (offererIndex === -1) {
@@ -369,7 +369,7 @@ export async function fetchLastWeekProblems() {
           }),
           count: count,
         };
-      })
+      }),
     );
     // 计算周环比数据
     const totalThisWeek = weekData.reduce((sum, day) => sum + day.count, 0);
@@ -472,7 +472,7 @@ export async function getExaminerNumber(problemId: number) {
 
     // 后端鉴权，只有管理员/此时在examiners列表中的用户才能审核
     const examinersIndex = dbProblem.examiners.findIndex(
-      (examiner) => examiner.id === userId
+      (examiner) => examiner.id === userId,
     );
 
     if (examinersIndex === -1 && session.user.role !== "admin") {
@@ -481,7 +481,7 @@ export async function getExaminerNumber(problemId: number) {
 
     // 查找 scoreEvents 中是否存在符合条件的事件
     const index = dbProblem.scoreEvents.findIndex(
-      (event) => event.tag === "EXAMINE" && event.userId === userId
+      (event) => event.tag === "EXAMINE" && event.userId === userId,
     );
 
     if (index !== -1) {
@@ -521,7 +521,7 @@ export async function getExaminerNumber(problemId: number) {
     console.error("获取审核员编号时出错:", error);
     throw new Error(
       "获取审核员信息失败: " +
-        (error instanceof Error ? error.message : "未知错误")
+        (error instanceof Error ? error.message : "未知错误"),
     );
   }
 }

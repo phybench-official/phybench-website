@@ -1,54 +1,95 @@
 "use client";
 
-import Markdown from 'react-markdown'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import rehypeMathjax from 'rehype-mathjax'
-import 'katex/dist/katex.min.css'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
-import remarkParse from 'remark-parse'
-import rehypeStringify from "rehype-stringify"
+import Markdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import rehypeMathjax from "rehype-mathjax";
+import "katex/dist/katex.min.css";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import remarkParse from "remark-parse";
+import rehypeStringify from "rehype-stringify";
 // @ts-ignore
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 // @ts-ignore
-import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { useTheme } from 'next-themes'
-import { Copy, ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  vscDarkPlus,
+  vs,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
+import { Copy, ChevronDown, ChevronRight } from "lucide-react";
 
 export default function RenderMarkdown({ content }) {
-
-  const { theme, systemTheme } = useTheme()
+  const { theme, systemTheme } = useTheme();
 
   const markdownComponents = {
     h1: ({ className, ...props }) => (
-      <h1 className={cn("scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-5xl", className)} {...props} />
+      <h1
+        className={cn(
+          "scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-5xl",
+          className,
+        )}
+        {...props}
+      />
     ),
     h2: ({ className, ...props }) => (
-      <h2 className={cn("mt-10 scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0", className)} {...props} />
+      <h2
+        className={cn(
+          "mt-10 scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight transition-colors first:mt-0",
+          className,
+        )}
+        {...props}
+      />
     ),
     h3: ({ className, ...props }) => (
-      <h3 className={cn("mt-8 scroll-m-20 text-xl font-semibold tracking-tight", className)} {...props} />
+      <h3
+        className={cn(
+          "mt-8 scroll-m-20 text-xl font-semibold tracking-tight",
+          className,
+        )}
+        {...props}
+      />
     ),
     h4: ({ className, ...props }) => (
-      <h4 className={cn("mt-4 scroll-m-20 text-lg font-semibold tracking-tight", className)} {...props} />
+      <h4
+        className={cn(
+          "mt-4 scroll-m-20 text-lg font-semibold tracking-tight",
+          className,
+        )}
+        {...props}
+      />
     ),
     p: ({ className, ...props }) => (
-      <p className={cn("leading-7 text-sm [&:not(:first-child)]:mt-6", className)} {...props} />
+      <p
+        className={cn(
+          "leading-7 text-sm [&:not(:first-child)]:mt-6",
+          className,
+        )}
+        {...props}
+      />
     ),
     ul: ({ className, ...props }) => (
-      <ul className={cn("my-6 ml-6 list-disc [&>li]:mt-2 text-sm", className)} {...props} />
+      <ul
+        className={cn("my-6 ml-6 list-disc [&>li]:mt-2 text-sm", className)}
+        {...props}
+      />
     ),
     ol: ({ className, ...props }) => (
-      <ol className={cn("my-6 ml-6 list-decimal [&>li]:mt-2 text-sm", className)} {...props} />
+      <ol
+        className={cn("my-6 ml-6 list-decimal [&>li]:mt-2 text-sm", className)}
+        {...props}
+      />
     ),
     li: ({ className, ...props }) => (
       <li className={cn("mt-2 text-sm", className)} {...props} />
     ),
     blockquote: ({ className, ...props }) => (
-      <blockquote className={cn("mt-6 border-l-2 pl-6 italic text-sm", className)} {...props} />
+      <blockquote
+        className={cn("mt-6 border-l-2 pl-6 italic text-sm", className)}
+        {...props}
+      />
     ),
     img: ({ className, ...props }) => (
       <img className={cn("rounded-md border", className)} {...props} />
@@ -62,27 +103,51 @@ export default function RenderMarkdown({ content }) {
       </div>
     ),
     tr: ({ className, ...props }) => (
-      <tr className={cn("m-0 border-t p-0 even:bg-muted", className)} {...props} />
+      <tr
+        className={cn("m-0 border-t p-0 even:bg-muted", className)}
+        {...props}
+      />
     ),
     th: ({ className, ...props }) => (
-      <th className={cn("border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right", className)} {...props} />
+      <th
+        className={cn(
+          "border px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right",
+          className,
+        )}
+        {...props}
+      />
     ),
     td: ({ className, ...props }) => (
-      <td className={cn("border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right", className)} {...props} />
+      <td
+        className={cn(
+          "border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right",
+          className,
+        )}
+        {...props}
+      />
     ),
     pre: ({ className, ...props }) => (
-      <pre className={cn("mb-4 mt-4 overflow-x-auto rounded-lg py-2", className)} {...props} />
+      <pre
+        className={cn("mb-4 mt-4 overflow-x-auto rounded-lg py-2", className)}
+        {...props}
+      />
     ),
     a: ({ className, ...props }) => (
-      <a className={cn("font-medium underline underline-offset-4 text-sky-800 dark:text-sky-200 hover:font-semibold transition-all", className)} {...props} />
+      <a
+        className={cn(
+          "font-medium underline underline-offset-4 text-sky-800 dark:text-sky-200 hover:font-semibold transition-all",
+          className,
+        )}
+        {...props}
+      />
     ),
     code: (props) => {
-      const { children, className, node, ...rest } = props
-      const match = /language-(\w+)/.exec(className || '')
+      const { children, className, node, ...rest } = props;
+      const match = /language-(\w+)/.exec(className || "");
       const [copied, setCopied] = useState(false);
 
       const handleCopy = async () => {
-        if (typeof children === 'string') {
+        if (typeof children === "string") {
           await navigator.clipboard.writeText(children);
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
@@ -92,7 +157,9 @@ export default function RenderMarkdown({ content }) {
       return match ? (
         <div className="relative group mt-6">
           <div className="flex items-center justify-between px-4 py-2 my-[-6px] bg-slate-200 dark:bg-slate-800 rounded-t-lg">
-            <span className="text-sm text-slate-700 dark:text-slate-300">{match[1]}</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300">
+              {match[1]}
+            </span>
             <button
               onClick={handleCopy}
               className="relative flex items-center gap-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
@@ -108,16 +175,24 @@ export default function RenderMarkdown({ content }) {
           <SyntaxHighlighter
             {...rest}
             PreTag="div"
-            children={String(children).replace(/\n$/, '')}
+            children={String(children).replace(/\n$/, "")}
             language={match[1]}
-            style={theme === 'system' ? (systemTheme === 'dark' ? vscDarkPlus : vs) : (theme === 'dark' ? vscDarkPlus : vs)}
+            style={
+              theme === "system"
+                ? systemTheme === "dark"
+                  ? vscDarkPlus
+                  : vs
+                : theme === "dark"
+                  ? vscDarkPlus
+                  : vs
+            }
           />
         </div>
       ) : (
         <code {...rest} className={cn("bg-transparent p-0 m-0", className)}>
           {children}
         </code>
-      )
+      );
     },
     think: ({ ...props }) => {
       const [isOpen, setIsOpen] = useState(true);
@@ -145,7 +220,6 @@ export default function RenderMarkdown({ content }) {
     },
   };
 
-
   return (
     <>
       <Markdown
@@ -157,4 +231,4 @@ export default function RenderMarkdown({ content }) {
       </Markdown>
     </>
   );
-};
+}
