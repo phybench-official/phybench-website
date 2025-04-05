@@ -83,8 +83,8 @@ export default function TranslateControlPage() {
   // 提交翻译问题
   const handleSubmit = async () => {
     const checkFormat = (input: string, maxId: number) => {
-      // 正则表达式：允许空字符串，或数字组成的逗号分隔的字符串
-      const regex = /^\s*$|^(\d+\s*(,\s*\d+\s*)*)$/;
+      // Regular expression: allows empty string, numbers, ranges (e.g., 1-3), and comma-separated values
+      const regex = /^\s*$|^(\d+\s*(-\s*\d+)?\s*(,\s*\d+\s*(-\s*\d+)?\s*)*)$/;
 
       if (!regex.test(input)) {
         return false; // 格式不正确
@@ -94,11 +94,26 @@ export default function TranslateControlPage() {
       const parts = input.split(",");
       for (const part of parts) {
         const trimmedPart = part.trim();
-        if (!trimmedPart) continue; // 跳过空字符串
+        if (!trimmedPart) continue; // Skip empty strings
 
-        const num = parseInt(trimmedPart);
-        if (num < 1 || num > maxId) {
-          return false; // 数字超出有效范围
+        if (trimmedPart.includes("-")) {
+          // Handle ranges
+          const [start, end] = trimmedPart.split("-").map((num) => parseInt(num.trim()));
+          if (
+            isNaN(start) ||
+            isNaN(end) ||
+            start < 1 ||
+            end > maxId ||
+            start > end // Invalid range
+          ) {
+            return false;
+          }
+        } else {
+          // Handle single numbers
+          const num = parseInt(trimmedPart);
+          if (isNaN(num) || num < 1 || num > maxId) {
+            return false; // Number out of valid range
+          }
         }
       }
 
@@ -111,10 +126,23 @@ export default function TranslateControlPage() {
 
       for (const part of parts) {
         const trimmedPart = part.trim();
-        if (!trimmedPart) continue; // 跳过空字符串
+        if (!trimmedPart) continue; // Skip empty strings
 
-        const num = parseInt(trimmedPart);
-        ids.push(num);
+        if (trimmedPart.includes("-")) {
+          // Handle ranges
+          const [start, end] = trimmedPart.split("-").map((num) => parseInt(num.trim()));
+          if (!isNaN(start) && !isNaN(end) && start <= end) {
+            for (let i = start; i <= end; i++) {
+              ids.push(i);
+            }
+          }
+        } else {
+          // Handle single numbers
+          const num = parseInt(trimmedPart);
+          if (!isNaN(num)) {
+            ids.push(num);
+          }
+        }
       }
 
       return ids;
