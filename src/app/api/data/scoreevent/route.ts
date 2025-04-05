@@ -36,6 +36,20 @@ export async function POST(request: Request) {
         tag,
       },
     });
+    // Aggregate the sum of scoreEvents for the given user
+    const aggregate = await prisma.scoreEvent.aggregate({
+      _sum: {
+        score: true,
+      },
+      where: { userId },
+    });
+    const newScore = aggregate._sum.score || 0;
+
+    // Update the user's score
+    await prisma.user.update({
+      where: { id: userId },
+      data: { score: newScore },
+    });
     return NextResponse.json({ message: "Score event created", newScoreEvent });
   } catch (error: any) {
     console.error("Error creating score event:", error);
