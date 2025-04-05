@@ -435,6 +435,9 @@ export async function getExaminerNumber(problemId: number) {
           select: { id: true },
         },
         scoreEvents: {
+          where: {
+            tag: "EXAMINE",
+          },
           select: {
             tag: true,
             userId: true,

@@ -247,7 +247,7 @@ function ExamDialog({
                     <div key={index} className="p-3 border rounded-md">
                       <div className="flex justify-between items-center mb-2">
                         <Badge variant="outline">
-                          审核人 {comment.userId.slice(-4)}
+                          {index+1}号审题人  {isAdmin && (comment.userId)}
                         </Badge>
                         <Badge
                           variant={
