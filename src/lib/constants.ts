@@ -11,6 +11,9 @@ const statusMap = {
 const translatedStatusMap = {
   PENDING: { label: "翻译未审", color: "bg-yellow-500" },
   ARCHIVED: { label: "翻译已审", color: "bg-green-500" },
+  RETURNED: { label: "Error，请联系管理员", color: "bg-orange-500" },
+  APPROVED: { label: "Error，请联系管理员", color: "bg-green-500" },
+  REJECTED: { label: "Error，请联系管理员", color: "bg-red-500" },
 };
 
 // 题目类型标签映射
