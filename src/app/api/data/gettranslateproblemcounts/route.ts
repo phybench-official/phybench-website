@@ -10,6 +10,7 @@ export async function GET() {
       },
       where: {
         translatedStatus: "PENDING",
+        status: "APPROVED",
       },
     });
 

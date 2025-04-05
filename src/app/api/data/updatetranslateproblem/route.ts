@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     // 获取各种类问题的通用函数
     const getProblemsByTag = async (tag: ProblemTag) => {
       return await prisma.problem.findMany({
-        where: { tag: tag, translatedStatus: "PENDING" },
+        where: { tag: tag, translatedStatus: "PENDING", status: "APPROVED" },
         select: { id: true },
         orderBy: { id: "asc" }, // 按 id 升序排序
       });
