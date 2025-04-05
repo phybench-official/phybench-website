@@ -3,8 +3,9 @@ const statusMap = {
   PENDING: { label: "待审核", color: "bg-yellow-500" },
   RETURNED: { label: "已打回", color: "bg-orange-500" },
   APPROVED: { label: "已通过", color: "bg-green-500" },
+  ARCHIVED: { label: "已入库", color: "bg-green-500" },
   REJECTED: { label: "已拒绝", color: "bg-red-500" },
-}
+};
 
 // 题目类型标签映射
 const tagMap = {
@@ -15,6 +16,6 @@ const tagMap = {
   MODERN: { label: "近代物理", color: "bg-green-700" },
   ADVANCED: { label: "高等物理", color: "bg-indigo-600" },
   OTHER: { label: "其它", color: "bg-gray-600" },
-}
+};
 
-export { tagMap, statusMap }
+export { tagMap, statusMap };

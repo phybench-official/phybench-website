@@ -1,6 +1,6 @@
-import OpenAI from 'openai';
-import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
+import OpenAI from "openai";
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 
 // This file demonstrates how to stream from a Next.JS server as
 // a new-line separated JSON-encoded stream. This file cannot be run
@@ -25,13 +25,14 @@ import { auth } from "@/auth"
 export const maxDuration = 3000;
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
+  const session = await auth();
 
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const { content, model } : { content: string, model: string } = await req.json();
+  const { content, model }: { content: string; model: string } =
+    await req.json();
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
   const stream = openai.beta.chat.completions.stream({
     model: model,
     stream: true,
-    messages: [{ role: 'user', content: content }],
+    messages: [{ role: "user", content: content }],
   });
 
   return new Response(stream.toReadableStream());

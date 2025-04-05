@@ -110,16 +110,17 @@ void main() {
 `;
 
 const getFragShader = (theme: string | undefined) => {
-  return BASE_FRAG + (
-    theme === "dark"
+  return (
+    BASE_FRAG +
+    (theme === "dark"
       ? "fragColor = mix(vec4(0.0), vec4(auroraColor, auroraAlpha), auroraAlpha);}"
       : `
       auroraAlpha = 0.8 * auroraAlpha;
       vec3 background = vec3(1.0, 0.8333, 0.8647); // 白色背景
       vec3 blendedColor = mix(background, auroraColor, auroraAlpha);
       fragColor = vec4(blendedColor, auroraAlpha);
-      }`
-      // "fragColor = mix(vec4(1.0), vec4(auroraColor, auroraAlpha), auroraAlpha);}"
+      }`)
+    // "fragColor = mix(vec4(1.0), vec4(auroraColor, auroraAlpha), auroraAlpha);}"
   );
 };
 
@@ -132,15 +133,31 @@ interface AuroraProps {
   children?: React.ReactNode;
 }
 
-export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "#00d8ff"], amplitude = 1.0, blend = 0.5, ...restProps }: AuroraProps) {
-  const propsRef = useRef<AuroraProps>({ colorStops, amplitude, blend, ...restProps });
+export default function Aurora({
+  children,
+  colorStops = ["#00d8ff", "#7cff67", "#00d8ff"],
+  amplitude = 1.0,
+  blend = 0.5,
+  ...restProps
+}: AuroraProps) {
+  const propsRef = useRef<AuroraProps>({
+    colorStops,
+    amplitude,
+    blend,
+    ...restProps,
+  });
   propsRef.current = { colorStops, amplitude, blend, ...restProps };
 
   const { resolvedTheme } = useTheme();
 
   const ctnDom = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<{ renderer?: Renderer; program?: Program; mesh?: Mesh; cleanup: () => void }>({
-    cleanup: () => {}
+  const rendererRef = useRef<{
+    renderer?: Renderer;
+    program?: Program;
+    mesh?: Mesh;
+    cleanup: () => void;
+  }>({
+    cleanup: () => {},
   });
 
   // 创建或更新渲染器和着色器程序
@@ -164,7 +181,7 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.canvas.style.backgroundColor = "transparent";
-    
+
     // 设置canvas的样式，确保它在内容下方
     gl.canvas.style.position = "absolute";
     gl.canvas.style.top = "0";
@@ -177,7 +194,10 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
       const height = ctn.offsetHeight;
       renderer.setSize(width, height);
       if (rendererRef.current.program) {
-        rendererRef.current.program.uniforms.uResolution.value = [width, height];
+        rendererRef.current.program.uniforms.uResolution.value = [
+          width,
+          height,
+        ];
       }
     }
     window.addEventListener("resize", resize);
@@ -247,7 +267,10 @@ export default function Aurora({ children, colorStops = ["#00d8ff", "#7cff67", "
   }, [resolvedTheme, amplitude]); // 当resolvedTheme改变时重新创建着色器
 
   return (
-    <div ref={ctnDom} className="w-full h-full flex items-center justify-center z-[-10] bg-linear-to-br from-indigo-300/15 to-pink-400/10 dark:bg-transparent">
+    <div
+      ref={ctnDom}
+      className="w-full h-full flex items-center justify-center z-[-10] bg-linear-to-br from-indigo-300/15 to-pink-400/10 dark:bg-transparent"
+    >
       {children}
     </div>
   );

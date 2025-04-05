@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,12 +12,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { MarkdownEditor } from "./markdown-editor"; 
+import { MarkdownEditor } from "./markdown-editor";
 
 export interface Variable {
   name: string;
@@ -31,7 +31,7 @@ export default function Step2({
   answer,
   setAnswer,
   variables,
-  setVariables
+  setVariables,
 }: {
   solution: string;
   setSolution: (v: string) => void;
@@ -43,14 +43,14 @@ export default function Step2({
   const [newVariable, setNewVariable] = useState<Variable>({
     name: "",
     min: "",
-    max: ""
+    max: "",
   });
   const [error, setError] = useState("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingVariable, setEditingVariable] = useState<Variable>({
     name: "",
     min: "",
-    max: ""
+    max: "",
   });
 
   const addVariable = () => {
@@ -58,7 +58,7 @@ export default function Step2({
       setError("请填写完整的变量信息");
       return;
     }
-    
+
     setError("");
     setVariables([...variables, newVariable]);
     setNewVariable({ name: "", min: "", max: "" });
@@ -106,7 +106,7 @@ export default function Step2({
               title="解题步骤"
             />
           </div>
-          
+
           {/* 右侧：答案和变量 */}
           <div className="flex flex-col overflow-hidden space-y-2">
             {/* 答案 */}
@@ -119,7 +119,7 @@ export default function Step2({
                 classNames="h-[120px]"
               />
             </div>
-            
+
             {/* 变量 */}
             <div className="flex-1 overflow-hidden flex flex-col py-1 px-1">
               <div className="flex justify-between items-center mb-2">
@@ -138,7 +138,10 @@ export default function Step2({
                 <TableBody>
                   {variables.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-gray-500">
+                      <TableCell
+                        colSpan={4}
+                        className="text-center text-gray-500"
+                      >
                         暂无变量，请添加
                       </TableCell>
                     </TableRow>
@@ -150,29 +153,44 @@ export default function Step2({
                           <TableCell>
                             <Input
                               value={editingVariable.name}
-                              onChange={(e) => setEditingVariable({...editingVariable, name: e.target.value})}
+                              onChange={(e) =>
+                                setEditingVariable({
+                                  ...editingVariable,
+                                  name: e.target.value,
+                                })
+                              }
                               className="h-8"
                             />
                           </TableCell>
                           <TableCell>
-                            <Input 
+                            <Input
                               value={editingVariable.min}
-                              onChange={(e) => setEditingVariable({...editingVariable, min: e.target.value})}
+                              onChange={(e) =>
+                                setEditingVariable({
+                                  ...editingVariable,
+                                  min: e.target.value,
+                                })
+                              }
                               type="text"
                               className="h-8"
                             />
                           </TableCell>
                           <TableCell>
-                            <Input 
+                            <Input
                               value={editingVariable.max}
-                              onChange={(e) => setEditingVariable({...editingVariable, max: e.target.value})}
+                              onChange={(e) =>
+                                setEditingVariable({
+                                  ...editingVariable,
+                                  max: e.target.value,
+                                })
+                              }
                               type="text"
                               className="h-8"
                             />
                           </TableCell>
                           <TableCell>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
                               onClick={saveEditing}
                               className="h-8 w-8"
@@ -188,16 +206,16 @@ export default function Step2({
                           <TableCell>{variable.max}</TableCell>
                           <TableCell>
                             <div className="flex space-x-1">
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
                                 onClick={() => startEditing(index)}
                                 className="h-8 w-8"
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
                                 onClick={() => removeVariable(index)}
                                 className="h-8 w-8 text-red-500"
@@ -217,30 +235,37 @@ export default function Step2({
                 <Input
                   placeholder="变量名"
                   value={newVariable.name}
-                  onChange={(e) => setNewVariable({...newVariable, name: e.target.value})}
+                  onChange={(e) =>
+                    setNewVariable({ ...newVariable, name: e.target.value })
+                  }
                   className="w-1/3 h-8"
                 />
-                <Input 
+                <Input
                   placeholder="最小值"
                   value={newVariable.min}
-                  onChange={(e) => setNewVariable({...newVariable, min: e.target.value})}
+                  onChange={(e) =>
+                    setNewVariable({ ...newVariable, min: e.target.value })
+                  }
                   type="text"
                   className="w-1/4 h-8"
                 />
-                <Input 
+                <Input
                   placeholder="最大值"
                   value={newVariable.max}
-                  onChange={(e) => setNewVariable({...newVariable, max: e.target.value})}
+                  onChange={(e) =>
+                    setNewVariable({ ...newVariable, max: e.target.value })
+                  }
                   type="text"
                   className="w-1/4 h-8"
                 />
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={addVariable}
                   className="flex-shrink-0 h-8"
                 >
-                  <Plus className="h-4 w-4 mr-1" />添加
+                  <Plus className="h-4 w-4 mr-1" />
+                  添加
                 </Button>
               </div>
             </div>

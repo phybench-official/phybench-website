@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog"
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "./input";
 import { prisma } from "@/prisma";
@@ -16,10 +16,12 @@ export async function Announcement() {
   const session = await auth();
   if (!session) return null;
 
-  const realname = await prisma.user.findUnique({
-    where: { email: session.user.email || "" },
-    select: { realname: true },
-  }).then((user) => user?.realname);
+  const realname = await prisma.user
+    .findUnique({
+      where: { email: session.user.email || "" },
+      select: { realname: true },
+    })
+    .then((user) => user?.realname);
 
   if (realname != null) return null;
 
@@ -31,7 +33,7 @@ export async function Announcement() {
       where: { email: session.user.email || "" },
       data: { realname },
     });
-  }
+  };
 
   return (
     <Dialog defaultOpen={true}>
@@ -59,5 +61,5 @@ export async function Announcement() {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

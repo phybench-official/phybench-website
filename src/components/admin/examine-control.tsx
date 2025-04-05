@@ -32,7 +32,7 @@ export default function ExamineControlPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [problemCounts, setProblemCounts] = useState<ProblemCounts | null>(
-    null
+    null,
   );
 
   // 新增状态用于存储输入框的值
@@ -71,7 +71,7 @@ export default function ExamineControlPage() {
 
   useEffect(() => {
     // 获取问题统计
-    fetch("/api/data/getproblemcounts")
+    fetch("/api/data/getexamineproblemcounts")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -150,37 +150,37 @@ export default function ExamineControlPage() {
 
     // 处理力学
     const mechanicsExamineProblemIds = getIdsFromInput(mechanicsReview).sort(
-      (a, b) => a - b
+      (a, b) => a - b,
     );
     setMechanicsReview("");
 
     // 处理电磁学
     const electricityExamineProblemIds = getIdsFromInput(
-      electricityReview
+      electricityReview,
     ).sort((a, b) => a - b);
     setElectricityReview("");
 
     // 处理热学
     const thermodynamicsExamineProblemIds = getIdsFromInput(
-      thermodynamicsReview
+      thermodynamicsReview,
     ).sort((a, b) => a - b);
     setThermodynamicsReview("");
 
     // 处理光学
     const opticsExamineProblemIds = getIdsFromInput(opticsReview).sort(
-      (a, b) => a - b
+      (a, b) => a - b,
     );
     setOpticsReview("");
 
     // 处理近代物理
     const modernExamineProblemIds = getIdsFromInput(modernReview).sort(
-      (a, b) => a - b
+      (a, b) => a - b,
     );
     setModernReview("");
 
     // 处理四大及以上
     const advancedExamineProblemIds = getIdsFromInput(advancedReview).sort(
-      (a, b) => a - b
+      (a, b) => a - b,
     );
     setAdvancedReview("");
 
@@ -239,7 +239,7 @@ export default function ExamineControlPage() {
             {problemCounts
               ? Object.values(problemCounts).reduce((a, b) => a + b, 0)
               : 0}{" "}
-            道问题，其中
+            道问题待审核，其中
           </h2>
           <ul className="grid grid-cols-2 gap-4">
             <li className="bg-gray-50 p-3 rounded-lg">

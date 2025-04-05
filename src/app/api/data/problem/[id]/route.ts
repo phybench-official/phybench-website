@@ -19,10 +19,7 @@ export async function GET(
   try {
     const problemId = parseInt(id);
     if (isNaN(problemId)) {
-      return NextResponse.json(
-        { message: "无效的题目ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "无效的题目ID" }, { status: 400 });
     }
 
     // 获取题目及其关联数据
@@ -34,27 +31,26 @@ export async function GET(
         variables: true,
         aiPerformances: {
           where: {
-            tag: "SUBMITTED" // 只获取用户提交的AI表现
-          }
-        }
-      }
+            tag: "SUBMITTED", // 只获取用户提交的AI表现
+          },
+        },
+      },
     });
 
     if (!problem) {
-      return NextResponse.json(
-        { message: "未找到题目" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "未找到题目" }, { status: 404 });
     }
 
-    const currentUserId = await prisma.user.findUnique({
-      where: {
-        email: session.user.email || ""
-      },
-      select: {
-        id: true
-      }
-    }).then((user) => user?.id);
+    const currentUserId = await prisma.user
+      .findUnique({
+        where: {
+          email: session.user.email || "",
+        },
+        select: {
+          id: true,
+        },
+      })
+      .then((user) => user?.id);
 
     // 验证用户权限（只有题目创建者或审核员可以编辑）
     if (currentUserId !== problem.userId) {
@@ -64,16 +60,16 @@ export async function GET(
           id: problemId,
           examiners: {
             some: {
-              id: currentUserId
-            }
-          }
-        }
+              id: currentUserId,
+            },
+          },
+        },
       });
 
       if (!isExaminer && session.user.role !== "admin") {
         return NextResponse.json(
           { message: "没有权限编辑此题目" },
-          { status: 403 }
+          { status: 403 },
         );
       }
     }
@@ -83,7 +79,7 @@ export async function GET(
     console.error("获取题目信息时出错:", error);
     return NextResponse.json(
       { message: "服务器错误，获取失败" },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();
@@ -93,7 +89,7 @@ export async function GET(
 // 更新特定题目
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
 
@@ -106,37 +102,33 @@ export async function PATCH(
   try {
     const problemId = parseInt(id);
     if (isNaN(problemId)) {
-      return NextResponse.json(
-        { message: "无效的题目ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "无效的题目ID" }, { status: 400 });
     }
 
     // 查找题目
     const existingProblem = await prisma.problem.findUnique({
       where: { id: problemId },
       include: {
-        variables: true, 
+        variables: true,
         aiPerformances: {
-          where: { tag: "SUBMITTED" }
-        }
-      }
+          where: { tag: "SUBMITTED" },
+        },
+      },
     });
 
     if (!existingProblem) {
-      return NextResponse.json(
-        { message: "未找到题目" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "未找到题目" }, { status: 404 });
     }
-    const currentUserId = await prisma.user.findUnique({
-      where: {
-        email: session.user.email || ""
-      },
-      select: {
-        id: true
-      }
-    }).then((user) => user?.id);
+    const currentUserId = await prisma.user
+      .findUnique({
+        where: {
+          email: session.user.email || "",
+        },
+        select: {
+          id: true,
+        },
+      })
+      .then((user) => user?.id);
 
     // 验证用户权限（只有题目创建者或审核员可以编辑）
     if (existingProblem.userId !== currentUserId) {
@@ -146,16 +138,16 @@ export async function PATCH(
           id: problemId,
           examiners: {
             some: {
-              id: currentUserId
-            }
-          }
-        }
+              id: currentUserId,
+            },
+          },
+        },
       });
 
       if (!isExaminer && session.user.role !== "admin") {
         return NextResponse.json(
           { message: "没有权限编辑此题目" },
-          { status: 403 }
+          { status: 403 },
         );
       }
     }
@@ -251,7 +243,7 @@ export async function PATCH(
               upperBound: parseFloat(variable.max) || 0,
             },
           });
-        })
+        }),
       );
     }
 
@@ -280,7 +272,7 @@ export async function PATCH(
               tag: "SUBMITTED",
             },
           });
-        })
+        }),
       );
     }
 
@@ -293,7 +285,7 @@ export async function PATCH(
     console.error("更新题目时出错:", error);
     return NextResponse.json(
       { message: "服务器错误，更新失败" },
-      { status: 500 }
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();

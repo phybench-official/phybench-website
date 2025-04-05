@@ -22,11 +22,15 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": [
-      "vitest/globals",
-      "@testing-library/jest-dom"
-    ]
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/middleware.ts.backup", "src/auth.ts.backup"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/middleware.ts.backup",
+    "src/auth.ts.backup"
+  ],
   "exclude": ["node_modules"]
 }

@@ -1,7 +1,6 @@
 "use server";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
-
 export async function updateUsername(formData: FormData) {
   const session = await auth();
   if (!session) return;
@@ -17,7 +16,7 @@ export async function updateUsername(formData: FormData) {
 export async function fetchProblems(
   page: number,
   perPage: number,
-  isExam = false
+  isExam = false,
 ) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");
@@ -43,6 +42,44 @@ export async function fetchProblems(
       take: perPage,
       orderBy: { createdAt: "desc" },
       select: {
+        id: true,
+        title: true,
+        tag: true,
+        status: true,
+        remark: true,
+        score: true,
+        createdAt: true,
+      },
+    }),
+    prisma.problem.count({ where }),
+  ]);
+  const totalPages = Math.ceil(count / perPage);
+  return { problems, totalPages };
+}
+
+export async function fetchTranslateProblems(page: number, perPage: number) {
+  const session = await auth();
+  if (!session) throw new Error("Not authorized");
+  if (!session.user.email) throw new Error("Email not found");
+  const currentUser = await prisma.user
+    .findUnique({ where: { email: session.user.email } })
+    .then((user) => user?.id);
+
+  const where =
+    session.user.role === "admin"
+      ? {}
+      : {
+          OR: [{ translators: { some: { id: currentUser } } }],
+        };
+  const [problems, count] = await Promise.all([
+    prisma.problem.findMany({
+      where,
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { createdAt: "desc" },
+      select: {
+        content: true,
+        solution: true,
         id: true,
         title: true,
         tag: true,
@@ -85,14 +122,14 @@ export const fetchAllUsers = async () => {
       users.map((user) => ({
         label: user.name + " (" + user.realname + ")",
         value: user.email,
-      }))
+      })),
     );
 };
 
 export async function examProblem(data: {
   problemId: number;
   remark?: string;
-  status: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED";
   score: number;
   nominated: string;
 }) {
@@ -125,6 +162,9 @@ export async function examProblem(data: {
             id: true,
           },
         },
+        offererEmail: true,
+        userId: true,
+        id: true,
         scoreEvents: { select: { id: true, userId: true, tag: true } },
       },
     });
@@ -134,7 +174,7 @@ export async function examProblem(data: {
 
     // 查找此人审此题的积分事件
     const index = problem.scoreEvents.findIndex(
-      (event) => event.tag === "EXAMINE" && event.userId === user.id
+      (event) => event.tag === "EXAMINE" && event.userId === user.id,
     );
     if (index === -1) {
       return { success: false, message: "未找到此人审此题的积分事件" };
@@ -147,7 +187,7 @@ export async function examProblem(data: {
       isExaminer = true;
     } else {
       isExaminer = problem.examiners.some(
-        (examiner) => examiner.id === user.id
+        (examiner) => examiner.id === user.id,
       );
     }
 
@@ -166,6 +206,105 @@ export async function examProblem(data: {
         problemNominated: data.nominated,
       },
     });
+
+    // 直接覆盖题目正式审核结果
+    await prisma.problem.update({
+      where: { id: data.problemId },
+      data: {
+        status: data.status,
+        score: data.score,
+        remark: data.remark,
+        nominated: data.nominated,
+      },
+    });
+
+    const hasOfferer = problem.offererEmail ? true : false;
+    // 查找编题人的积分事件
+    const submitterIndex = problem.scoreEvents.findIndex(
+      (event) => event.tag === "SUBMIT" && event.userId === problem.userId,
+    );
+    if (submitterIndex === -1) {
+      await prisma.scoreEvent.create({
+        data: {
+          tag: "SUBMIT",
+          score: hasOfferer ? data.score / 2 : data.score,
+          userId: problem.userId,
+          problemId: problem.id,
+        },
+      });
+    } else {
+      const submitScoreEvent = problem.scoreEvents[submitterIndex];
+      await prisma.scoreEvent.update({
+        where: { id: submitScoreEvent.id },
+        data: {
+          score: hasOfferer ? data.score / 2 : data.score,
+        },
+      });
+    }
+
+    // 刷新编题人的积分
+    const submitterAggregate = await prisma.scoreEvent.aggregate({
+      _sum: {
+        score: true,
+      },
+      where: { userId: problem.userId },
+    });
+    const submitterNewScore = submitterAggregate._sum.score || 0;
+    await prisma.user.update({
+      where: { id: problem.userId },
+      data: { score: submitterNewScore },
+    });
+
+    if (hasOfferer) {
+      if (!problem.offererEmail) {
+        return { success: false, message: "错误访问offererEmail字段！" };
+      }
+
+      const offerer = await prisma.user.findUnique({
+        where: { email: problem.offererEmail },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!offerer) {
+        return { success: false, message: "未找到供题者ID！" };
+      }
+      const offererIndex = problem.scoreEvents.findIndex(
+        (event) => event.tag === "OFFER" && event.userId === offerer.id,
+      );
+
+      if (offererIndex === -1) {
+        await prisma.scoreEvent.create({
+          data: {
+            tag: "OFFER",
+            score: data.score / 2,
+            userId: offerer.id,
+            problemId: problem.id,
+          },
+        });
+      } else {
+        const offerScoreEvent = problem.scoreEvents[offererIndex];
+        await prisma.scoreEvent.update({
+          where: { id: offerScoreEvent.id },
+          data: {
+            score: data.score / 2,
+          },
+        });
+      }
+      // 刷新供题人的积分
+      const offererAggregate = await prisma.scoreEvent.aggregate({
+        _sum: {
+          score: true,
+        },
+        where: { userId: offerer.id },
+      });
+      const offererNewScore = offererAggregate._sum.score || 0;
+      await prisma.user.update({
+        where: { id: offerer.id },
+        data: { score: offererNewScore },
+      });
+    }
     return {
       success: true,
       message: "审核成功",
@@ -256,7 +395,7 @@ export async function fetchLastWeekProblems() {
           }),
           count: count,
         };
-      })
+      }),
     );
     // 计算周环比数据
     const totalThisWeek = weekData.reduce((sum, day) => sum + day.count, 0);
@@ -322,6 +461,9 @@ export async function getExaminerNumber(problemId: number) {
           select: { id: true },
         },
         scoreEvents: {
+          where: {
+            tag: "EXAMINE",
+          },
           select: {
             tag: true,
             userId: true,
@@ -331,6 +473,10 @@ export async function getExaminerNumber(problemId: number) {
             problemNominated: true,
           },
         },
+        status: true,
+        score: true,
+        remark: true,
+        nominated: true,
       },
     });
 
@@ -355,7 +501,7 @@ export async function getExaminerNumber(problemId: number) {
 
     // 后端鉴权，只有管理员/此时在examiners列表中的用户才能审核
     const examinersIndex = dbProblem.examiners.findIndex(
-      (examiner) => examiner.id === userId
+      (examiner) => examiner.id === userId,
     );
 
     if (examinersIndex === -1 && session.user.role !== "admin") {
@@ -364,7 +510,7 @@ export async function getExaminerNumber(problemId: number) {
 
     // 查找 scoreEvents 中是否存在符合条件的事件
     const index = dbProblem.scoreEvents.findIndex(
-      (event) => event.tag === "EXAMINE" && event.userId === userId
+      (event) => event.tag === "EXAMINE" && event.userId === userId,
     );
 
     if (index !== -1) {
@@ -384,27 +530,27 @@ export async function getExaminerNumber(problemId: number) {
           score: 0,
           userId: userId,
           problemId: Number(problemId),
-          problemStatus: "PENDING",
-          problemScore: 0,
-          problemRemark: "",
-          problemNominated: "No",
+          problemStatus: dbProblem.status,
+          problemScore: dbProblem.score,
+          problemRemark: dbProblem.remark,
+          problemNominated: dbProblem.nominated,
         },
       });
 
       // 返回新创建的事件的编号
       return {
         examinerNo: dbProblem.scoreEvents.length + 1,
-        examinerAssignedStatus: "PENDING",
-        examinerAssignedScore: 0,
-        examinerRemark: "",
-        examinerNominated: "No",
+        examinerAssignedStatus: dbProblem.status,
+        examinerAssignedScore: dbProblem.score,
+        examinerRemark: dbProblem.remark,
+        examinerNominated: dbProblem.nominated,
       };
     }
   } catch (error) {
     console.error("获取审核员编号时出错:", error);
     throw new Error(
       "获取审核员信息失败: " +
-        (error instanceof Error ? error.message : "未知错误")
+        (error instanceof Error ? error.message : "未知错误"),
     );
   }
 }

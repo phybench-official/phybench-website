@@ -18,7 +18,7 @@ export default async function Page({
   const { id } = await params;
   const problemId = parseInt(id);
 
-  const problem = await prisma.problem.findUnique({
+  const problem = (await prisma.problem.findUnique({
     where: {
       id: problemId,
     },
@@ -57,7 +57,7 @@ export default async function Page({
         },
       },
     },
-  }) as unknown as ProblemData; 
+  })) as unknown as ProblemData;
 
   if (!problem) return notFound();
   if (
@@ -68,7 +68,8 @@ export default async function Page({
     return <NotPermitted />;
 
   // 根据题目审核状态决定是否可编辑
-  const isEditable = problem.status === "RETURNED" || problem.status === "REJECTED";
+  const isEditable =
+    problem.status === "RETURNED" || problem.status === "REJECTED";
 
   return (
     <div className="w-screen py-20 flex flex-col items-center">

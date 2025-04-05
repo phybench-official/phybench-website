@@ -29,8 +29,10 @@ interface ProblemData {
   note: string;
   source?: string | null;
   content: string;
+  translatedContent?: string;
   variables: ProblemVariable[];
   solution: string;
+  translatedSolution?: string;
   answer: string;
   aiPerformances: AIPerformance[];
   status: keyof typeof statusMap;
@@ -40,6 +42,13 @@ interface ProblemData {
   offererEmail?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  translators: {
+    id: string;
+    name: string | null;
+    username: string | null;
+    realname: string | null;
+    email: string;
+  }[];
   user: {
     name?: string | null;
     username?: string | null;
@@ -49,18 +58,30 @@ interface ProblemData {
   offer?: {
     email: string;
   } | null;
+  scoreEvents: {
+    id?: number;
+    tag: string;
+    userId: string;
+    score?: number;
+    problemId?: number | null;
+    problemScore?: number | null;
+    problemRemark?: string | null;
+    problemStatus?: string | null;
+    problemNominated?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }[];
 }
 
 export interface User {
-  id?: string
-  name?: string | null
-  email?: string | null
-  image?: string | null
-  role: string,
-  realname: string,
-  username: string,
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: string;
+  realname: string;
+  username: string;
 }
-
 
 interface ExaminerInfo {
   examinerNo: number;
@@ -68,6 +89,6 @@ interface ExaminerInfo {
   examinerAssignedScore: number | null;
   examinerRemark: string | null;
   examinerNominated: string | null;
-};
+}
 
 export type { AIPerformance, ProblemVariable, ProblemData, ExaminerInfo };

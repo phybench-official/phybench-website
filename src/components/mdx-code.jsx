@@ -5,7 +5,10 @@ import { cn } from "@/lib/utils";
 import { Copy } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus, vs } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  vscDarkPlus,
+  vs,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function MDXCode(props) {
   const { children, className, node, ...rest } = props;
@@ -50,8 +53,8 @@ export function MDXCode(props) {
               ? vscDarkPlus
               : vs
             : theme === "dark"
-            ? vscDarkPlus
-            : vs
+              ? vscDarkPlus
+              : vs
         }
       />
     </div>

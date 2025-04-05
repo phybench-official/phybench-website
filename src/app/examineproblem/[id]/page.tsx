@@ -21,9 +21,6 @@ export default async function Page({
       id: parseInt(id),
     },
     include: {
-      variables: true,
-      aiPerformances: true,
-      examiners: true,
       user: {
         select: {
           name: true,
@@ -31,6 +28,33 @@ export default async function Page({
           realname: true,
           username: true,
           email: true,
+        },
+      },
+      offer: {
+        select: {
+          email: true,
+        },
+      },
+      variables: true,
+      aiPerformances: true,
+      examiners: true,
+      translators: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          realname: true,
+          email: true,
+        },
+      },
+      scoreEvents: {
+        select: {
+          tag: true,
+          userId: true,
+          problemScore: true,
+          problemRemark: true,
+          problemStatus: true,
+          problemNominated: true,
         },
       },
     },
@@ -49,13 +73,14 @@ export default async function Page({
   if (!isExaminer) {
     return <NotPermitted />;
   }
-  
+
   return (
     <div className="w-screen py-20 flex flex-col items-center">
       <ProblemView
         problem={problem}
         editable={true}
         examable={true}
+        isAdmin={session.user.role == "admin"}
       />
     </div>
   );

@@ -32,6 +32,7 @@ model User {
   problems        Problem[]                                    // 用户上传的题目
   examineProblems Problem[] @relation("UserExamineProblems")   // 用户可审的题目
   offerProblems   Problem[] @relation("UserOfferProblems")     // 用户提供的题目
+  translateProblems Problem[] @relation("UserTranslateProblems")
 
   score       Int          @default(0)                         // 用户的积分
   scoreEvents ScoreEvent[] @relation("UserScoreEvents")        // 用户的积分事件
@@ -107,16 +108,20 @@ model Problem {
   note             String @default("")       // 题目备注
   source           String?                   // 题目来源（选填）
   content          String                    // 题干
+  translatedContent  String  @default("")    // 题目翻译
   variables        ProblemVariable[]         // 题目涉及的变量（包括数值范围）
   solution         String                    // 题目解答过程
+  translatedSolution  String  @default("")   // 翻译的解答过程
   answer           String                    // 题目答案，一个表达式
   offererEmail     String?                   // 供题人邮箱（选填）
   offererId        String?                   // 供题人Id
   aiPerformances   AiPerformance[]           // AI表现（提交时选填，允许列表为空）
   status           ProblemStatus @default(PENDING)             // 审核状态
+  translatedStatus ProblemStatus @default(PENDING)             // 翻译状态
   score            Int?                                        // 题目积分（由审核员给出）
   remark           String?                                     // 审核评语（由审核员给出）
   examiners        User[]  @relation("UserExamineProblems")    // 审核员
+  translators        User[]  @relation("UserTranslateProblems")
   nominated        String?  @default("No")                     // 审核提名
   scoreEvents      ScoreEvent[]   @relation("ProblemScoreEvents")
   createdAt        DateTime @default(now())
@@ -150,9 +155,8 @@ enum ProblemStatus {
   RETURNED      // 已打回
   APPROVED      // 已通过
   REJECTED      // 已拒绝
+  ARCHIVED      // 已归档
 }
-
-
 
 // AI表现对象
 model AiPerformance {

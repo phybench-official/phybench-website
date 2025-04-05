@@ -129,10 +129,14 @@
   /* Aurora 动画效果 */
   @keyframes aurora {
     from {
-      background-position: 50% 50%, 50% 50%;
+      background-position:
+        50% 50%,
+        50% 50%;
     }
     to {
-      background-position: 350% 50%, 350% 50%;
+      background-position:
+        350% 50%,
+        350% 50%;
     }
   }
 
@@ -143,7 +147,9 @@
 
 @layer components {
   .dark .text-shadow-dark {
-    text-shadow: 0 0 2px white,0 0 10px white;
+    text-shadow:
+      0 0 2px white,
+      0 0 10px white;
   }
 }
 
@@ -152,12 +158,14 @@
   display: none;
 }
 body {
-  -ms-overflow-style: none;  /* 针对IE和Edge */
-  scrollbar-width: none;  /* 针对Firefox */
+  -ms-overflow-style: none; /* 针对IE和Edge */
+  scrollbar-width: none; /* 针对Firefox */
 }
 
 /* 超长公式显示 */
-.katex,.katex-html, .katex-display {
+.katex,
+.katex-html,
+.katex-display {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -221,5 +229,5 @@ body {
     --chart-3: 216 92% 60%;
     --chart-4: 210 98% 78%;
     --chart-5: 212 97% 87%;
-    }
+  }
 }

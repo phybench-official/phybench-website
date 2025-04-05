@@ -5,11 +5,11 @@ import { ModeToggle } from "./ui/toggle-mode";
 
 export function MyNavBar() {
   const navItems = [
-    { name: "主页", url: "/"},
-    { name: "提交", url: "/submit"},
+    { name: "主页", url: "/" },
+    { name: "提交", url: "/submit" },
     // { name: '测试', url: '/chat', icon: "MessageCircle" },
-    { name: "审核", url: "/examine"},
-    { name: "发现", url: "/find"},
+    { name: "审核", url: "/examine" },
+    { name: "发现", url: "/find" },
   ];
 
   return (

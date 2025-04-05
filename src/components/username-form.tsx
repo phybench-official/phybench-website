@@ -22,7 +22,10 @@ interface EditUsernameFormProps {
   userEmail: string;
 }
 
-export default function EditUsernameForm({ initialUsername, userEmail }: EditUsernameFormProps) {
+export default function EditUsernameForm({
+  initialUsername,
+  userEmail,
+}: EditUsernameFormProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
@@ -53,7 +56,12 @@ export default function EditUsernameForm({ initialUsername, userEmail }: EditUse
               <Label htmlFor="username" className="text-right">
                 Username
               </Label>
-              <Input id="username" name="username" defaultValue={initialUsername} className="col-span-3" />
+              <Input
+                id="username"
+                name="username"
+                defaultValue={initialUsername}
+                className="col-span-3"
+              />
             </div>
             <input type="hidden" name="email" value={userEmail} />
           </div>

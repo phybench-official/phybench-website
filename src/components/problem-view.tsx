@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Eye, ChevronLeft } from "lucide-react";
 import type { ExaminerInfo, ProblemData } from "@/lib/types";
@@ -43,21 +44,25 @@ import { toast } from "sonner";
 
 function ExamDialog({
   problem,
+  isAdmin = false,
 }: {
   problem: ProblemData;
+  isAdmin?: boolean;
 }) {
-  
   const router = useRouter();
   const [examinerInfo, setExaminerInfo] = useState<ExaminerInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [remark, setRemark] = useState("");
   const [score, setScore] = useState<string>("0");
   const [status, setStatus] = useState<
-    "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
+    "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED"
   >("PENDING");
   const [nominated, setNominated] = useState<string>("No");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
+  const [examinerComments, setExaminerComments] = useState<ExaminerComment[]>(
+    [],
+  );
 
   // 获取审核信息
   useEffect(() => {
@@ -69,8 +74,21 @@ function ExamDialog({
         // 设置表单初始值
         setRemark(info?.examinerRemark || "");
         setScore((info?.examinerAssignedScore || 0).toString());
-        setStatus((info?.examinerAssignedStatus as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED") || "PENDING");
+        setStatus(
+          (info?.examinerAssignedStatus as
+            | "PENDING"
+            | "RETURNED"
+            | "APPROVED"
+            | "REJECTED"
+            | "ARCHIVED") || "PENDING",
+        );
         setNominated(info?.examinerNominated === "Yes" ? "Yes" : "No");
+
+        // 设置历史审核消息
+        const comments = problem.scoreEvents.filter(
+          (event) => event.tag === "EXAMINE",
+        );
+        setExaminerComments(comments);
       } catch (error) {
         toast.error("获取审核信息失败");
         console.error(error);
@@ -82,7 +100,7 @@ function ExamDialog({
     if (open) {
       fetchExaminerInfo();
     }
-  }, [problem.id, open]);
+  }, [problem.id, open, problem.scoreEvents]);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -128,95 +146,183 @@ function ExamDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {loading ? "加载中..." : `审核题目：您是${examinerInfo?.examinerNo}号审题人`}
+            {loading
+              ? "加载中..."
+              : `审核题目：您是${examinerInfo?.examinerNo}号审题人`}
           </DialogTitle>
           <DialogDescription>
             编辑审核状态、积分和评语，决定是否提名为好题
           </DialogDescription>
         </DialogHeader>
         {loading ? (
-          <div className="flex justify-center items-center py-8">加载审核信息...</div>
-        ) : (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="status">审核状态</Label>
-              <Select
-                value={status}
-                onValueChange={(value) =>
-                  setStatus(
-                    value as "PENDING" | "RETURNED" | "APPROVED" | "REJECTED"
-                  )
-                }
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="选择审核状态" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PENDING">待审核</SelectItem>
-                  <SelectItem value="APPROVED">已通过</SelectItem>
-                  <SelectItem value="REJECTED">已拒绝</SelectItem>
-                  <SelectItem value="RETURNED">已打回</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="score">审核积分</Label>
-              <Input
-                id="score"
-                type="text"
-                placeholder="请输入一个自然数"
-                value={score}
-                onChange={(e) => setScore(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nominated">是否提名为好题</Label>
-              <Select value={nominated} onValueChange={setNominated}>
-                <SelectTrigger id="nominated">
-                  <SelectValue placeholder="是否提名为好题" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Yes">是</SelectItem>
-                  <SelectItem value="No">否</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="remark">审核评语</Label>
-              <Textarea
-                id="remark"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-                placeholder="请输入审核评语"
-                rows={3}
-              />
-            </div>
-
-            <Button
-              onClick={handleSubmit}
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "提交中..." : "提交审核信息"}
-            </Button>
+          <div className="flex justify-center items-center py-8">
+            加载审核信息...
           </div>
+        ) : (
+          <Tabs defaultValue="review" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="review">审核</TabsTrigger>
+              <TabsTrigger value="history">历史记录</TabsTrigger>
+            </TabsList>
+            <TabsContent value="review">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status">审核状态</Label>
+                  <Select
+                    value={status}
+                    onValueChange={(value) =>
+                      setStatus(
+                        value as
+                          | "PENDING"
+                          | "RETURNED"
+                          | "APPROVED"
+                          | "REJECTED"
+                          | "ARCHIVED",
+                      )
+                    }
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue placeholder="选择审核状态" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">待审核</SelectItem>
+                      <SelectItem value="APPROVED">已通过</SelectItem>
+                      <SelectItem value="REJECTED">已拒绝</SelectItem>
+                      <SelectItem value="RETURNED">已打回</SelectItem>
+                      {isAdmin && (
+                        <SelectItem value="ARCHIVED">已入库</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="score">审核积分</Label>
+                  <Input
+                    id="score"
+                    type="text"
+                    placeholder="请输入一个自然数"
+                    value={score}
+                    onChange={(e) => setScore(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nominated">是否提名为好题</Label>
+                  <Select value={nominated} onValueChange={setNominated}>
+                    <SelectTrigger id="nominated">
+                      <SelectValue placeholder="是否提名为好题" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">是</SelectItem>
+                      <SelectItem value="No">否</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="remark">审核评语</Label>
+                  <Textarea
+                    id="remark"
+                    value={remark}
+                    onChange={(e) => setRemark(e.target.value)}
+                    placeholder="请输入审核评语"
+                    rows={3}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "提交中..." : "提交审核信息"}
+                </Button>
+              </div>
+            </TabsContent>
+            <TabsContent value="history">
+              {examinerComments.length > 0 ? (
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                  {examinerComments.map((comment, index) => (
+                    <div key={index} className="p-3 border rounded-md">
+                      <div className="flex justify-between items-center mb-2">
+                        <Badge variant="outline">
+                          {index+1}号审题人  {isAdmin && (comment.userId)}
+                        </Badge>
+                        <Badge
+                          variant={
+                            comment.problemStatus === "APPROVED"
+                              ? "default"
+                              : comment.problemStatus === "REJECTED"
+                                ? "destructive"
+                                : "secondary"
+                          }
+                        >
+                          {comment.problemStatus === "APPROVED"
+                            ? "已通过"
+                            : comment.problemStatus === "REJECTED"
+                              ? "已拒绝"
+                              : comment.problemStatus === "RETURNED"
+                                ? "已打回"
+                                : comment.problemStatus === "ARCHIVED"
+                                  ? "已入库"
+                                  : "待审核"}
+                        </Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>积分: {comment.problemScore || 0}</span>
+                          <span>
+                            提名好题:{" "}
+                            {comment.problemNominated === "Yes" ? "是" : "否"}
+                          </span>
+                        </div>
+                        {comment.problemRemark && (
+                          <div className="text-sm mt-2">
+                            <p className="font-medium text-xs text-muted-foreground">
+                              评语:
+                            </p>
+                            <p className="italic p-2 bg-muted rounded-md">
+                              {comment.problemRemark}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  暂无历史审核记录
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </DialogContent>
     </Dialog>
   );
 }
 
+interface ExaminerComment {
+  tag: string;
+  userId: string;
+  problemScore?: number | null;
+  problemRemark?: string | null;
+  problemStatus?: string | null;
+  problemNominated?: string | null;
+}
+
 export function ProblemView({
   problem,
   editable = false,
   examable = false,
+  isAdmin = false,
 }: {
   problem: ProblemData;
   editable?: boolean;
   examable?: boolean;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
 
@@ -242,11 +348,7 @@ export function ProblemView({
             >
               编辑题目
             </Button>
-            {examable && (
-              <ExamDialog 
-                problem={problem} 
-              />
-            )}
+            {examable && <ExamDialog problem={problem} isAdmin={isAdmin} />}
           </div>
         )}
       </div>
