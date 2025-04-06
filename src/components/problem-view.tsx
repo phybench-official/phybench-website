@@ -387,12 +387,12 @@ export function ProblemView({
           </div>
 
           <div className="pt-2 border-t">
-            <h4 className="font-semibold mb-2">题目描述</h4>
+            <h4 className="font-semibold mb-2">题目标签</h4>
             <div className="text-sm text-muted-foreground">
               {problem.description ? (
                 <RenderMarkdown content={problem.description} />
               ) : (
-                <p className="italic">无描述</p>
+                <p className="italic">暂无标签</p>
               )}
             </div>
           </div>

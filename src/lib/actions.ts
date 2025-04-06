@@ -199,7 +199,7 @@ export async function examProblem(data: {
     await prisma.scoreEvent.update({
       where: { id: scoreEvent.id },
       data: {
-        score: 5,
+        score: 20,
         problemStatus: data.status,
         problemScore: data.score,
         problemRemark: data.remark,
