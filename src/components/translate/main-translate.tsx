@@ -192,11 +192,13 @@ export default function TranslatePage({
               >
                 {problem.status === "APPROVED"
                   ? "已通过"
-                  : problem.status === "REJECTED"
-                    ? "已拒绝"
-                    : problem.status === "RETURNED"
-                      ? "已退回"
-                      : "待审核"}
+                  : problem.status === "ARCHIVED"
+                    ? "已入库"
+                    : problem.status === "REJECTED"
+                      ? "已拒绝"
+                      : problem.status === "RETURNED"
+                        ? "已退回"
+                        : "待审核"}
               </div>
             </CardFooter>
           </Card>
