@@ -44,6 +44,7 @@ interface Problem {
   title: string;
   tag: keyof typeof tagMap;
   status: string;
+  translatedStatus: string;
   remark: string | null;
   score: number | null;
   createdAt: Date;
@@ -241,6 +242,29 @@ export default function BrowsePage({
                       : problem.status === "RETURNED"
                         ? "已退回"
                         : "待审核"}
+              </div>
+              <div
+                className={
+                  problem.translatedStatus === "APPROVED"
+                    ? "text-green-700 dark:text-green-300"
+                    : problem.translatedStatus === "ARCHIVED"
+                      ? "text-green-700 dark:text-green-300"
+                      : problem.translatedStatus === "REJECTED"
+                        ? "text-red-800 dark:text-red-300"
+                        : problem.translatedStatus === "PENDING"
+                          ? "text-gray-600 dark:text-slate-300"
+                          : "text-yellow-800 dark:text-yellow-300"
+                }
+              >
+                {problem.translatedStatus === "APPROVED"
+                  ? "Error，请联系管理员"
+                  : problem.translatedStatus === "ARCHIVED"
+                    ? "翻译已审"
+                    : problem.translatedStatus === "REJECTED"
+                      ? "Error，请联系管理员"
+                      : problem.translatedStatus === "PENDING"
+                        ? "翻译未审"
+                        : "Error，请联系管理员"}
               </div>
               {!isExam && (
                 <Dialog>
