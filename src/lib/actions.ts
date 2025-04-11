@@ -238,6 +238,19 @@ export async function examProblem(data: {
       },
     });
 
+    // 刷新审题人的积分
+    const examinerAggregate = await prisma.scoreEvent.aggregate({
+      _sum: {
+        score: true,
+      },
+      where: { userId: user.id },
+    });
+    const examinerNewScore = examinerAggregate._sum.score || 0;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { score: examinerNewScore },
+    });
+
     // 直接覆盖题目正式审核结果
     await prisma.problem.update({
       where: { id: data.problemId },
