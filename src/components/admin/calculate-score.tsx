@@ -5,8 +5,8 @@ import Link from "next/link";
 
 export default function CalculateScorePage() {
   const [loadingAll, setLoadingAll] = useState(false);
-  const [loadingSingle, setLoadingSingle] = useState(false);
   const [message, setMessage] = useState("");
+  const [loadingSingle, setLoadingSingle] = useState(false);
   const [userId, setUserId] = useState("");
 
   // Calculate all users' scores using the /api/data/calculateallscores endpoint
