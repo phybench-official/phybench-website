@@ -1,26 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
+// 定义用户和问题的类型
+interface User {
+  id: string;
+  name?: string;
+  email: string;
+  realname?: string;
+}
+
 export default function SubmitEventPage() {
-  const [userId, setUserId] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [score, setScore] = useState("");
-  const [tag, setTag] = useState("OFFER"); // Default value is OFFER
+  const [tag, setTag] = useState("OFFER");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    // 获取所有用户
+    fetch("/api/data/getusers")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setUsers(data.users);
+        }
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
 
-    if (!userId.trim() || !score.trim() || !tag.trim()) {
-      setMessage("User ID, Score, and Tag are required.");
+    if (!selectedUserId || !score.trim() || !tag.trim()) {
+      setMessage("请选择用户、输入积分和选择标签");
       return;
     }
     const numericScore = Number(score);
     if (isNaN(numericScore)) {
-      setMessage("Score must be a valid number.");
+      setMessage("积分必须为有效数字");
       return;
     }
 
@@ -30,17 +50,17 @@ export default function SubmitEventPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: userId.trim(),
+          userId: selectedUserId,
           score: numericScore,
           tag,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Failed to add score event");
+        throw new Error(data.message || "添加失败");
       }
-      setMessage("Score event added successfully!");
-      setUserId("");
+      setMessage("积分事件添加成功！");
+      setSelectedUserId("");
       setScore("");
       setTag("OFFER");
     } catch (error: any) {
@@ -61,17 +81,28 @@ export default function SubmitEventPage() {
       <h1 className="text-xl mb-4">Submit Score Event</h1>
       <form onSubmit={handleSubmit} className="max-w-md">
         <div className="mb-4">
-          <label htmlFor="userId" className="block mb-1">
-            User ID
+          <label htmlFor="user-select" className="block mb-1">
+            选择用户
           </label>
-          <input
-            type="text"
-            id="userId"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+          <select
+            id="user-select"
+            value={selectedUserId}
+            onChange={(e) => setSelectedUserId(e.target.value)}
             className="border border-gray-300 p-2 w-full"
-            placeholder="Enter User ID"
-          />
+          >
+            <option value="">请选择用户</option>
+              {users
+                .sort((a, b) => {
+                  const nameA = a.realname || a.name || a.email; // 获取用户的名称
+                  const nameB = b.realname || b.name || b.email;
+                  return nameA.localeCompare(nameB, "zh"); // 使用拼音排序
+                })
+                .map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.realname || user.name || user.email}
+                  </option>
+                ))}
+          </select>
         </div>
         <div className="mb-4">
           <label htmlFor="score" className="block mb-1">
