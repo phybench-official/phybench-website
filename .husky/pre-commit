@@ -1,1 +1,21 @@
-npx lint-staged
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 检查是否需要 pull
+LOCAL=$(git rev-parse @)
+REMOTE=$(git rev-parse @{u})
+BASE=$(git merge-base @ @{u})
+
+if [ "$LOCAL" = "$REMOTE" ]; then
+  # 本地与远程同步，继续执行 lint-staged
+  npx lint-staged
+elif [ "$LOCAL" = "$BASE" ]; then
+  echo "错误：你的本地分支落后于远程分支，请先执行 git pull"
+  exit 1
+elif [ "$REMOTE" = "$BASE" ]; then
+  # 本地有新的提交但未推送，继续执行 lint-staged
+  npx lint-staged
+else
+  echo "错误：你的分支与远程分支出现分叉，请先整合更改"
+  exit 1
+fi
