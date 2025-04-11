@@ -49,6 +49,7 @@ export function FilterDialog({
       status: null,
       nominated: null,
       title: null,
+      translatedStatus: null,
     };
     setFilters(emptyFilters);
     onClearFilter();
@@ -72,7 +73,8 @@ export function FilterDialog({
           {(currentFilters.tag ||
             currentFilters.status ||
             currentFilters.nominated ||
-            currentFilters.title) && (
+            currentFilters.title ||
+            currentFilters.translatedStatus) && (
             <span className="ml-1 h-2 w-2 rounded-full bg-primary"></span>
           )}
         </Button>
@@ -126,6 +128,26 @@ export function FilterDialog({
                 <SelectItem value="APPROVED">已通过</SelectItem>
                 <SelectItem value="REJECTED">已拒绝</SelectItem>
                 <SelectItem value="ARCHIVED">已入库</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="translatedStatus" className="text-right">
+              翻译状态
+            </Label>
+            <Select
+              value={filters.translatedStatus || ""}
+              onValueChange={(value) =>
+                setFilters({ ...filters, translatedStatus: value || null })
+              }
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="选择翻译状态" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="PENDING">翻译未审</SelectItem>
+                <SelectItem value="ARCHIVED">翻译已审</SelectItem>
               </SelectContent>
             </Select>
           </div>

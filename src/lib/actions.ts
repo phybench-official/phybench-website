@@ -18,11 +18,13 @@ export async function fetchProblems(
   page: number,
   perPage: number,
   isExam = false,
+  isAdmin = false,
   filters: FilterOptions = {
     tag: null,
     status: null,
     nominated: null,
     title: null,
+    translatedStatus: null,
   },
 ) {
   const session = await auth();
@@ -34,7 +36,7 @@ export async function fetchProblems(
 
   // 基础查询条件
   const where: any = isExam
-    ? session.user.role === "admin"
+    ? isAdmin
       ? {}
       : {
           OR: [{ examiners: { some: { id: currentUser } } }],
@@ -49,6 +51,9 @@ export async function fetchProblems(
   }
   if (filters.status && filters.status !== "all") {
     where.status = filters.status;
+  }
+  if (filters.translatedStatus && filters.translatedStatus !== "all") {
+    where.translatedStatus = filters.translatedStatus;
   }
   if (filters.nominated === true) {
     where.nominated = "Yes";
@@ -235,6 +240,19 @@ export async function examProblem(data: {
         problemRemark: data.remark,
         problemNominated: data.nominated,
       },
+    });
+
+    // 刷新审题人的积分
+    const examinerAggregate = await prisma.scoreEvent.aggregate({
+      _sum: {
+        score: true,
+      },
+      where: { userId: user.id },
+    });
+    const examinerNewScore = examinerAggregate._sum.score || 0;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { score: examinerNewScore },
     });
 
     // 直接覆盖题目正式审核结果
