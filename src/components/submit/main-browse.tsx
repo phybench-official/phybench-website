@@ -108,6 +108,7 @@ export default function BrowsePage({
       status: searchParams.get("status"),
       nominated: searchParams.get("nominated") === "true" ? true : null,
       title: searchParams.get("title"),
+      translatedStatus: searchParams.get("translatedStatus"),
     };
   };
 
@@ -120,6 +121,8 @@ export default function BrowsePage({
 
     if (newFilters.tag) params.set("tag", newFilters.tag);
     if (newFilters.status) params.set("status", newFilters.status);
+    if (newFilters.translatedStatus)
+      params.set("translatedStatus", newFilters.translatedStatus);
     if (newFilters.nominated === true) params.set("nominated", "true");
     if (newFilters.title) params.set("title", newFilters.title);
     const queryString = params.toString();
@@ -165,6 +168,8 @@ export default function BrowsePage({
       const params = new URLSearchParams();
       if (newFilters.tag) params.set("tag", newFilters.tag);
       if (newFilters.status) params.set("status", newFilters.status);
+      if (newFilters.translatedStatus)
+        params.set("translatedStatus", newFilters.translatedStatus);
       if (newFilters.nominated === true) params.set("nominated", "true");
       if (newFilters.title) params.set("title", newFilters.title);
 
@@ -201,6 +206,8 @@ export default function BrowsePage({
     const params = new URLSearchParams();
     if (filters.tag) params.set("tag", filters.tag);
     if (filters.status) params.set("status", filters.status);
+    if (filters.translatedStatus)
+      params.set("translatedStatus", filters.translatedStatus);
     if (filters.nominated === true) params.set("nominated", "true");
     if (filters.title) params.set("title", filters.title);
 
