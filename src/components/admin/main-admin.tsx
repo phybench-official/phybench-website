@@ -59,6 +59,12 @@ export default function AdminPage() {
           跳转到积分核算页面（使用无害，但应已自动化）
         </button>
       </Link>
+      
+      <Link href="/admin/update-examine-score">
+        <button className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
+          批量更新审核积分
+        </button>
+      </Link>
       <Link href="/admin/sync-examination-opinion">
         <button className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors">
           跳转到审核意见同步页面（慎用！可能冲掉题目的正式审核状态）
