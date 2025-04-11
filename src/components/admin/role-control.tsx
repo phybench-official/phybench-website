@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -80,7 +81,7 @@ export default function RoleControlPage() {
       );
     } catch (error) {
       console.error(error);
-      alert("更改用户角色失败");
+      toast.error("更改用户角色失败");
     }
   };
 
