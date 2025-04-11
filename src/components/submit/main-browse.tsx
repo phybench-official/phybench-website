@@ -32,9 +32,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { deleteProblem, fetchProblems } from "@/lib/actions";
 import { tagMap } from "@/lib/constants";
 import { Plus, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { FilterDialog } from "./browse-filter";
+import { FilterOptions } from "@/lib/types";
 
 // 定义每页显示数量
 const PER_PAGE = 15;
@@ -91,19 +93,123 @@ export default function BrowsePage({
   const [problems, setProblems] = useState<Problem[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [nextPage, setNextPage] = useState(currentPage);
-
   const [loading, setLoading] = useState(true);
 
+  // 使用URL查询参数获取筛选条件
+  const searchParams = useSearchParams();
   const router = useRouter();
+
+  // 从URL查询参数中提取筛选条件
+  const getFiltersFromUrl = (): FilterOptions => {
+    return {
+      tag: searchParams.get("tag"),
+      status: searchParams.get("status"),
+      nominated: searchParams.get("nominated") === "true" ? true : null,
+      title: searchParams.get("title"),
+    };
+  };
+
+  // 初始化筛选条件
+  const [filters, setFilters] = useState<FilterOptions>(getFiltersFromUrl());
+
+  // 更新URL查询参数
+  const updateUrlParams = (newFilters: FilterOptions) => {
+    const params = new URLSearchParams();
+
+    if (newFilters.tag) params.set("tag", newFilters.tag);
+    if (newFilters.status) params.set("status", newFilters.status);
+    if (newFilters.nominated === true) params.set("nominated", "true");
+    if (newFilters.title) params.set("title", newFilters.title);
+
+    const baseUrl = isExam
+      ? `/examine/${currentPage}`
+      : `/submit/${currentPage}`;
+    const queryString = params.toString();
+    const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+
+    router.replace(url, { scroll: false });
+  };
+
+  // 当URL参数变化时，更新本地筛选状态
   useEffect(() => {
-    fetchProblems(currentPage, PER_PAGE, isExam).then(
-      ({ problems, totalPages }) => {
+    const urlFilters = getFiltersFromUrl();
+    setFilters(urlFilters);
+  }, [searchParams]);
+
+  // 获取题目数据
+  useEffect(() => {
+    setLoading(true);
+    fetchProblems(currentPage, PER_PAGE, isExam, filters)
+      .then(({ problems, totalPages }) => {
         setProblems(problems);
         setTotalPages(totalPages);
         setLoading(false);
-      },
-    );
-  }, [currentPage]);
+      })
+      .catch((error) => {
+        console.error("获取题目失败", error);
+        setLoading(false);
+        toast.error("获取题目列表失败");
+      });
+  }, [currentPage, filters, isExam]);
+
+  // 应用筛选
+  const handleApplyFilter = (newFilters: FilterOptions) => {
+    // 更新URL参数
+    updateUrlParams(newFilters);
+    // 如果筛选条件变化很大，可能需要回到第一页
+    if (currentPage !== 1) {
+      const params = new URLSearchParams();
+      if (newFilters.tag) params.set("tag", newFilters.tag);
+      if (newFilters.status) params.set("status", newFilters.status);
+      if (newFilters.nominated === true) params.set("nominated", "true");
+      if (newFilters.title) params.set("title", newFilters.title);
+
+      const queryString = params.toString();
+      const url = isExam
+        ? queryString
+          ? `/examine/1?${queryString}`
+          : `/examine/1`
+        : queryString
+          ? `/submit/1?${queryString}`
+          : `/submit/1`;
+
+      router.replace(url);
+    }
+  };
+
+  // 清空筛选
+  const handleClearFilter = () => {
+    // 清空URL参数
+    const baseUrl = isExam
+      ? `/examine/${currentPage}`
+      : `/submit/${currentPage}`;
+    router.replace(baseUrl);
+  };
+
+  // 生成带有筛选参数的分页链接
+  const getPageLink = (pageNum: number) => {
+    const params = new URLSearchParams();
+    if (filters.tag) params.set("tag", filters.tag);
+    if (filters.status) params.set("status", filters.status);
+    if (filters.nominated === true) params.set("nominated", "true");
+    if (filters.title) params.set("title", filters.title);
+
+    const queryString = params.toString();
+    return isExam
+      ? queryString
+        ? `/examine/${pageNum}?${queryString}`
+        : `/examine/${pageNum}`
+      : queryString
+        ? `/submit/${pageNum}?${queryString}`
+        : `/submit/${pageNum}`;
+  };
+
+  // 跳转到指定页面
+  const handleJumpToPage = () => {
+    if (nextPage >= 1 && nextPage <= totalPages) {
+      router.push(getPageLink(nextPage));
+    }
+  };
 
   // 生成分页数组的函数
   const getPaginationItems = () => {
@@ -158,21 +264,31 @@ export default function BrowsePage({
             当前 {currentPage}页 / 共 {totalPages} 页{" "}
           </p>
         </div>
-        {!isExam && (
-          <>
-            <Button disabled className="inline md:hidden cursor-pointer">
-              添加问题
-            </Button>
-            <Button
-              onClick={() => {
-                router.push("/submit/add");
-              }}
-              className="md:flex hidden cursor-pointer"
-            >
-              <Plus /> 添加问题
-            </Button>
-          </>
-        )}
+        <div className="flex space-x-2">
+          {isExam && (
+            <FilterDialog
+              onApplyFilter={handleApplyFilter}
+              onClearFilter={handleClearFilter}
+              currentFilters={filters}
+              isExam={isExam}
+            />
+          )}
+          {!isExam && (
+            <>
+              <Button disabled className="inline md:hidden cursor-pointer">
+                添加问题
+              </Button>
+              <Button
+                onClick={() => {
+                  router.push("/submit/add");
+                }}
+                className="md:flex hidden cursor-pointer"
+              >
+                <Plus /> 添加问题
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* main list */}
@@ -243,67 +359,69 @@ export default function BrowsePage({
                         ? "已退回"
                         : "待审核"}
               </div>
-              <div
-                className={
-                  problem.translatedStatus === "APPROVED"
-                    ? "text-green-700 dark:text-green-300"
-                    : problem.translatedStatus === "ARCHIVED"
+              <div className="flex flex-row items-center space-x-2">
+                <div
+                  className={
+                    problem.translatedStatus === "APPROVED"
                       ? "text-green-700 dark:text-green-300"
+                      : problem.translatedStatus === "ARCHIVED"
+                        ? "text-green-700 dark:text-green-300"
+                        : problem.translatedStatus === "REJECTED"
+                          ? "text-red-800 dark:text-red-300"
+                          : problem.translatedStatus === "PENDING"
+                            ? "text-gray-600 dark:text-slate-300"
+                            : "text-yellow-800 dark:text-yellow-300"
+                  }
+                >
+                  {problem.translatedStatus === "APPROVED"
+                    ? "Error，请联系管理员"
+                    : problem.translatedStatus === "ARCHIVED"
+                      ? "翻译已审"
                       : problem.translatedStatus === "REJECTED"
-                        ? "text-red-800 dark:text-red-300"
+                        ? "Error，请联系管理员"
                         : problem.translatedStatus === "PENDING"
-                          ? "text-gray-600 dark:text-slate-300"
-                          : "text-yellow-800 dark:text-yellow-300"
-                }
-              >
-                {problem.translatedStatus === "APPROVED"
-                  ? "Error，请联系管理员"
-                  : problem.translatedStatus === "ARCHIVED"
-                    ? "翻译已审"
-                    : problem.translatedStatus === "REJECTED"
-                      ? "Error，请联系管理员"
-                      : problem.translatedStatus === "PENDING"
-                        ? "翻译未审"
-                        : "Error，请联系管理员"}
-              </div>
-              {!isExam && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className=" cursor-pointer"
-                    >
-                      <Trash2 />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>删除问题</DialogTitle>
-                    </DialogHeader>
-                    <p>
-                      是否真的要删除问题{" "}
-                      <span className="font-semibold">{problem.title}</span>？
-                    </p>
-                    <DialogFooter>
+                          ? "翻译未审"
+                          : "Error，请联系管理员"}
+                </div>
+                {!isExam && (
+                  <Dialog>
+                    <DialogTrigger asChild>
                       <Button
                         variant="destructive"
-                        onClick={() => {
-                          deleteProblem(problem.id).then(() => {
-                            router.refresh();
-                            toast.success("问题已删除");
-                          });
-                        }}
+                        size="sm"
+                        className=" cursor-pointer"
                       >
-                        删除
+                        <Trash2 />
                       </Button>
-                      <DialogClose asChild>
-                        <Button>取消</Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>删除问题</DialogTitle>
+                      </DialogHeader>
+                      <p>
+                        是否真的要删除问题{" "}
+                        <span className="font-semibold">{problem.title}</span>？
+                      </p>
+                      <DialogFooter>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            deleteProblem(problem.id).then(() => {
+                              router.refresh();
+                              toast.success("问题已删除");
+                            });
+                          }}
+                        >
+                          删除
+                        </Button>
+                        <DialogClose asChild>
+                          <Button>取消</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
             </CardFooter>
           </Card>
         ))}
@@ -316,11 +434,7 @@ export default function BrowsePage({
               <PaginationItem>
                 <PaginationPrevious
                   href={
-                    currentPage > 1
-                      ? isExam
-                        ? `/examine/${Number(currentPage) - 1}`
-                        : `/submit/${Number(currentPage) - 1}`
-                      : "#"
+                    currentPage > 1 ? getPageLink(Number(currentPage) - 1) : "#"
                   }
                   isActive={Number(currentPage) > 1}
                 />
@@ -340,9 +454,7 @@ export default function BrowsePage({
                   return (
                     <PaginationItem key={`page-${pageNum}`}>
                       <PaginationLink
-                        href={
-                          isExam ? `/examine/${pageNum}` : `/submit/${pageNum}`
-                        }
+                        href={getPageLink(pageNum)}
                         isActive={pageNum === currentPage}
                       >
                         {pageNum}
@@ -356,9 +468,7 @@ export default function BrowsePage({
                 <PaginationNext
                   href={
                     currentPage < totalPages
-                      ? isExam
-                        ? `/examine/${Number(currentPage) + 1}`
-                        : `/submit/${Number(currentPage) + 1}`
+                      ? getPageLink(Number(currentPage) + 1)
                       : "#"
                   }
                   isActive={Number(currentPage) < totalPages}
@@ -376,19 +486,7 @@ export default function BrowsePage({
                 className="w-20 text-center"
                 onChange={(e) => setNextPage(parseInt(e.target.value))}
               />
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  if (nextPage >= 1 && nextPage <= totalPages) {
-                    if (isExam) {
-                      router.push(`/examine/${nextPage}`);
-                    } else {
-                      router.push(`/submit/${nextPage}`);
-                    }
-                  }
-                }}
-              >
+              <Button variant="secondary" size="sm" onClick={handleJumpToPage}>
                 跳转
               </Button>
             </div>

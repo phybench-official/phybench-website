@@ -93,3 +93,10 @@ interface ExaminerInfo {
 }
 
 export type { AIPerformance, ProblemVariable, ProblemData, ExaminerInfo };
+
+export interface FilterOptions {
+  tag: string | null;
+  status: string | null;
+  nominated: boolean | null;
+  title: string | null;
+}
