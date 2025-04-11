@@ -24,6 +24,7 @@ export async function GET(req: Request) {
         description: true,
         status: true,
       },
+      orderBy: { id: "asc" }, // 按 id 升序排序
     });
 
     return NextResponse.json({

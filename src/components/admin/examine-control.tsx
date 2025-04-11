@@ -34,6 +34,7 @@ export default function ExamineControlPage() {
   const [problemCounts, setProblemCounts] = useState<ProblemCounts | null>(
     null,
   );
+  const [loadingAll, setLoadingAll] = useState(false);
 
   // 新增状态用于存储输入框的值
   const [mechanicsReview, setMechanicsReview] = useState<string>("");
@@ -98,7 +99,9 @@ export default function ExamineControlPage() {
 
         if (trimmedPart.includes("-")) {
           // Handle ranges
-          const [start, end] = trimmedPart.split("-").map((num) => parseInt(num.trim()));
+          const [start, end] = trimmedPart
+            .split("-")
+            .map((num) => parseInt(num.trim()));
           if (
             isNaN(start) ||
             isNaN(end) ||
@@ -130,7 +133,9 @@ export default function ExamineControlPage() {
 
         if (trimmedPart.includes("-")) {
           // Handle ranges
-          const [start, end] = trimmedPart.split("-").map((num) => parseInt(num.trim()));
+          const [start, end] = trimmedPart
+            .split("-")
+            .map((num) => parseInt(num.trim()));
           if (!isNaN(start) && !isNaN(end) && start <= end) {
             for (let i = start; i <= end; i++) {
               ids.push(i);
@@ -250,6 +255,37 @@ export default function ExamineControlPage() {
       }
     } else {
       alert(`更新失败: ${result.message}`);
+    }
+  };
+
+  // 清空审核问题
+  const handleClear = async () => {
+    setLoadingAll(true);
+    try {
+      const res = await fetch("/api/data/clearexamineproblems", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          data.message || "失败了失败了失败了失败了失败了失败了失败了失败了",
+        );
+      }
+      alert("清完啦！");
+      // 重新获取当前用户的可审题目
+      if (selectedUserId) {
+        fetch(`/api/data/getexamineproblems?userId=${selectedUserId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              setExamineProblems(data.problems);
+            }
+          });
+      }
+    } catch (error: any) {
+      console.error(error);
+    } finally {
+      setLoadingAll(false);
     }
   };
 
@@ -402,6 +438,13 @@ export default function ExamineControlPage() {
           className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
         >
           修改审核权限
+        </button>
+        <button
+          onClick={handleClear}
+          disabled={loadingAll}
+          className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          {loadingAll ? "正在清除中。。。" : "清空所有用户的审核权限"}
         </button>
       </div>
     </div>

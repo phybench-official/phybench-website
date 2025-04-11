@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
+import { FilterOptions } from "./types";
 export async function updateUsername(formData: FormData) {
   const session = await auth();
   if (!session) return;
@@ -17,6 +18,14 @@ export async function fetchProblems(
   page: number,
   perPage: number,
   isExam = false,
+  isAdmin = false,
+  filters: FilterOptions = {
+    tag: null,
+    status: null,
+    nominated: null,
+    title: null,
+    translatedStatus: null,
+  },
 ) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");
@@ -25,8 +34,9 @@ export async function fetchProblems(
     .findUnique({ where: { email: session.user.email } })
     .then((user) => user?.id);
 
-  const where = isExam
-    ? session.user.role === "admin"
+  // 基础查询条件
+  const where: any = isExam
+    ? isAdmin
       ? {}
       : {
           OR: [{ examiners: { some: { id: currentUser } } }],
@@ -34,6 +44,27 @@ export async function fetchProblems(
     : {
         OR: [{ userId: currentUser }, { offererEmail: session.user.email }],
       };
+
+  // 添加筛选条件
+  if (filters.tag && filters.tag !== "all") {
+    where.tag = filters.tag;
+  }
+  if (filters.status && filters.status !== "all") {
+    where.status = filters.status;
+  }
+  if (filters.translatedStatus && filters.translatedStatus !== "all") {
+    where.translatedStatus = filters.translatedStatus;
+  }
+  if (filters.nominated === true) {
+    where.nominated = "Yes";
+  }
+
+  if (filters.title) {
+    where.title = {
+      contains: filters.title,
+      mode: "insensitive",
+    };
+  }
 
   const [problems, count] = await Promise.all([
     prisma.problem.findMany({
@@ -46,6 +77,7 @@ export async function fetchProblems(
         title: true,
         tag: true,
         status: true,
+        translatedStatus: true,
         remark: true,
         score: true,
         createdAt: true,
@@ -67,7 +99,9 @@ export async function fetchTranslateProblems(page: number, perPage: number) {
 
   const where =
     session.user.role === "admin"
-      ? {}
+      ? {
+          OR: [{ translators: { some: { id: currentUser } } }],
+        }
       : {
           OR: [{ translators: { some: { id: currentUser } } }],
         };
@@ -84,6 +118,7 @@ export async function fetchTranslateProblems(page: number, perPage: number) {
         title: true,
         tag: true,
         status: true,
+        translatedStatus: true,
         remark: true,
         score: true,
         createdAt: true,
@@ -205,6 +240,19 @@ export async function examProblem(data: {
         problemRemark: data.remark,
         problemNominated: data.nominated,
       },
+    });
+
+    // 刷新审题人的积分
+    const examinerAggregate = await prisma.scoreEvent.aggregate({
+      _sum: {
+        score: true,
+      },
+      where: { userId: user.id },
+    });
+    const examinerNewScore = examinerAggregate._sum.score || 0;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { score: examinerNewScore },
     });
 
     // 直接覆盖题目正式审核结果

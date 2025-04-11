@@ -2,9 +2,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner"; // 使用 sonner 提示库
+import { ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MarkdownEditor } from "@/components/submit/markdown-editor";
 import RenderMarkdown from "@/components/render-markdown"; // 引入 RenderMarkdown
+
 interface Problem {
   content: string;
   id: number;
@@ -18,95 +21,21 @@ interface Problem {
   solution?: string;
   translatedSolution?: string;
 }
-// Left side: non-editable problem content.
-export function ProblemContent({ problem }: { problem: Problem }) {
-  return (
-    <Card className="mb-4 md:mb-0 h-[400px] overflow-auto">
-      <CardContent>
-        <h2>题目内容</h2>
-        <RenderMarkdown content={problem.content} />
-        <Button
-          onClick={() => {
-            navigator.clipboard.writeText(problem.content || "");
-            toast.success("题目内容已复制");
-          }}
-          className="mt-2"
-        >
-          复制内容
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
 
-// Editable translation component.
-// 定义 EditableTranslation 的参数类型
-interface EditableTranslationProps {
-  content: string; // 翻译内容
-  onSave: (text: string) => void; // 保存翻译的回调函数
-}
-
-// 修改后的 EditableTranslation 组件
-export function EditableTranslation({
-  content,
-  onSave,
-}: EditableTranslationProps) {
-  const [text, setText] = useState(content || "");
-
-  return (
-    <Card className="mb-4 md:mb-0 h-[400px] overflow-auto">
-      <CardContent>
-        <h2>翻译内容</h2>
-        <Textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="resize-none h-full"
-        />
-        <Button onClick={() => onSave(text)}>保存翻译</Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-// 修改 SolutionContent 组件，添加复制按钮
-interface SolutionContentProps {
-  solution: string; // 明确类型定义
-}
-
-function SolutionContent({ solution }: SolutionContentProps) {
-  // 复制解答内容的函数
-  const handleCopySolution = () => {
-    if (solution) {
-      navigator.clipboard.writeText(solution);
-      toast.success("解答内容已复制");
-    } else {
-      toast.info("暂无解答内容可复制");
-    }
-  };
-
-  return (
-    <Card className="mb-4 md:mb-0 h-[400px] overflow-auto">
-      <CardContent>
-        <h2>解答内容</h2>
-        {/* 渲染 Markdown 内容，处理空值 */}
-        <RenderMarkdown content={solution || "暂无解答内容"} />
-        {/* 复制按钮 */}
-        <Button onClick={handleCopySolution} className="mt-2">
-          复制解答
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-// Main TranslateView component.
 export function TranslateView({ problem }: { problem: Problem }) {
-  // 新增状态管理
+  const router = useRouter();
+
   const [translatedStatus, setTranslatedStatus] = useState(
     problem.translatedStatus || "PENDING",
   );
 
-  // 新增保存状态的函数
+  const [englishTranslation, setEnglishTranslation] = useState(
+    problem.translatedContent,
+  );
+  const [translatedSolution, setTranslatedSolution] = useState(
+    problem.translatedSolution,
+  );
+
   const saveStatus = async (
     newStatus: "PENDING" | "RETURNED" | "APPROVED" | "REJECTED" | "ARCHIVED",
   ) => {
@@ -130,15 +59,6 @@ export function TranslateView({ problem }: { problem: Problem }) {
     }
   };
 
-  // Local state for translations.
-  const [englishTranslation, setEnglishTranslation] = useState(
-    problem.translatedContent, // 原字段名修正
-  );
-  const [translatedSolution, setTranslatedSolution] = useState(
-    problem.translatedSolution,
-  );
-
-  // Function to save the translated content (题目翻译).
   const saveEnglishTranslation = async (text: string) => {
     try {
       const res = await fetch("/api/data/translate", {
@@ -146,7 +66,7 @@ export function TranslateView({ problem }: { problem: Problem }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           problemId: problem.id,
-          translatedContent: text, // 确保字段名与后端一致
+          translatedContent: text,
         }),
       });
       if (!res.ok) {
@@ -160,7 +80,6 @@ export function TranslateView({ problem }: { problem: Problem }) {
     }
   };
 
-  // Function to save the translated solution.
   const saveTranslatedSolution = async (text: string) => {
     try {
       const res = await fetch("/api/data/translate", {
@@ -175,34 +94,116 @@ export function TranslateView({ problem }: { problem: Problem }) {
         throw new Error("Failed to save solution translation");
       }
       setTranslatedSolution(text);
-      toast.success("解答翻译保存成功！"); // 成功提示
+      toast.success("解答过程翻译保存成功！");
     } catch (error) {
       console.error("Error saving translated solution:", error);
-      toast.error("解答翻译保存失败，请重试。"); // 错误提示
+      toast.error("解答过程翻译保存失败，请重试。");
+    }
+  };
+
+  const handleCopyProblemContent = () => {
+    if (problem.content) {
+      navigator.clipboard.writeText(problem.content);
+      toast.success("题干已复制");
+    } else {
+      toast.info("暂无题干可复制");
+    }
+  };
+
+  const handleCopySolution = () => {
+    if (problem.solution) {
+      navigator.clipboard.writeText(problem.solution);
+      toast.success("解答过程已复制");
+    } else {
+      toast.info("暂无解答过程可复制");
     }
   };
 
   return (
-    <div className="container grid grid-cols-1 gap-4 md:grid-cols-2 md:grid-rows-2 max-w-screen-lg mx-auto">
-      {/* Top row: problem content and its translation */}
-      <ProblemContent problem={problem} />
-      <EditableTranslation
-        content={englishTranslation || ""}
-        onSave={saveEnglishTranslation}
-      />
-
-      {/* Bottom row: solution content and its translation */}
-      <SolutionContent solution={problem.solution || ""} />
-      <EditableTranslation
-        content={translatedSolution || ""}
-        onSave={saveTranslatedSolution}
-      />
-
-      {/* 现有内容保持不变 */}
+    <div className="container max-w-full mx-auto px-4 py-4">
+      {/* 返回按钮放在最上方 */}
       <div className="mb-4">
-        <h2>当前状态: {translatedStatus == "PENDING" ? "待处理" : "已归档"}</h2>
-        <Button onClick={() => saveStatus("ARCHIVED")}>标记为归档</Button>
-        <Button onClick={() => saveStatus("PENDING")}>标记为待处理</Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1 cursor-pointer ml-40"
+          onClick={() => router.back()}
+        >
+          <ChevronLeft className="h-4 w-4" /> 返回
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <div className="container grid grid-cols-1 gap-4 md:grid-cols-2 max-w-auto mx-auto">
+          {/* 顶部行：问题内容及其翻译 */}
+          <Card className="mb-4 md:mb-0 h-[600px] overflow-auto">
+            <CardContent>
+              <p className="font-bold">题干</p>
+              <RenderMarkdown content={problem.content} />
+              <Button onClick={handleCopyProblemContent} className="mt-2">
+                复制内容
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="mb-4 md:mb-0 h-[600px] overflow-auto">
+            <CardContent>
+              <p className="font-bold">题干翻译</p>
+              <br></br>
+              <MarkdownEditor
+                text={englishTranslation || ""}
+                setText={setEnglishTranslation}
+                placeholder="暂无题干翻译"
+              />
+              <br></br>
+              <Button
+                onClick={() => saveEnglishTranslation(englishTranslation || "")}
+              >
+                保存翻译
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* 底部行：解决方案内容及其翻译 */}
+          <Card className="mb-4 md:mb-0 h-[800px] overflow-auto">
+            <CardContent>
+              <p className="font-bold">解答过程</p>
+              <RenderMarkdown content={problem.solution || "暂无解答内容"} />
+              <Button onClick={handleCopySolution} className="mt-2">
+                复制解答
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="mb-4 md:mb-0 h-[800px] overflow-auto">
+            <CardContent>
+              <p className="font-bold">解答过程翻译</p>
+              <br></br>
+              <MarkdownEditor
+                text={translatedSolution || ""}
+                setText={setTranslatedSolution}
+                placeholder="暂无解答过程翻译"
+              />
+              <br></br>
+              <Button
+                onClick={() => saveTranslatedSolution(translatedSolution || "")}
+              >
+                保存翻译
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* 当前状态保持不变 */}
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">
+              当前状态: {translatedStatus === "PENDING" ? "待处理" : "已归档"}
+            </h2>
+            <div className="flex gap-2 mt-2">
+              <Button onClick={() => saveStatus("ARCHIVED")}>标记为归档</Button>
+              <Button onClick={() => saveStatus("PENDING")}>
+                标记为待处理
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,13 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+
+interface User {
+  id: string;
+  name?: string;
+  email: string;
+  realname?: string;
+}
 
 export default function CalculateScorePage() {
   const [loadingAll, setLoadingAll] = useState(false);
-  const [loadingSingle, setLoadingSingle] = useState(false);
   const [message, setMessage] = useState("");
-  const [userId, setUserId] = useState("");
+  const [loadingSingle, setLoadingSingle] = useState(false);
+  const [userId, setUserId] = useState<string>("");
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    // 获取所有用户
+    fetch("/api/data/getusers")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setUsers(data.users);
+        }
+      });
+  }, []);
 
   // Calculate all users' scores using the /api/data/calculateallscores endpoint
   const handleCalculateAllScores = async () => {
@@ -81,6 +100,30 @@ export default function CalculateScorePage() {
       </div>
 
       {/* Section for calculating a single user's score */}
+      <div className="mb-4">
+        <label htmlFor="user-select" className="block mb-1">
+          选择用户
+        </label>
+        <select
+          id="user-select"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          className="border border-gray-300 p-2 w-full"
+        >
+          <option value="">请选择用户</option>
+          {users
+            .sort((a, b) => {
+              const nameA = a.realname || a.name || a.email; // 获取用户的名称
+              const nameB = b.realname || b.name || b.email;
+              return nameA.localeCompare(nameB, "zh"); // 使用拼音排序
+            })
+            .map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.realname || user.name || user.email}
+              </option>
+            ))}
+        </select>
+      </div>
       <div className="mb-6">
         <h2 className="text-lg mb-2">Calculate Score for a Single User</h2>
         <input

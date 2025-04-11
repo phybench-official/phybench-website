@@ -72,6 +72,30 @@ export default function Component({
       if (problemId) {
         setIsLoading(true);
         try {
+          // 优先检查本地存储是否有该题目的草稿
+          const draftKey = `problem-${problemId}`;
+          const localDraft = localStorage.getItem(draftKey);
+
+          if (localDraft) {
+            // 如果有本地草稿，优先使用本地草稿
+            const data = JSON.parse(localDraft);
+            setTitle(data.title || "");
+            setProblem(data.content || data.problem || "");
+            setSource(data.source || "");
+            setSelectedType(data.selectedType || "");
+            setDescription(data.description || "");
+            setNote(data.note || "");
+            setOffererEmail(data.offererEmail || "");
+            setSolution(data.solution || "");
+            setAnswer(data.answer || "");
+            setVariables(data.variables || []);
+            setAiResponses(data.aiResponses || []);
+
+            toast.info("已加载本地保存的草稿");
+            setIsLoading(false);
+            return;
+          }
+
           const response = await fetch(`/api/data/problem/${problemId}`);
 
           if (!response.ok) {
@@ -217,22 +241,27 @@ export default function Component({
     if (page.step < 4) {
       if (!validateForm()) return;
       // 保存当前题目信息至本地
-      if (!problemId) {
-        localStorage.setItem(
-          "problemDraft",
-          JSON.stringify({
-            title,
-            source,
-            selectedType,
-            description,
-            note,
-            problem,
-            solution,
-            answer,
-            variables,
-            aiResponses,
-          }),
-        );
+      const draftData = {
+        title,
+        source,
+        selectedType,
+        description,
+        note,
+        problem,
+        solution,
+        answer,
+        variables,
+        aiResponses,
+        offererEmail,
+      };
+
+      if (problemId) {
+        // 如果是编辑已有题目，使用problemId作为key
+        localStorage.setItem(`problem-${problemId}`, JSON.stringify(draftData));
+        toast.success("题目编辑已保存至浏览器本地");
+      } else {
+        // 新题目使用原来的key
+        localStorage.setItem("problemDraft", JSON.stringify(draftData));
         toast.success("题目信息已保存至浏览器本地");
       }
       setPage((prev) => ({ step: prev.step + 1, direction: 1 }));
@@ -276,7 +305,9 @@ export default function Component({
 
         toast.success(problemId ? "题目更新成功!" : "题目提交成功!");
         // 提交成功后删除本地草稿数据
-        if (!problemId) {
+        if (problemId) {
+          localStorage.removeItem(`problem-${problemId}`);
+        } else {
           localStorage.removeItem("problemDraft");
         }
         // 成功后跳转到提交页面
@@ -365,7 +396,7 @@ export default function Component({
             className="flex items-center gap-1 cursor-pointer col-span-1"
             onClick={() => router.back()}
           >
-            <ChevronLeft className="h-4 w-4" /> 返回题目列表
+            <ChevronLeft className="h-4 w-4" /> 返回
           </Button>
         </div>
         <Stepper

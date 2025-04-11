@@ -48,6 +48,55 @@ export async function GET(req: NextRequest) {
         totalCount,
         hasMore: skip + users.length < totalCount,
       });
+    } else if (type == "offerproblem") {
+      // 按供题数排名
+      const usersWithProblemCount = await prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          realname: true,
+          email: true,
+          score: true,
+          _count: {
+            select: {
+              offerProblems: true,
+            },
+          },
+        },
+        // orderBy: [
+        //   {
+        //     offerProblems: {
+        //       _count: "desc",
+        //     },
+        //   },
+        //   {
+        //     createdAt: "asc",
+        //   },
+        // ],
+        skip,
+        take: pageSize,
+      });
+
+      const formattedUsers = usersWithProblemCount.map((user) => ({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        realname: user.realname,
+        email: user.email,
+        score: user.score,
+        problemCount: user._count.offerProblems,
+      }));
+
+      // 获取总记录数
+      const totalCount = await prisma.user.count();
+
+      return NextResponse.json({
+        success: true,
+        data: formattedUsers,
+        totalCount,
+        hasMore: skip + formattedUsers.length < totalCount,
+      });
     } else {
       // 按题目数排名
       const usersWithProblemCount = await prisma.user.findMany({
