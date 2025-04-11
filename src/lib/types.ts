@@ -99,4 +99,5 @@ export interface FilterOptions {
   status: string | null;
   nominated: boolean | null;
   title: string | null;
+  translatedStatus: string | null;
 }

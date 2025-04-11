@@ -24,6 +24,7 @@ export async function fetchProblems(
     status: null,
     nominated: null,
     title: null,
+    translatedStatus: null,
   },
 ) {
   const session = await auth();
@@ -50,6 +51,9 @@ export async function fetchProblems(
   }
   if (filters.status && filters.status !== "all") {
     where.status = filters.status;
+  }
+  if (filters.translatedStatus && filters.translatedStatus !== "all") {
+    where.translatedStatus = filters.translatedStatus;
   }
   if (filters.nominated === true) {
     where.nominated = "Yes";
