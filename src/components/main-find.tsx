@@ -28,6 +28,7 @@ type UserScore = {
 // 题目数排行榜用户类型
 type UserProblemCount = UserScore & {
   problemCount: number;
+  offerProblemCount: number;
 };
 
 export function Scoreboard() {
@@ -50,6 +51,18 @@ export function Scoreboard() {
   const problemObserverRef = useRef<IntersectionObserver | null>(null);
   const problemLastElementRef = useRef<HTMLDivElement>(null);
   const [problemTotalCount, setProblemTotalCount] = useState(0);
+
+  // 供题数排行榜相关状态
+  const [offerProblemUsers, setOfferProblemUsers] = useState<
+    UserProblemCount[]
+  >([]);
+  const [offerProblemLoading, setOfferProblemLoading] = useState(true);
+  const [offerProblemLoadingMore, setOfferProblemLoadingMore] = useState(false);
+  const [offerProblemPage, setOfferProblemPage] = useState(1);
+  const [offerProblemHasMore, setOfferProblemHasMore] = useState(true);
+  const offerProblemObserverRef = useRef<IntersectionObserver | null>(null);
+  const offerProblemLastElementRef = useRef<HTMLDivElement>(null);
+  const [offerProblemTotalCount, setOfferProblemTotalCount] = useState(0);
 
   // 获取积分排行榜数据
   const fetchScoreUsers = useCallback(async (page: number) => {
@@ -119,11 +132,46 @@ export function Scoreboard() {
     }
   }, []);
 
+  // 获取供题数排行榜数据
+  const fetchOfferProblemUsers = useCallback(async (page: number) => {
+    try {
+      if (page === 1) setOfferProblemLoading(true);
+      else setOfferProblemLoadingMore(true);
+
+      const response = await fetch(
+        `/api/data/getscoreboard?type=offerproblems&page=${page}&pageSize=20`,
+      );
+
+      if (!response.ok) {
+        throw new Error("服务器响应错误");
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setOfferProblemUsers((prev) =>
+          page === 1 ? data.data : [...prev, ...data.data],
+        );
+        setOfferProblemHasMore(data.data.length === 20);
+        setOfferProblemTotalCount(data.totalCount);
+      } else {
+        toast.error("获取题目排行榜失败");
+      }
+    } catch (error) {
+      toast.error("获取题目排行榜时发生错误");
+      console.error(error);
+    } finally {
+      setOfferProblemLoading(false);
+      setOfferProblemLoadingMore(false);
+    }
+  }, []);
+
   // 初始加载数据
   useEffect(() => {
     fetchScoreUsers(1);
     fetchProblemUsers(1);
-  }, [fetchScoreUsers, fetchProblemUsers]);
+    fetchOfferProblemUsers(1);
+  }, [fetchScoreUsers, fetchProblemUsers, fetchOfferProblemUsers]);
 
   // 设置IntersectionObserver用于无限滚动
   useEffect(() => {
@@ -151,11 +199,34 @@ export function Scoreboard() {
       { threshold: 0.5 },
     );
 
+    // 供题数排行榜的observer
+    offerProblemObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          offerProblemHasMore &&
+          !offerProblemLoadingMore
+        ) {
+          setOfferProblemPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.5 },
+    );
+
     return () => {
       if (scoreObserverRef.current) scoreObserverRef.current.disconnect();
       if (problemObserverRef.current) problemObserverRef.current.disconnect();
+      if (offerProblemObserverRef.current)
+        offerProblemObserverRef.current.disconnect();
     };
-  }, [scoreHasMore, scoreLoadingMore, problemHasMore, problemLoadingMore]);
+  }, [
+    scoreHasMore,
+    scoreLoadingMore,
+    problemHasMore,
+    problemLoadingMore,
+    offerProblemHasMore,
+    offerProblemLoadingMore,
+  ]);
 
   // 监听观察点元素
   useEffect(() => {
@@ -166,7 +237,13 @@ export function Scoreboard() {
     if (problemLastElementRef.current && problemObserverRef.current) {
       problemObserverRef.current.observe(problemLastElementRef.current);
     }
-  }, [scoreUsers, problemUsers]);
+
+    if (offerProblemLastElementRef.current && offerProblemObserverRef.current) {
+      offerProblemObserverRef.current.observe(
+        offerProblemLastElementRef.current,
+      );
+    }
+  }, [scoreUsers, problemUsers, offerProblemUsers]);
 
   // 加载更多积分排行榜数据
   useEffect(() => {
@@ -181,6 +258,13 @@ export function Scoreboard() {
       fetchProblemUsers(problemPage);
     }
   }, [problemPage, fetchProblemUsers]);
+
+  // 加载更多供题数排行榜数据
+  useEffect(() => {
+    if (offerProblemPage > 1) {
+      fetchOfferProblemUsers(offerProblemPage);
+    }
+  }, [offerProblemPage, fetchOfferProblemUsers]);
 
   // 返回顶部功能
   const scrollToTop = () => {
@@ -197,7 +281,7 @@ export function Scoreboard() {
 
   return (
     <div className="container mt-8 sm:mt-12 mx-auto h-full px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 px-2 gap-6 my-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 px-2 gap-6 my-auto">
         {/* 积分排行榜卡片 */}
         <Card className="w-full">
           <CardHeader className="pb-3">
@@ -365,6 +449,97 @@ export function Scoreboard() {
                       className="py-4 text-center"
                     >
                       {problemLoadingMore ? (
+                        <Skeleton className="h-8 w-24 mx-auto" />
+                      ) : (
+                        <span className="text-sm text-gray-500">
+                          滚动加载更多...
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+        {/* 供题数排行榜卡片 */}
+        <Card className="w-full">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl flex items-center">
+                <Trophy className="h-5 w-5 mr-2 text-blue-500" />
+                供题贡献排行榜
+              </CardTitle>
+              <Badge variant="outline" className="flex items-center">
+                <BookOpen className="h-3.5 w-3.5 mr-1 text-blue-500" />
+                供题数
+              </Badge>
+            </div>
+            <CardDescription>
+              根据用户供题题目数量进行排名 共{offerProblemTotalCount} 施工中
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px] pr-4">
+              {offerProblemLoading ? (
+                // 加载中显示骨架屏
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4 mb-4">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                ))
+              ) : (
+                <>
+                  {offerProblemUsers.map((user, index) => (
+                    <div
+                      key={user.id + index}
+                      className={`flex items-center px-4 py-3 border-b last:border-b-0 ${
+                        index < 3 ? "bg-amber-50/50 dark:bg-amber-800/20" : ""
+                      }`}
+                    >
+                      {/* 排名 */}
+                      <div
+                        className={`flex-shrink-0 w-8 text-center font-semibold ${
+                          index === 0
+                            ? "text-yellow-300"
+                            : index === 1
+                              ? "text-cyan-400"
+                              : index === 2
+                                ? "text-red-700"
+                                : ""
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+
+                      {/* 用户名 */}
+                      <div className="flex-1 min-w-0 ml-2">
+                        <p className="font-medium truncate">
+                          {getUserDisplayName(user)}
+                        </p>
+                      </div>
+
+                      {/* 题目数 */}
+                      <div className="flex items-center space-x-1 text-blue-500 font-semibold">
+                        <BookOpen className="h-4 w-4" />
+                        <span>{user.offerProblemCount}</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* 观察点元素，用于无限滚动 */}
+                  {offerProblemHasMore && (
+                    <div
+                      ref={offerProblemLastElementRef}
+                      className="py-4 text-center"
+                    >
+                      {offerProblemLoadingMore ? (
                         <Skeleton className="h-8 w-24 mx-auto" />
                       ) : (
                         <span className="text-sm text-gray-500">
