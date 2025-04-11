@@ -247,7 +247,7 @@ function ExamDialog({
                     <div key={index} className="p-3 border rounded-md">
                       <div className="flex justify-between items-center mb-2">
                         <Badge variant="outline">
-                          {index+1}号审题人  {isAdmin && (comment.userId)}
+                          {index + 1}号审题人 {isAdmin && comment.userId}
                         </Badge>
                         <Badge
                           variant={
@@ -335,7 +335,7 @@ export function ProblemView({
           className="flex items-center gap-1 cursor-pointer"
           onClick={() => router.back()}
         >
-          <ChevronLeft className="h-4 w-4" /> 返回题目列表
+          <ChevronLeft className="h-4 w-4" /> 返回
         </Button>
 
         {editable && (
@@ -361,9 +361,13 @@ export function ProblemView({
             <Badge className={`${statusMap[problem.status].color}`}>
               {statusMap[problem.status].label}
             </Badge>
-            {isAdmin && (<Badge className={`${translatedStatusMap[problem.translatedStatus].color}`}>
-              {translatedStatusMap[problem.translatedStatus].label}
-            </Badge>)}
+            {isAdmin && (
+              <Badge
+                className={`${translatedStatusMap[problem.translatedStatus].color}`}
+              >
+                {translatedStatusMap[problem.translatedStatus].label}
+              </Badge>
+            )}
           </CardTitle>
           <CardDescription>查看题目详细信息</CardDescription>
         </CardHeader>

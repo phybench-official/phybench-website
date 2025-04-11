@@ -129,7 +129,7 @@ export function TranslateView({ problem }: { problem: Problem }) {
           className="flex items-center gap-1 cursor-pointer ml-40"
           onClick={() => router.back()}
         >
-          <ChevronLeft className="h-4 w-4" /> 返回题目列表
+          <ChevronLeft className="h-4 w-4" /> 返回
         </Button>
       </div>
 

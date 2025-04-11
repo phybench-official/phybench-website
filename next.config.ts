@@ -36,6 +36,11 @@ const nextConfig: NextConfig = {
         destination: "/translate/1",
         permanent: true,
       },
+      {
+        source: "/admin/admin-browse",
+        destination: "/admin/admin-browse/1",
+        permanent: true,
+      },
     ];
   },
   output: "standalone",

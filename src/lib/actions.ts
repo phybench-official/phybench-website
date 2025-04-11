@@ -27,7 +27,9 @@ export async function fetchProblems(
 
   const where = isExam
     ? session.user.role === "admin"
-      ? {}
+      ? {
+          OR: [{ examiners: { some: { id: currentUser } } }],
+        }
       : {
           OR: [{ examiners: { some: { id: currentUser } } }],
         }
@@ -68,7 +70,9 @@ export async function fetchTranslateProblems(page: number, perPage: number) {
 
   const where =
     session.user.role === "admin"
-      ? {}
+      ? {
+          OR: [{ translators: { some: { id: currentUser } } }],
+        }
       : {
           OR: [{ translators: { some: { id: currentUser } } }],
         };

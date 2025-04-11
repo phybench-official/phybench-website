@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import UploadTranslatedContent from "@/components/admin/upload-translated-content";
+import UploadProblemAttributePage from "@/components/admin/upload-problem-attribute";
 import { NotPermitted } from "@/components/ui/not-permitted";
 import { NotAuthorized } from "@/components/ui/not-authorized";
 
@@ -11,7 +11,7 @@ export default async function Page() {
 
   return (
     <div className=" h-screen max-h-screen overflow-clip pt-24">
-      <UploadTranslatedContent />
+      <UploadProblemAttributePage />
     </div>
   );
 }

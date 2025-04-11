@@ -365,7 +365,7 @@ export default function Component({
             className="flex items-center gap-1 cursor-pointer col-span-1"
             onClick={() => router.back()}
           >
-            <ChevronLeft className="h-4 w-4" /> 返回题目列表
+            <ChevronLeft className="h-4 w-4" /> 返回
           </Button>
         </div>
         <Stepper
