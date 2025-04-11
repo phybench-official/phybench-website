@@ -18,6 +18,7 @@ export async function fetchProblems(
   page: number,
   perPage: number,
   isExam = false,
+  isAdmin = false,
   filters: FilterOptions = {
     tag: null,
     status: null,
@@ -34,7 +35,7 @@ export async function fetchProblems(
 
   // 基础查询条件
   const where: any = isExam
-    ? session.user.role === "admin"
+    ? isAdmin
       ? {}
       : {
           OR: [{ examiners: { some: { id: currentUser } } }],

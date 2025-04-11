@@ -85,9 +85,11 @@ function SkeletonCard() {
 export default function BrowsePage({
   currentPage,
   isExam = false,
+  isAdmin = false,
 }: {
   currentPage: number;
   isExam?: boolean;
+  isAdmin?: boolean;
 }) {
   // 获取题目列表与总页数
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -120,11 +122,12 @@ export default function BrowsePage({
     if (newFilters.status) params.set("status", newFilters.status);
     if (newFilters.nominated === true) params.set("nominated", "true");
     if (newFilters.title) params.set("title", newFilters.title);
-
-    const baseUrl = isExam
-      ? `/examine/${currentPage}`
-      : `/submit/${currentPage}`;
     const queryString = params.toString();
+    const baseUrl = isExam
+      ? isAdmin
+        ? `/admin/admin-browse/${currentPage}`
+        : `/examine/${currentPage}`
+      : `/submit/${currentPage}`;
     const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
 
     router.replace(url, { scroll: false });
@@ -139,7 +142,8 @@ export default function BrowsePage({
   // 获取题目数据
   useEffect(() => {
     setLoading(true);
-    fetchProblems(currentPage, PER_PAGE, isExam, filters)
+
+    fetchProblems(currentPage, PER_PAGE, isExam, isAdmin, filters)
       .then(({ problems, totalPages }) => {
         setProblems(problems);
         setTotalPages(totalPages);
@@ -166,9 +170,13 @@ export default function BrowsePage({
 
       const queryString = params.toString();
       const url = isExam
-        ? queryString
-          ? `/examine/1?${queryString}`
-          : `/examine/1`
+        ? isAdmin
+          ? queryString
+            ? `/admin/admin-browse/1?${queryString}`
+            : `/admin/admin-browse/1`
+          : queryString
+            ? `/examine/1?${queryString}`
+            : `/examine/1`
         : queryString
           ? `/submit/1?${queryString}`
           : `/submit/1`;
@@ -181,7 +189,9 @@ export default function BrowsePage({
   const handleClearFilter = () => {
     // 清空URL参数
     const baseUrl = isExam
-      ? `/examine/${currentPage}`
+      ? isAdmin
+        ? `/admin/admin-browse/${currentPage}`
+        : `/examine/${currentPage}`
       : `/submit/${currentPage}`;
     router.replace(baseUrl);
   };
@@ -196,9 +206,13 @@ export default function BrowsePage({
 
     const queryString = params.toString();
     return isExam
-      ? queryString
-        ? `/examine/${pageNum}?${queryString}`
-        : `/examine/${pageNum}`
+      ? isAdmin
+        ? queryString
+          ? `/admin/admin-browse/${pageNum}?${queryString}`
+          : `/admin/admin-browse/${pageNum}`
+        : queryString
+          ? `/examine/${pageNum}?${queryString}`
+          : `/examine/${pageNum}`
       : queryString
         ? `/submit/${pageNum}?${queryString}`
         : `/submit/${pageNum}`;
@@ -299,7 +313,9 @@ export default function BrowsePage({
         {!problems.length && (
           <div className="md:col-span-3 text-center text-gray-500 dark:text-gray-400 h-[50vh]">
             {isExam
-              ? "暂无可审问题；如果希望审核题目，请关注群内消息、报名审核活动！"
+              ? isAdmin
+                ? "暂未找到问题"
+                : "暂无可审问题；如果希望审核题目，请关注群内消息、报名审核活动！"
               : "暂无提交问题"}
           </div>
         )}
