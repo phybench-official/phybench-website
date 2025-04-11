@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/prisma";
 import { auth } from "@/auth";
+import { FilterOptions } from "./types";
 export async function updateUsername(formData: FormData) {
   const session = await auth();
   if (!session) return;
@@ -17,6 +18,12 @@ export async function fetchProblems(
   page: number,
   perPage: number,
   isExam = false,
+  filters: FilterOptions = {
+    tag: null,
+    status: null,
+    nominated: null,
+    title: null,
+  },
 ) {
   const session = await auth();
   if (!session) throw new Error("Not authorized");
@@ -25,17 +32,34 @@ export async function fetchProblems(
     .findUnique({ where: { email: session.user.email } })
     .then((user) => user?.id);
 
-  const where = isExam
+  // 基础查询条件
+  const where: any = isExam
     ? session.user.role === "admin"
-      ? {
-          OR: [{ examiners: { some: { id: currentUser } } }],
-        }
+      ? {}
       : {
           OR: [{ examiners: { some: { id: currentUser } } }],
         }
     : {
         OR: [{ userId: currentUser }, { offererEmail: session.user.email }],
       };
+
+  // 添加筛选条件
+  if (filters.tag && filters.tag !== "all") {
+    where.tag = filters.tag;
+  }
+  if (filters.status && filters.status !== "all") {
+    where.status = filters.status;
+  }
+  if (filters.nominated === true) {
+    where.nominated = "Yes";
+  }
+
+  if (filters.title) {
+    where.title = {
+      contains: filters.title,
+      mode: "insensitive",
+    };
+  }
 
   const [problems, count] = await Promise.all([
     prisma.problem.findMany({
