@@ -348,6 +348,16 @@ export function ProblemView({
             >
               编辑题目
             </Button>
+            {isAdmin && (
+              <Button
+                size="sm"
+                variant="secondary"
+                className="flex items-center gap-1 cursor-pointer"
+                onClick={() => router.push(`/translateproblem/${problem.id}`)}
+              >
+                查看题目翻译
+              </Button>
+            )}
             {examable && <ExamDialog problem={problem} isAdmin={isAdmin} />}
           </div>
         )}
