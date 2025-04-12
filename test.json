@@ -1,0 +1,31 @@
+[
+  {
+    "id": 240,
+    "aiPerformances": [
+      {
+        "aiName": "神秘AI",
+        "aiSolution": "一个AI的解答过程",
+        "aiAnswer": "一个AI给出的答案",
+        "isCorrect": "No"
+      },
+      {
+        "aiName": "神秘AI二号",
+        "aiSolution": "另一个AI的解答过程",
+        "aiAnswer": "另一个AI给出的答案",
+        "isCorrect": "No",
+        "comment": "评价可写可不写"
+      }
+    ]
+  },
+  {
+    "id": 241,
+    "aiPerformances": [
+      {
+        "aiName": "神秘AI二号",
+        "aiSolution": "另一个AI的解答过程",
+        "aiAnswer": "另一个AI给出的答案",
+        "isCorrect": "No"
+      }
+    ]
+  }
+]
