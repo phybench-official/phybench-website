@@ -42,7 +42,7 @@ export default function UploadProblemAttributePage() {
       const text = await file.text();
       const jsonData = JSON.parse(text);
 
-      const res = await fetch("/api/data/uploadtranslatedcontent", {
+      const res = await fetch("/api/data/uploadproblemattribute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(jsonData),
@@ -70,7 +70,7 @@ export default function UploadProblemAttributePage() {
         </button>
       </Link>
 
-      <h1 className="text-xl mb-4">Upload Translated Content</h1>
+      <h1 className="text-xl mb-4">Upload Problem Attribute</h1>
 
       {/* Drag-and-drop area (plus click to select file) */}
       <div
