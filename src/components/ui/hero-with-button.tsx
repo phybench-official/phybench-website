@@ -38,10 +38,11 @@ function Hero1() {
             </a>
             <Button
               size="lg"
+              disabled
               className="gap-4 cursor-pointer"
               onClick={() => router.push("/submit")}
             >
-              即刻提交题目 <MoveRight className="w-4 h-4" />
+              提交题目 <MoveRight className="w-4 h-4" />
             </Button>
           </div>
         </div>

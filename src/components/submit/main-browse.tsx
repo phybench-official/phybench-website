@@ -300,6 +300,7 @@ export default function BrowsePage({
                 添加问题
               </Button>
               <Button
+                disabled
                 onClick={() => {
                   router.push("/submit/add");
                 }}

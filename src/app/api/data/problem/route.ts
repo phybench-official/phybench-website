@@ -6,13 +6,18 @@ import { ProblemTag } from "@prisma/client";
 export async function POST(req: NextRequest) {
   const session = await auth();
 
+  const isDisabled = true;
+
+  if (isDisabled) {
+    return NextResponse.json({ message: "提交功能已关闭" }, { status: 503 });
+  }
+
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const userEmail = session.user.email;
-
     if (!userEmail) {
       return NextResponse.json(
         { message: "用户邮箱缺失，无法确认用户身份" },
