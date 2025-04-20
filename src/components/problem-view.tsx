@@ -22,6 +22,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Eye, ChevronLeft } from "lucide-react";
@@ -39,7 +50,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { examProblem, getExaminerNumber } from "@/lib/actions";
+import { deleteProblem, examProblem, getExaminerNumber } from "@/lib/actions";
 import { toast } from "sonner";
 
 function ExamDialog({
@@ -326,6 +337,18 @@ export function ProblemView({
 }) {
   const router = useRouter();
 
+  const handleDelete = async () => {
+    try {
+      await deleteProblem(problem.id);
+      toast.success("题目删除成功");
+      router.back();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "删除题目时发生未知错误";
+      toast.error(`删除失败: ${errorMessage}`);
+    }
+  };
+
   return (
     <div className="container mt-16 md:mt-0 px-4 md:px-0 grid grid-cols-1 lg:grid-cols-3 gap-4 py-4 max-w-7xl">
       <div className="lg:col-span-3 mb-2 w-full flex flex-row justify-between items-center">
@@ -358,6 +381,34 @@ export function ProblemView({
                 查看题目翻译
               </Button>
             )}
+            {isAdmin && (
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="flex items-center gap-1 cursor-pointer"
+                  >
+                    删除题目
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>是否确认删除题目？</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      您即将删除题目<strong>{problem.title}</strong>
+                      ，请确认是否继续。请确认是否继续。
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>
+                      确认
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             {examable && <ExamDialog problem={problem} isAdmin={isAdmin} />}
           </div>
         )}
@@ -368,16 +419,18 @@ export function ProblemView({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>题目信息</span>
-            <Badge className={`${statusMap[problem.status].color}`}>
-              {statusMap[problem.status].label}
-            </Badge>
-            {isAdmin && (
-              <Badge
-                className={`${translatedStatusMap[problem.translatedStatus].color}`}
-              >
-                {translatedStatusMap[problem.translatedStatus].label}
+            <div className="flex flex-row items-center gap-2">
+              <Badge className={`${statusMap[problem.status].color}`}>
+                {statusMap[problem.status].label}
               </Badge>
-            )}
+              {isAdmin && (
+                <Badge
+                  className={`${translatedStatusMap[problem.translatedStatus].color}`}
+                >
+                  {translatedStatusMap[problem.translatedStatus].label}
+                </Badge>
+              )}
+            </div>
           </CardTitle>
           <CardDescription>查看题目详细信息</CardDescription>
         </CardHeader>

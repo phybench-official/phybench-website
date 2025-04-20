@@ -10,7 +10,7 @@ export default async function Page() {
   if (session.user.role !== "admin") return <NotPermitted />;
 
   return (
-    <div className=" h-screen max-h-screen overflow-clip pt-24">
+    <div className=" h-screen max-h-screen overflow-auto pt-24">
       <DownloadProblemPage />
     </div>
   );
