@@ -9,18 +9,19 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const tag = searchParams.get("tag") || undefined;
-  const status = searchParams.get("status") || undefined;
-  const translatedStatus = searchParams.get("translatedStatus") || undefined;
+  // Get all values as arrays
+  const tags = searchParams.getAll("tag") || undefined;
+  const statuses = searchParams.getAll("status") || undefined;
+  const translatedStatuses = searchParams.getAll("translatedStatus") || undefined;
   const nominated = searchParams.get("nominated") || undefined;
   const aiPerformancesParam = searchParams.get("aiPerformances") || undefined;
   const fieldsParam = searchParams.get("fields") || "";
 
   // Build the basic filter (where) clause.
   const where: any = {
-    ...(status ? { status } : {}),
-    ...(tag ? { tag } : {}),
-    ...(translatedStatus ? { translatedStatus } : {}),
+    ...(tags && tags.length > 0 ? { tag: { in: tags } } : {}),
+    ...(statuses && statuses.length > 0 ? { status: { in: statuses } } : {}),
+    ...(translatedStatuses && translatedStatuses.length > 0 ? { translatedStatus: { in: translatedStatuses } } : {}),
     ...(nominated ? { nominated } : {}),
   };
 
