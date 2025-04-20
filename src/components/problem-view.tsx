@@ -368,16 +368,18 @@ export function ProblemView({
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>题目信息</span>
-            <Badge className={`${statusMap[problem.status].color}`}>
-              {statusMap[problem.status].label}
-            </Badge>
-            {isAdmin && (
-              <Badge
-                className={`${translatedStatusMap[problem.translatedStatus].color}`}
-              >
-                {translatedStatusMap[problem.translatedStatus].label}
+            <div className="flex flex-row items-center gap-2">
+              <Badge className={`${statusMap[problem.status].color}`}>
+                {statusMap[problem.status].label}
               </Badge>
-            )}
+              {isAdmin && (
+                <Badge
+                  className={`${translatedStatusMap[problem.translatedStatus].color}`}
+                >
+                  {translatedStatusMap[problem.translatedStatus].label}
+                </Badge>
+              )}
+            </div>
           </CardTitle>
           <CardDescription>查看题目详细信息</CardDescription>
         </CardHeader>
