@@ -65,6 +65,17 @@ export default function AdminPage() {
               积分事件上传
             </motion.button>
           </Link>
+
+          {/* 6. 积分事件上传 */}
+          <Link href="/admin/update-examination-status" className="block mb-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-blue-500 text-white py-4 rounded-lg hover:bg-blue-600 transition-colors shadow-md"
+            >
+              更新翻译已归档、待审核题目的审核状态
+            </motion.button>
+          </Link>
         </div>
 
         {/* 右侧栏 */}
