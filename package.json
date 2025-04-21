@@ -27,7 +27,7 @@
     ]
   },
   "dependencies": {
-    "@ai-sdk/deepseek": "^0.1.13",
+    "@ai-sdk/deepseek": "^0.2.12",
     "@ai-sdk/openai": "^1.2.1",
     "@ai-sdk/react": "^1.1.21",
     "@auth/prisma-adapter": "^2.7.2",
