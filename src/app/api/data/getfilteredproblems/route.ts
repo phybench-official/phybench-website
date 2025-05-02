@@ -12,7 +12,8 @@ export async function GET(request: Request) {
   // Get all values as arrays
   const tags = searchParams.getAll("tag") || undefined;
   const statuses = searchParams.getAll("status") || undefined;
-  const translatedStatuses = searchParams.getAll("translatedStatus") || undefined;
+  const translatedStatuses =
+    searchParams.getAll("translatedStatus") || undefined;
   const nominated = searchParams.get("nominated") || undefined;
   const aiPerformancesParam = searchParams.get("aiPerformances") || undefined;
   const fieldsParam = searchParams.get("fields") || "";
@@ -21,7 +22,9 @@ export async function GET(request: Request) {
   const where: any = {
     ...(tags && tags.length > 0 ? { tag: { in: tags } } : {}),
     ...(statuses && statuses.length > 0 ? { status: { in: statuses } } : {}),
-    ...(translatedStatuses && translatedStatuses.length > 0 ? { translatedStatus: { in: translatedStatuses } } : {}),
+    ...(translatedStatuses && translatedStatuses.length > 0
+      ? { translatedStatus: { in: translatedStatuses } }
+      : {}),
     ...(nominated ? { nominated } : {}),
   };
 
@@ -36,6 +39,7 @@ export async function GET(request: Request) {
     content: true,
     solution: true,
     answer: true,
+    description: true,
   };
 
   // Allowed additional fields.
@@ -70,7 +74,7 @@ export async function GET(request: Request) {
     console.error("Error fetching problems:", error);
     return NextResponse.json(
       { message: "Server error", error: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
