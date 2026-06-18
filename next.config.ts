@@ -17,6 +17,19 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // 把 OIDC 标准发现地址映射到内部路由处理器。
+  async rewrites() {
+    return [
+      {
+        source: "/.well-known/openid-configuration",
+        destination: "/api/oauth/openid-configuration",
+      },
+      {
+        source: "/.well-known/jwks.json",
+        destination: "/api/oauth/jwks",
+      },
+    ];
+  },
   // redirect /submit to /submit/1 permanently
   // redirect /examine to /examine/1 permanently
   async redirects() {

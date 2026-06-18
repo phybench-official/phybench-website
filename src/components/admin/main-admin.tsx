@@ -134,6 +134,17 @@ export default function AdminPage() {
               审核意见同步
             </motion.button>
           </Link>
+
+          {/* 6. 下游应用 OAuth 接入管理 */}
+          <Link href="/admin/oauth-clients" className="block mb-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-purple-600 text-white py-4 rounded-lg hover:bg-purple-700 transition-colors shadow-md"
+            >
+              OAuth 应用接入管理
+            </motion.button>
+          </Link>
         </div>
       </div>
     </div>

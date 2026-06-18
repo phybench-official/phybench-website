@@ -37,6 +37,11 @@ model User {
   score       Int          @default(0)                         // 用户的积分
   scoreEvents ScoreEvent[] @relation("UserScoreEvents")        // 用户的积分事件
 
+  // 作为 OIDC Provider 下发给下游应用的授权产物
+  oauthCodes         OAuthAuthorizationCode[]
+  oauthAccessTokens  OAuthAccessToken[]
+  oauthRefreshTokens OAuthRefreshToken[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -78,6 +83,89 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+// ============================================================================
+// 本应用作为 OIDC Provider（身份代理网关）下发给第三方下游应用的相关模型。
+// 上游身份来自 UAAA（见 auth.config.ts），这里签发的是本站自有的 token，
+// 下游应用永远拿不到 UAAA 的原始 token。
+// ============================================================================
+
+// 已注册的下游应用（OAuth 客户端）。由管理员在 /admin/oauth-clients 创建。
+model OAuthClient {
+  id             String   @id @default(cuid())
+  clientId       String   @unique
+  clientSecret   String                              // 仅存 sha256 哈希；明文创建时一次性展示
+  name           String
+  description    String?
+  redirectUris   String[]                            // 回调地址白名单（精确匹配）
+  scopes         String[] @default(["openid", "profile", "email"])
+  grantTypes     String[] @default(["authorization_code", "refresh_token"])
+  isConfidential Boolean  @default(true)             // 机密客户端需校验 client_secret
+  disabled       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  authorizationCodes OAuthAuthorizationCode[]
+  accessTokens       OAuthAccessToken[]
+  refreshTokens      OAuthRefreshToken[]
+}
+
+// 一次性授权码（短时效，60s，用后即焚）。
+model OAuthAuthorizationCode {
+  id                  String    @id @default(cuid())
+  code                String    @unique             // 仅存 sha256 哈希
+  clientId            String
+  userId              String
+  redirectUri         String
+  scope               String
+  nonce               String?
+  codeChallenge       String?
+  codeChallengeMethod String?
+  expiresAt           DateTime
+  consumedAt          DateTime?
+  createdAt           DateTime  @default(now())
+
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+}
+
+// 访问令牌（opaque，可吊销，存哈希）。
+model OAuthAccessToken {
+  id        String   @id @default(cuid())
+  token     String   @unique                        // 仅存 sha256 哈希
+  clientId  String
+  userId    String
+  scope     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+}
+
+// 刷新令牌（opaque，旋转式，存哈希）。
+model OAuthRefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique                       // 仅存 sha256 哈希
+  clientId  String
+  userId    String
+  scope     String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
 }
 
 // Optional for WebAuthn support
