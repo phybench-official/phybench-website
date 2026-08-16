@@ -27,6 +27,7 @@ export async function GET() {
       name: true,
       description: true,
       redirectUris: true,
+      postLogoutRedirectUris: true,
       scopes: true,
       grantTypes: true,
       isConfidential: true,
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest) {
     name?: string;
     description?: string;
     redirectUris?: string[];
+    postLogoutRedirectUris?: string[];
     scopes?: string[];
     isConfidential?: boolean;
   };
@@ -82,6 +84,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // 登出后回跳地址白名单。可选 —— 不配就是「不允许带回跳地址登出」，
+  // 登出本身照常执行。与 redirectUris 一样必须是合法绝对 URL 且精确匹配。
+  const postLogoutRedirectUris = (payload.postLogoutRedirectUris ?? [])
+    .map((u) => u.trim())
+    .filter(Boolean);
+  for (const u of postLogoutRedirectUris) {
+    try {
+      new URL(u);
+    } catch {
+      return NextResponse.json(
+        { error: `登出回跳地址不是合法 URL: ${u}` },
+        { status: 400 },
+      );
+    }
+  }
+
   const scopes = (payload.scopes ?? ["openid", "profile", "email"]).filter(
     (s) => SUPPORTED_SCOPES.includes(s),
   );
@@ -99,6 +117,7 @@ export async function POST(req: NextRequest) {
       name,
       description: payload.description?.trim() || null,
       redirectUris,
+      postLogoutRedirectUris,
       scopes: Array.from(new Set(scopes)),
       isConfidential,
     },

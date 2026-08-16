@@ -27,6 +27,7 @@ export async function PATCH(
     name?: string;
     description?: string;
     redirectUris?: string[];
+    postLogoutRedirectUris?: string[];
     scopes?: string[];
   };
   try {
@@ -61,6 +62,24 @@ export async function PATCH(
       );
     }
     data.redirectUris = uris;
+  }
+
+  // 登出回跳白名单：允许清空（传空数组 = 收回该客户端带回跳登出的能力）。
+  if (Array.isArray(payload.postLogoutRedirectUris)) {
+    const uris = payload.postLogoutRedirectUris
+      .map((u) => u.trim())
+      .filter(Boolean);
+    for (const u of uris) {
+      try {
+        new URL(u);
+      } catch {
+        return NextResponse.json(
+          { error: `登出回跳地址不是合法 URL: ${u}` },
+          { status: 400 },
+        );
+      }
+    }
+    data.postLogoutRedirectUris = uris;
   }
 
   if (Array.isArray(payload.scopes)) {

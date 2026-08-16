@@ -112,3 +112,31 @@ export async function resolveAccessToken(token: string) {
   if (record.expiresAt.getTime() < Date.now()) return null;
   return record;
 }
+
+// 登出时吊销该用户在某个客户端下已签发的令牌。
+//
+// 为什么必须做：access token 是 opaque 且**服务端校验**的，下游后端只要还捏着
+// 它就能继续取数据，最长 1 小时；refresh token 更长，30 天。只清 cookie 不吊销
+// 令牌，等于「前台登出了、后台还在」。
+//
+// access token 直接删（无 revokedAt 字段，删除即失效）；refresh token 打
+// revokedAt 标记，保留记录以便审计能看出它是被主动吊销而不是自然过期。
+export async function revokeTokensForUserClient(params: {
+  userId: string;
+  clientId: string;
+}): Promise<{ accessRevoked: number; refreshRevoked: number }> {
+  const [access, refresh] = await prisma.$transaction([
+    prisma.oAuthAccessToken.deleteMany({
+      where: { userId: params.userId, clientId: params.clientId },
+    }),
+    prisma.oAuthRefreshToken.updateMany({
+      where: {
+        userId: params.userId,
+        clientId: params.clientId,
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    }),
+  ]);
+  return { accessRevoked: access.count, refreshRevoked: refresh.count };
+}

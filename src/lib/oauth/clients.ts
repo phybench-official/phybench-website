@@ -67,3 +67,16 @@ export function parseClientCredentials(
     clientSecret: body.get("client_secret"),
   };
 }
+
+// 登出后的回跳地址同样必须精确匹配白名单。
+//
+// 单独一份白名单而不是复用 redirectUris：两者语义不同，混用会让登出端点变成
+// 开放重定向 —— 一个合法的授权回调地址就能把用户从登出流程导去任意站点。
+// 未配置（空数组）时一律拒绝，登出照常执行、只是不回跳。
+export function isPostLogoutRedirectUriAllowed(
+  client: OAuthClient,
+  uri: string | null | undefined,
+): boolean {
+  if (!uri) return false;
+  return client.postLogoutRedirectUris.includes(uri);
+}

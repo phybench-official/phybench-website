@@ -18,6 +18,7 @@ export async function GET() {
       token_endpoint: ENDPOINTS.token_endpoint,
       userinfo_endpoint: ENDPOINTS.userinfo_endpoint,
       jwks_uri: ENDPOINTS.jwks_uri,
+      end_session_endpoint: ENDPOINTS.end_session_endpoint,
       response_types_supported: ["code"],
       grant_types_supported: ["authorization_code", "refresh_token"],
       subject_types_supported: ["public"],

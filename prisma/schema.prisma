@@ -99,6 +99,10 @@ model OAuthClient {
   name           String
   description    String?
   redirectUris   String[]                            // 回调地址白名单（精确匹配）
+  // 登出后可回跳的地址白名单（精确匹配）。与 redirectUris 分开是因为二者语义不同：
+  // 一个是「拿到授权码后回哪」，一个是「登出完成后回哪」，混用会让登出端点
+  // 变成一个可被滥用的开放重定向。默认空数组 = 该客户端不允许带回跳地址登出。
+  postLogoutRedirectUris String[] @default([])
   scopes         String[] @default(["openid", "profile", "email"])
   grantTypes     String[] @default(["authorization_code", "refresh_token"])
   isConfidential Boolean  @default(true)             // 机密客户端需校验 client_secret
