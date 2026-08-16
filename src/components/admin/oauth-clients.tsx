@@ -13,6 +13,7 @@ interface OAuthClient {
   name: string;
   description: string | null;
   redirectUris: string[];
+  postLogoutRedirectUris: string[];
   scopes: string[];
   isConfidential: boolean;
   disabled: boolean;
@@ -34,6 +35,7 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [redirectUris, setRedirectUris] = useState("");
+  const [postLogoutRedirectUris, setPostLogoutRedirectUris] = useState("");
   const [scopes, setScopes] = useState<string[]>([
     "openid",
     "profile",
@@ -42,6 +44,13 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
   const [isConfidential, setIsConfidential] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<CreatedSecret | null>(null);
+
+  // 已注册应用的登出回跳白名单就地编辑（一次只编辑一个）。
+  // 之所以要有它而不是只在创建表单里给一个框：需要配这个白名单的客户端
+  // 早就存在了，只能创建时填等于仍然要开 psql。
+  const [logoutEditId, setLogoutEditId] = useState<string | null>(null);
+  const [logoutEditValue, setLogoutEditValue] = useState("");
+  const [logoutSaving, setLogoutSaving] = useState(false);
 
   const load = async () => {
     try {
@@ -74,6 +83,10 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
       .map((u) => u.trim())
       .filter(Boolean);
     if (uris.length === 0) return toast.error("请至少填写一个回调地址");
+    const logoutUris = postLogoutRedirectUris
+      .split("\n")
+      .map((u) => u.trim())
+      .filter(Boolean);
 
     setSubmitting(true);
     try {
@@ -84,6 +97,12 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
           name: name.trim(),
           description: description.trim(),
           redirectUris: uris,
+          // 没填就不发这个 key。后端两处都以 Array.isArray 为门卫，
+          // 「不发」和「发空数组」语义不同：后者在 PATCH 上等于主动清空白名单。
+          // 创建时两者结果相同，但保持同一个约定，免得以后复制这段代码出事。
+          ...(logoutUris.length > 0
+            ? { postLogoutRedirectUris: logoutUris }
+            : {}),
           scopes,
           isConfidential,
         }),
@@ -95,6 +114,7 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
       setName("");
       setDescription("");
       setRedirectUris("");
+      setPostLogoutRedirectUris("");
       setScopes(["openid", "profile", "email"]);
       setIsConfidential(true);
       load();
@@ -118,6 +138,32 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
       load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "操作失败");
+    }
+  };
+
+  const saveLogoutUris = async (c: OAuthClient) => {
+    const uris = logoutEditValue
+      .split("\n")
+      .map((u) => u.trim())
+      .filter(Boolean);
+    setLogoutSaving(true);
+    try {
+      const res = await fetch(`/api/admin/oauth-clients/${c.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        // 只发这一个 key：PATCH 的其余字段都以 Array.isArray / typeof 为门卫，
+        // 不发就不会被覆盖。空数组是**有意**的清空，不是「没填」。
+        body: JSON.stringify({ postLogoutRedirectUris: uris }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "保存失败");
+      toast.success(uris.length === 0 ? "已清空登出回跳白名单" : "已保存");
+      setLogoutEditId(null);
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "保存失败");
+    } finally {
+      setLogoutSaving(false);
     }
   };
 
@@ -227,6 +273,25 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
           />
         </div>
         <div className="space-y-1">
+          <label className="text-sm font-medium">
+            登出后回跳地址 post_logout_redirect_uri（每行一个，可选）
+          </label>
+          <Textarea
+            value={postLogoutRedirectUris}
+            onChange={(e) => setPostLogoutRedirectUris(e.target.value)}
+            rows={2}
+            placeholder={"https://app.example.com/"}
+          />
+          <p className="text-muted-foreground text-xs">
+            必须与下游登出后实际跳转的地址<b>逐字节相同</b>
+            ，含协议、端口和结尾斜杠。不匹配时登出照常完成、
+            <b>但静默忽略回跳</b>
+            ，用户会停在一个 JSON 页面上 ——
+            症状很像「端点没生效」，实际是这里配错了。
+            留空则该应用不允许带回跳地址登出。
+          </p>
+        </div>
+        <div className="space-y-1">
           <label className="text-sm font-medium">授权 scope</label>
           <div className="flex flex-wrap gap-3">
             {ALL_SCOPES.map((s) => (
@@ -324,6 +389,70 @@ export default function OAuthClientsPage({ issuer }: { issuer: string }) {
                       </li>
                     ))}
                   </ul>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">
+                      post_logout_redirect_uris:
+                    </span>
+                    {logoutEditId !== c.id && (
+                      <button
+                        onClick={() => {
+                          setLogoutEditId(c.id);
+                          setLogoutEditValue(
+                            c.postLogoutRedirectUris.join("\n"),
+                          );
+                        }}
+                        className="text-blue-600 hover:underline"
+                      >
+                        编辑
+                      </button>
+                    )}
+                  </div>
+                  {logoutEditId === c.id ? (
+                    <div className="mt-1 space-y-2">
+                      <Textarea
+                        value={logoutEditValue}
+                        onChange={(e) => setLogoutEditValue(e.target.value)}
+                        rows={2}
+                        placeholder={"https://app.example.com/"}
+                        className="font-mono text-xs"
+                      />
+                      <p className="text-muted-foreground">
+                        每行一个，与下游落地地址<b>逐字节相同</b>
+                        （含结尾斜杠）。不匹配 = 静默不回跳，用户停在 JSON 页。
+                        清空则收回该应用带回跳登出的能力。
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => saveLogoutUris(c)}
+                          disabled={logoutSaving}
+                        >
+                          {logoutSaving ? "保存中…" : "保存"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setLogoutEditId(null)}
+                        >
+                          取消
+                        </Button>
+                      </div>
+                    </div>
+                  ) : c.postLogoutRedirectUris.length === 0 ? (
+                    <span className="text-muted-foreground ml-1">
+                      未配置（该应用登出后不回跳）
+                    </span>
+                  ) : (
+                    <ul className="ml-4 list-disc">
+                      {c.postLogoutRedirectUris.map((u) => (
+                        <li key={u} className="break-all">
+                          {u}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </div>

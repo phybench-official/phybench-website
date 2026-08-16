@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { randomToken, sha256 } from "@/lib/oauth/crypto";
 import { SUPPORTED_SCOPES } from "@/lib/oauth/config";
+import { validateClientUri } from "@/lib/oauth/clients";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,13 +73,12 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  // 回调地址必须是合法的绝对 URL。
+  // 协议白名单见 validateClientUri：new URL() 单独用不住，javascript: 也是合法 URL。
   for (const u of redirectUris) {
-    try {
-      new URL(u);
-    } catch {
+    const bad = validateClientUri(u);
+    if (bad) {
       return NextResponse.json(
-        { error: `回调地址不是合法 URL: ${u}` },
+        { error: `回调地址不可用（${bad}）: ${u}` },
         { status: 400 },
       );
     }
@@ -90,11 +90,10 @@ export async function POST(req: NextRequest) {
     .map((u) => u.trim())
     .filter(Boolean);
   for (const u of postLogoutRedirectUris) {
-    try {
-      new URL(u);
-    } catch {
+    const bad = validateClientUri(u);
+    if (bad) {
       return NextResponse.json(
-        { error: `登出回跳地址不是合法 URL: ${u}` },
+        { error: `登出回跳地址不可用（${bad}）: ${u}` },
         { status: 400 },
       );
     }

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { SUPPORTED_SCOPES } from "@/lib/oauth/config";
+import { validateClientUri } from "@/lib/oauth/clients";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,14 +44,17 @@ export async function PATCH(
   if (typeof payload.description === "string")
     data.description = payload.description.trim() || null;
 
+  // 每个字段都以 Array.isArray 为门卫：请求里没带的 key 一律不进 data，
+  // 也就不会被重新校验。这既是「老界面不会误清空新字段」的保证，也意味着
+  // 收紧协议校验不会波及未改动的历史值 —— 但改动时提交的是整个数组（含未变的
+  // 条目），所以 validateClientUri 仍必须放行 http://localhost。
   if (Array.isArray(payload.redirectUris)) {
     const uris = payload.redirectUris.map((u) => u.trim()).filter(Boolean);
     for (const u of uris) {
-      try {
-        new URL(u);
-      } catch {
+      const bad = validateClientUri(u);
+      if (bad) {
         return NextResponse.json(
-          { error: `回调地址不是合法 URL: ${u}` },
+          { error: `回调地址不可用（${bad}）: ${u}` },
           { status: 400 },
         );
       }
@@ -70,11 +74,10 @@ export async function PATCH(
       .map((u) => u.trim())
       .filter(Boolean);
     for (const u of uris) {
-      try {
-        new URL(u);
-      } catch {
+      const bad = validateClientUri(u);
+      if (bad) {
         return NextResponse.json(
-          { error: `登出回跳地址不是合法 URL: ${u}` },
+          { error: `登出回跳地址不可用（${bad}）: ${u}` },
           { status: 400 },
         );
       }
@@ -98,6 +101,8 @@ export async function PATCH(
         name: true,
         description: true,
         redirectUris: true,
+        // 写得进去却读不回来，排查时会误以为没保存成功
+        postLogoutRedirectUris: true,
         scopes: true,
         isConfidential: true,
         disabled: true,
