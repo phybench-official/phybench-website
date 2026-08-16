@@ -6,12 +6,21 @@
 // 于是**零交互**签发授权码回去 —— 表现为「退出了但还是上一个人的身份」。
 // 在机房、实验室这类共用机器上，这是一个真实的身份串号问题。
 //
-// ── 三层会话，必须逐层往上清 ────────────────────────────────────────────────
+// ── 三层会话，本端点负责中间一层 ────────────────────────────────────────────
 //   下游应用（自有会话，它自己能清）
-//     → 本站 NextAuth（cookie，只有这里能清）
+//     → 本站 NextAuth（cookie，只有这里能清）  ← 本端点的职责边界
 //       → UAAA（它自己的 SSO，只有它自己能清）
-// 只清中间一层不够：/oauth/authorize 在无 session 时会 AutoSignIn 静默跳 UAAA，
-// 身份原样回来，静默那一跳只是从第一段挪到了第二段。所以要级联到上游。
+//
+// **不级联到 UAAA，这是产品决策，不是没做完。**
+// UAAA 作为学校的统一身份认证记住登录状态是预期行为 —— 那是它跟用户之间的事，
+// 不该由某个接入方替全校做主清掉。所以退出后重新登录会停在 UAAA 的「用户确认」
+// 页（显示当前账号 + 提供「切换账号」），而不是零交互直接进来。这已经解决了
+// 共用机器上真正的问题：换人时看得见、切得掉。
+//
+// 下面 UPSTREAM_END_SESSION 那条级联路径的代码保留但**默认不启用**（环境变量
+// 留空）。保留是为了万一将来需求变了，不是等着谁去打开它。要开之前先确认这
+// 是不是当前的产品意图，再确认 UAAA 管理员已登记 LOGOUT_CALLBACK 白名单 ——
+// 两个条件缺一个，用户就会卡在 UAAA 的错误页上，比不做更差。
 //
 // ── 请求参数（OIDC RP-Initiated Logout 1.0）──────────────────────────────
 //   id_token_hint            推荐。用它确定「是谁、从哪个客户端来」
@@ -152,9 +161,9 @@ async function handle(req: NextRequest): Promise<NextResponse> {
   // redirect: false —— 由本函数决定去哪，不让 NextAuth 抢方向盘。
   await signOut({ redirect: false });
 
-  // ── 5. 级联到 UAAA ───────────────────────────────────────────────────
-  // 没配上游地址时跳过：本站 cookie 已经清了，但下一次登录仍会从 UAAA
-  // 静默拿回身份。响应头里标一下，免得排查时以为端点没生效。
+  // ── 5. 级联到 UAAA（默认不启用，见文件头）────────────────────────────
+  // 正常路径走的是下面的 skipped 分支：本站会话已清，UAAA 仍记得用户 ——
+  // 这是有意的。响应头标一下，免得排查时以为是端点没生效或配置漏了。
   if (UPSTREAM_END_SESSION) {
     const state = await signLogoutState({ redirectUri, downstreamState });
     const url = new URL(UPSTREAM_END_SESSION);
@@ -199,13 +208,14 @@ async function handle(req: NextRequest): Promise<NextResponse> {
 // 是禁止修改的请求头）。关键是它能区分「资源加载」和「顶层导航」：
 //   <img>    → Dest: image     <iframe> → Dest: iframe
 //   fetch/XHR→ Dest: empty     顶层跳转  → Dest: document + Mode: navigate
-// 所以放行条件就是 document + navigate，对 cp 那条链路零影响（跨站顶层跳转的
-// Sec-Fetch-Site 是 cross-site，但我们**故意不看 Site** —— 登出天生就是跨站
-// 发起的，看 Site 会把正常场景全部挡掉）。
+// 所以基础放行条件是 document + navigate（再叠加下面的 Sec-Fetch-User）。
+// 对 cp 那条链路零影响：跨站顶层跳转的 Sec-Fetch-Site 是 cross-site，但我们
+// **故意不看 Site** —— 登出天生就是跨站发起的，看 Site 会把正常场景全挡掉。
 //
-// 同理故意不看 Sec-Fetch-User(?1，表示有用户激活)：cp 是先请求自己后端拿到
-// idp_logout_url 再跳转，这中间的异步足以让瞬时用户激活过期，要求 ?1 会让链路
-// 随网络快慢时灵时不灵 —— 最糟的失败模式。
+// 这条规则对下游是一个**接入约束**，不是兼容性遗漏：发起登出必须用整页跳转，
+// 隐藏 iframe / <img> 那种「不离开当前页面就把人登出」的写法一律 403。
+// OIDC 生态里确实有用 iframe 做前端登出的实现，本站有意不支持 —— 正是那种
+// 形态让 CSRF 和正常登出无从区分。接新下游时把这条写进对接说明。
 //
 // ── 缺头时放行 ─────────────────────────────────────────────────────────────
 // Chrome 76+/Edge 79+/Firefox 90+/Safari 16.4+ 才发这些头，Safari 16.3 及更早
