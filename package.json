@@ -53,7 +53,7 @@
     "framer-motion": "^12.7.4",
     "jose": "^6.2.3",
     "katex": "^0.16.21",
-    "lucide-react": "^0.477.0",
+    "lucide-react": "^0.548.0",
     "micromark-extension-llm-math": "^3.1.0",
     "motion": "^12.7.4",
     "next": "^15.3.0",
